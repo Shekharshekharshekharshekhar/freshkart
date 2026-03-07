@@ -918,40 +918,46 @@ window.sendOrder = async (pm) => {
       const w = cart[item].selectedWeight || 1;
       const pr = unit === "g" ? (p.price / 1000) * w * qty : p.price * w * qty;
       grandTotal += pr;
-      itemsText += "• " + item + "\n"
-        + "  Qty: " + qty + " x " + w + unit + "\n"
-        + "  Price: ₹" + pr.toFixed(2) + "\n\n";
+      itemsText += "   " + item + "\n"
+        + "   Qty: " + qty + " x " + w + unit + "\n"
+        + "   Price: Rs." + pr.toFixed(2) + "\n\n";
     }
   }
 
   grandTotal += delivery;
   const oid = "FK" + Date.now();
 
-  const msg =
-    "🛒✨ *FreshKart Order*\n\n" +
-    "🆔 Order ID: " + oid + "\n" +
-    "📅 " + new Date().toLocaleDateString("en-IN") + "\n" +
-    "🕒 " + new Date().toLocaleTimeString("en-IN") + "\n\n" +
-    "━━━━━━━━━━━━━━━━\n" +
-    "👤 *CUSTOMER DETAILS*\n" +
-    "• Name: " + nm + "\n" +
-    "• Phone: " + ph + "\n" +
-    "• Address: " + ad + "\n\n" +
-    "━━━━━━━━━━━━━━━━\n" +
-    "🛍 *ORDER SUMMARY*\n" +
-    itemsText +
-    "━━━━━━━━━━━━━━━━\n" +
-    "🚚 Delivery: ₹" + delivery + "\n" +
-    "💰 *GRAND TOTAL: ₹" + grandTotal.toFixed(2) + "*\n" +
-    "💳 Payment: " + pm + "\n\n" +
-    "🌿 FreshKart – Freshness Delivered!";
+  const line = "--------------------------------";
 
-  await addDoc(collection(db,"orders"), {
+  const msg = ""
+    + "*FRESHKART ORDER*\n"
+    + line + "\n\n"
+    + "*Order ID:* " + oid + "\n"
+    + "*Date:* " + new Date().toLocaleDateString("en-IN") + "\n"
+    + "*Time:* " + new Date().toLocaleTimeString("en-IN") + "\n\n"
+    + line + "\n"
+    + "*CUSTOMER DETAILS*\n"
+    + line + "\n"
+    + "*Name:*    " + nm + "\n"
+    + "*Phone:*   " + ph + "\n"
+    + "*Address:* " + ad + "\n\n"
+    + line + "\n"
+    + "*ORDER ITEMS*\n"
+    + line + "\n"
+    + itemsText
+    + line + "\n"
+    + "*Delivery Charge:* Rs." + delivery + "\n"
+    + "*GRAND TOTAL:* Rs." + grandTotal.toFixed(2) + "\n"
+    + "*Payment Mode:* " + pm + "\n\n"
+    + line + "\n"
+    + "Thank you for ordering from FreshKart!\n"
+    + "Fresh Vegetables | 30 Min Delivery\n"
+    + line;
+
+  await addDoc(collection(db, "orders"), {
     orderId: oid,
     userId: currentUser ? currentUser.uid : "guest",
-    name: nm,
-    phone: ph,
-    address: ad,
+    name: nm, phone: ph, address: ad,
     items: cart,
     total: grandTotal,
     paymentType: pm,
@@ -960,18 +966,50 @@ window.sendOrder = async (pm) => {
   });
 
   window.open("https://wa.me/917888716909?text=" + encodeURIComponent(msg), "_blank");
-  alert("Order Placed ✅ Order ID: " + oid);
+  alert("Order Placed Successfully!\nOrder ID: " + oid + "\nThank you for shopping with FreshKart!");
   cart = {};
   calcTotal();
 };
-
 window.trackOrder = async () => {
   const id = document.getElementById("trackId").value.trim();
   if (!id) { alert("Enter Order ID"); return; }
-  const snap = await getDoc(doc(db,"orders",id));
-  document.getElementById("orderStatus").textContent = snap.exists() ? "📍 Status: " + snap.data().status : "Order Not Found ❌";
-};
 
+  const statusEl = document.getElementById("orderStatus");
+  statusEl.textContent = "🔍 Searching...";
+  statusEl.style.color = "#888";
+
+  try {
+    // orderId field se search karo
+    const snap = await getDocs(
+      query(collection(db, "orders"), where("orderId", "==", id))
+    );
+
+    if (!snap.empty) {
+      const order = snap.docs[0].data();
+      const date = order.createdAt && order.createdAt.toDate
+        ? order.createdAt.toDate().toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit"})
+        : "—";
+
+      statusEl.style.color = "#27ae60";
+      statusEl.innerHTML =
+        "<div style='background:#f0fdf4;border:1px solid #e8f5e9;border-radius:12px;padding:14px;margin-top:8px;'>" +
+        "<div style='font-size:15px;font-weight:800;color:#27ae60;margin-bottom:8px;'>✅ Order Found!</div>" +
+        "<div style='font-size:13px;color:#333;margin-bottom:4px;'>📦 <b>Status:</b> " + (order.status || "Pending") + "</div>" +
+        "<div style='font-size:13px;color:#333;margin-bottom:4px;'>👤 <b>Name:</b> " + (order.name || "—") + "</div>" +
+        "<div style='font-size:13px;color:#333;margin-bottom:4px;'>📍 <b>Address:</b> " + (order.address || "—") + "</div>" +
+        "<div style='font-size:13px;color:#333;margin-bottom:4px;'>💰 <b>Total:</b> ₹" + (order.total || 0).toFixed(2) + "</div>" +
+        "<div style='font-size:13px;color:#333;margin-bottom:4px;'>💳 <b>Payment:</b> " + (order.paymentType || "COD") + "</div>" +
+        "<div style='font-size:12px;color:#888;margin-top:6px;'>🕒 " + date + "</div>" +
+        "</div>";
+    } else {
+      statusEl.style.color = "#e74c3c";
+      statusEl.textContent = "Order Not Found ❌ — Please check Order ID";
+    }
+  } catch(e) {
+    statusEl.style.color = "#e74c3c";
+    statusEl.textContent = "⚠️ Error searching order. Try again!";
+  }
+};
 window.scrollToProducts = () => document.getElementById("productsSection").scrollIntoView({ behavior: "smooth" });
 window.goHome = el => { setDNav(el); window.scrollTo({ top: 0, behavior: "smooth" }); };
 window.goHomeM = () => { setBNav("bn-home"); window.scrollTo({ top: 0, behavior: "smooth" }); };
