@@ -727,25 +727,6 @@ window.placeOrder = async () => {
     alert("Payment setup failed. Try again!");
   }
 };
-```
-
-**Save karo** ✅
-
----
-
-## Step 5 — Netlify Pe Deploy Karo
-
-1. **netlify.com** pe jao
-2. Apna **freshkart-web** site open karo
-3. **Deploys** tab pe click karo
-4. Poora **`freshkart` folder** drag & drop karo yahan:
-```
-┌─────────────────────────────────┐
-│                                 │
-│   Drag and drop your site       │
-│        folder here              │
-│                                 │
-└─────────────────────────────────┘
 window.sendOrder=async(pm="Cash on Delivery")=>{
   if(total<=0){alert("Cart is empty!");return;}
   const nm=document.getElementById("cust-name").value.trim();
