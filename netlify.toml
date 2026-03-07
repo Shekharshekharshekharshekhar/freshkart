@@ -1,0 +1,57 @@
+[build]
+  functions = "netlify/functions"
+```
+
+**Save karo** — naam rakho: `netlify.toml`
+
+---
+
+## Folder Structure Banao
+
+**Desktop pe ek folder banao** — naam: `freshkart`
+
+Andar yeh structure banao:
+```
+freshkart/              ← Main folder
+│
+├── index.html          ← Tumhara website
+├── netlify.toml        ← Abhi banaya
+│
+└── netlify/            ← Naya folder banao
+    └── functions/      ← Andar ek aur folder
+        └── getkey.js   ← Abhi banaya
+```
+
+---
+
+## Kaise Banaye — Simple Steps:
+
+**1.** Desktop pe `freshkart` naam ka folder banao
+
+**2.** Usme `index.html` aur `netlify.toml` rakho
+
+**3.** Usme `netlify` naam ka folder banao
+
+**4.** `netlify` ke andar `functions` naam ka folder banao
+
+**5.** `functions` ke andar `getkey.js` rakho
+
+---
+
+## Step 4 — Netlify Pe Upload
+
+1. **netlify.com** → apna site open karo
+2. **Deploys** tab pe jao
+3. Poora **`freshkart` folder** drag & drop karo
+
+---
+
+## Screenshot Guide:
+```
+Desktop
+└── 📁 freshkart
+    ├── 📄 index.html
+    ├── 📄 netlify.toml
+    └── 📁 netlify
+        └── 📁 functions
+            └── 📄 getkey.js
