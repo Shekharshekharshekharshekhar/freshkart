@@ -1463,26 +1463,6 @@ window.placeOrder = async () => {
       description: "Grocery Order",
       image: "https://i.imgur.com/n5tjHFD.png",
       prefill: { name: nm, contact: ph },
-config: {
-  display: {
-    blocks: {
-      upi: {
-        name: "Pay via UPI",
-        instruments: [
-          { method: "upi" }
-        ]
-      },
-      wallet: {
-        name: "Pay via Wallet",
-        instruments: [
-          { method: "wallet", wallets: ["paytm", "phonepe", "amazonpay", "freecharge", "mobikwik"] }
-        ]
-      }
-    },
-    sequence: ["block.upi", "block.wallet", "netbanking", "card", "emi"],
-    preferences: { show_default_blocks: true }
-  }
-},
       handler: async r => {
         const oid = "FK" + Date.now();
         await addDoc(collection(db, "orders"), {
