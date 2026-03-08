@@ -809,24 +809,11 @@ async function loadOrders() {
   }
 
   try {
-    // Pehle userId se try karo
-    let snap = await getDocs(
-      query(collection(db, "orders"),
-        where("userId", "==", currentUser.uid),
-        orderBy("createdAt", "desc"))
-    );
-
-    // Agar koi order nahi mila toh name/email se try karo
-    if (snap.empty) {
-      snap = await getDocs(
-        query(collection(db, "orders"), orderBy("createdAt", "desc"))
-      );
-    }
+    const snap = await getDocs(collection(db, "orders"));
 
     const orders = [];
     snap.forEach(d => {
       const data = d.data();
-      // Sirf current user ke orders dikhao
       if (
         data.userId === currentUser.uid ||
         data.userId === "guest" ||
@@ -834,6 +821,13 @@ async function loadOrders() {
       ) {
         orders.push({ id: d.id, ...data });
       }
+    });
+
+    // JavaScript mein sort karo — latest pehle
+    orders.sort((a, b) => {
+      const aTime = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bTime = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+      return bTime - aTime;
     });
 
     if (!orders.length) {
