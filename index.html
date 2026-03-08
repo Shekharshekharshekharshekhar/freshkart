@@ -1445,70 +1445,105 @@ window.toggleCart = () => {
    ========================================== */
 window.placeOrder = async () => {
   if (total <= 0) { alert("Cart is empty!"); return; }
+
+  const nm = document.getElementById("cust-name").value.trim();
+  const ph = document.getElementById("cust-phone").value.trim();
+  const ad = document.getElementById("cust-address").value.trim();
+  if (!nm || !ph || !ad) { alert("Please fill Name, Phone and Address first!"); return; }
+
   try {
     const res = await fetch("/.netlify/functions/getkey");
     const data = await res.json();
+
     const options = {
       key: data.key,
       amount: (total + delivery) * 100,
       currency: "INR",
       name: "FreshKart",
       description: "Grocery Order",
+      image: "https://i.imgur.com/n5tjHFD.png",
+      prefill: { name: nm, contact: ph },
+
       handler: async r => {
         const oid = "FK" + Date.now();
-        const nm = document.getElementById("cust-name").value.trim();
-        const ph = document.getElementById("cust-phone").value.trim();
-        const ad = document.getElementById("cust-address").value.trim();
-        await addDoc(collection(db,"orders"), {
+        await addDoc(collection(db, "orders"), {
           orderId: oid,
           userId: currentUser ? currentUser.uid : "guest",
           name: nm, phone: ph, address: ad,
           items: cart,
           total: total + delivery,
           paymentType: "Online",
+          paymentId: r.razorpay_payment_id,
           status: "Pending",
           createdAt: new Date()
         });
-        alert("Payment Successful ✅ Order ID: " + oid);
-try {
-  let itemsForEmail = "";
-  for (let item in cart) {
-    if (cart[item] && cart[item].qty > 0) {
-      const p = allP[item];
-      const qty = cart[item].qty;
-      const unit = p ? (p.unit || "kg") : "kg";
-      const w = cart[item].selectedWeight || 1;
-      const pr = unit === "g" ? (p.price/1000)*w*qty : p.price*w*qty;
-      itemsForEmail += "• " + item + " — " + qty + " x " + w + unit + " = ₹" + pr.toFixed(2) + "\n";
-    }
-  }
-  const custName  = document.getElementById("cust-name").value.trim();
-  const custPhone = document.getElementById("cust-phone").value.trim();
-  const custAddr  = document.getElementById("cust-address").value.trim();
-  await emailjs.send("service_zqcrmzh", "template_mijiaae", {
-    order_id:         oid,
-    customer_name:    custName,
-    customer_phone:   custPhone,
-    customer_address: custAddr,
-    order_items:      itemsForEmail,
-    total:            (total + delivery).toFixed(2),
-    order_date:       new Date().toLocaleDateString("en-IN"),
-    payment_type:     "Online Payment",
-    email:            currentUser ? currentUser.email : custPhone
-  });
-  console.log("✅ Email sent!");
-} catch(emailErr) {
-  console.log("Email error:", emailErr);
-}
+        alert("Payment Successful! Order ID: " + oid);
+        try {
+          let itemsForEmail = "";
+          for (let item in cart) {
+            if (cart[item] && cart[item].qty > 0) {
+              const p = allP[item];
+              const qty = cart[item].qty;
+              const unit = p ? (p.unit||"kg") : "kg";
+              const w = cart[item].selectedWeight || 1;
+              const pr = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
+              itemsForEmail += "- " + item + " | " + qty + " x " + w + unit + " = Rs." + pr.toFixed(2) + "\n";
+            }
+          }
+          await emailjs.send("service_zqcrmzh", "template_mijiaae", {
+            order_id: oid, customer_name: nm, customer_phone: ph,
+            customer_address: ad, order_items: itemsForEmail,
+            total: (total+delivery).toFixed(2),
+            order_date: new Date().toLocaleDateString("en-IN"),
+            payment_type: "Online Payment",
+            email: currentUser ? currentUser.email : ph
+          });
+        } catch(emailErr) { console.log("Email error:", emailErr); }
         cart = {}; calcTotal();
+      },
+
+      // ✅ PAYMENT FAILED HANDLING
+      modal: {
+        ondismiss: function() {
+          alert("Payment cancelled. Your cart is still saved!\n\nYou can try again or choose Cash on Delivery.");
+        }
       }
     };
-    new Razorpay(options).open();
-  } catch (e) {
-    alert("Payment setup failed. Try again!");
+
+    const rzp = new Razorpay(options);
+
+    // ✅ PAYMENT ERROR HANDLING
+    rzp.on("payment.failed", function(response) {
+      const reason = response.error.reason || "Unknown error";
+      const desc = response.error.description || "";
+      const code = response.error.code || "";
+
+      const messages = {
+        "payment_cancelled": "Payment was cancelled. Please try again.",
+        "payment_failed": "Payment failed. Please check your card details.",
+        "bad_request_error": "Invalid payment details. Please try again.",
+        "gateway_error": "Bank gateway error. Try again after some time.",
+        "network_error": "Network issue. Check your internet and retry."
+      };
+
+      const userMessage = messages[reason] || "Payment failed: " + desc;
+
+      alert(
+        "❌ Payment Failed!\n\n" +
+        "Reason: " + userMessage + "\n\n" +
+        "Options:\n" +
+        "1. Try again with a different card\n" +
+        "2. Use UPI instead\n" +
+        "3. Choose Cash on Delivery"
+      );
+    });
+
+    rzp.open();
+
+  } catch(e) {
+    alert("⚠️ Payment setup failed.\n\nPlease check your internet connection and try again, or use Cash on Delivery.");
   }
 };
-
 /* ==========================================
    WHATSAPP COD — FULLY FIXED
    ========================================== */
