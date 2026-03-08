@@ -385,6 +385,10 @@ body.dark .bnav-label{color:#555;}
 }
 .cancel-success p{font-size:13px;color:var(--green);font-weight:600;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("aL9YJ8DDVAsK33ZTv");
+</script>
 </head>
 <body>
 
@@ -1299,6 +1303,36 @@ window.placeOrder = async () => {
           createdAt: new Date()
         });
         alert("Payment Successful ✅ Order ID: " + oid);
+try {
+  let itemsForEmail = "";
+  for (let item in cart) {
+    if (cart[item] && cart[item].qty > 0) {
+      const p = allP[item];
+      const qty = cart[item].qty;
+      const unit = p ? (p.unit || "kg") : "kg";
+      const w = cart[item].selectedWeight || 1;
+      const pr = unit === "g" ? (p.price/1000)*w*qty : p.price*w*qty;
+      itemsForEmail += "• " + item + " — " + qty + " x " + w + unit + " = ₹" + pr.toFixed(2) + "\n";
+    }
+  }
+  const custName  = document.getElementById("cust-name").value.trim();
+  const custPhone = document.getElementById("cust-phone").value.trim();
+  const custAddr  = document.getElementById("cust-address").value.trim();
+  await emailjs.send("service_zqcrmzh", "template_mijiaae", {
+    order_id:         oid,
+    customer_name:    custName,
+    customer_phone:   custPhone,
+    customer_address: custAddr,
+    order_items:      itemsForEmail,
+    total:            (total + delivery).toFixed(2),
+    order_date:       new Date().toLocaleDateString("en-IN"),
+    payment_type:     "Online Payment",
+    email:            currentUser ? currentUser.email : custPhone
+  });
+  console.log("✅ Email sent!");
+} catch(emailErr) {
+  console.log("Email error:", emailErr);
+}
         cart = {}; calcTotal();
       }
     };
@@ -1379,6 +1413,33 @@ window.sendOrder = async (pm) => {
   });
 
   window.open("https://wa.me/917888716909?text=" + encodeURIComponent(msg), "_blank");
+try {
+  let itemsForEmail = "";
+  for (let item in cart) {
+    if (cart[item] && cart[item].qty > 0) {
+      const p = allP[item];
+      const qty = cart[item].qty;
+      const unit = p ? (p.unit || "kg") : "kg";
+      const w = cart[item].selectedWeight || 1;
+      const pr = unit === "g" ? (p.price/1000)*w*qty : p.price*w*qty;
+      itemsForEmail += "• " + item + " — " + qty + " x " + w + unit + " = ₹" + pr.toFixed(2) + "\n";
+    }
+  }
+  await emailjs.send("service_zqcrmzh", "template_mijiaae", {
+    order_id:         oid,
+    customer_name:    nm,
+    customer_phone:   ph,
+    customer_address: ad,
+    order_items:      itemsForEmail,
+    total:            grandTotal.toFixed(2),
+    order_date:       new Date().toLocaleDateString("en-IN"),
+    payment_type:     pm,
+    email:            currentUser ? currentUser.email : ph
+  });
+  console.log("✅ Email sent!");
+} catch(emailErr) {
+  console.log("Email error:", emailErr);
+}
   alert("Order Placed Successfully!\nOrder ID: " + oid + "\nThank you for shopping with FreshKart!");
   cart = {};
   calcTotal();
