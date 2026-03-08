@@ -384,6 +384,28 @@ body.dark .bnav-label{color:#555;}
   display:none;
 }
 .cancel-success p{font-size:13px;color:var(--green);font-weight:600;}
+/* WISHLIST */
+.wish-btn.active{background:rgba(255,71,87,0.15)!important;}
+.wish-btn.active::after{content:"";position:absolute;}
+
+/* WISHLIST PANEL */
+#wishlistPanel{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:5000;opacity:0;visibility:hidden;transition:0.35s;display:flex;align-items:stretch;justify-content:flex-end;}
+#wishlistPanel.show{opacity:1;visibility:visible;}
+.wishlist-drawer{background:#fff;width:min(480px,100vw);height:100%;overflow-y:auto;box-shadow:-6px 0 40px rgba(0,0,0,0.18);animation:slideIn 0.36s ease;-webkit-overflow-scrolling:touch;}
+.wl-header{background:linear-gradient(135deg,#e74c3c,#ff6b81);padding:18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.wl-header h2{color:#fff;font-size:17px;font-weight:800;}
+.wl-close{background:rgba(255,255,255,0.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;}
+.wl-body{padding:14px;}
+.wl-empty{text-align:center;padding:50px 20px;color:#ccc;}
+.wl-empty span{font-size:50px;display:block;margin-bottom:12px;}
+.wl-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(0,0,0,0.05);display:flex;align-items:center;gap:12px;}
+.wl-card img{width:70px;height:70px;object-fit:cover;border-radius:12px;flex-shrink:0;}
+.wl-card-info{flex:1;}
+.wl-card-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.wl-card-price{font-size:13px;color:var(--green);font-weight:700;margin-bottom:6px;}
+.wl-card-btns{display:flex;gap:7px;}
+.wl-add-btn{flex:1;padding:7px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;}
+.wl-remove-btn{padding:7px 10px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -412,6 +434,7 @@ body.dark .bnav-label{color:#555;}
       <span style="font-size:10px;color:#aaa;">▼</span>
       <div class="user-dropdown-menu">
         <a href="#" onclick="openProfilePanel();return false;">👤 My Profile</a>
+<a href="#" onclick="openWishlist();return false;">❤️ My Wishlist</a>
         <a href="#" onclick="openOrdersPanel();return false;">📦 My Orders</a>
         <a href="#" class="logout-link" onclick="doLogout();return false;">🚪 Logout</a>
       </div>
@@ -645,10 +668,23 @@ body.dark .bnav-label{color:#555;}
     </div>
   </div>
 </div>
+<!-- WISHLIST PANEL -->
+<div id="wishlistPanel">
+  <div class="wishlist-drawer">
+    <div class="wl-header">
+      <h2>❤️ My Wishlist</h2>
+      <button class="wl-close" onclick="closeWishlist()">✕</button>
+    </div>
+    <div class="wl-body" id="wishlistBody">
+      <div class="wl-empty"><span>❤️</span><p>Your wishlist is empty!</p></div>
+    </div>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, query, where, orderBy, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, query, where, orderBy, getDocs, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDDYqExFGbNWytFlYY3ttbr0zug427x_QM",
@@ -677,6 +713,7 @@ onAuthStateChanged(auth, u => {
     document.getElementById("userDisplayName").textContent = n;
     document.getElementById("userAvatarLetter").textContent = n.charAt(0).toUpperCase();
     closeLoginModal();
+loadWishlist(); 
   } else {
     lb.style.display = "flex";
     ud.style.display = "none";
@@ -1085,6 +1122,138 @@ window.confirmCancelOrder = async () => {
     alert("⚠️ Could not cancel order. Try again!");
   }
 };
+/* ── WISHLIST ── */
+let userWishlist = [];
+
+async function loadWishlist() {
+  if (!currentUser) return;
+  try {
+    const snap = await getDocs(
+      query(collection(db, "wishlists"), where("userId", "==", currentUser.uid))
+    );
+    userWishlist = [];
+    snap.forEach(d => userWishlist.push({ docId: d.id, ...d.data() }));
+    updateWishlistButtons();
+  } catch(e) { console.log("Wishlist load error:", e); }
+}
+
+function updateWishlistButtons() {
+  document.querySelectorAll(".wish-btn").forEach(btn => {
+    const card = btn.closest(".pcard");
+    if (!card) return;
+    const productName = card.querySelector(".pc-name");
+    if (!productName) return;
+    const name = productName.textContent;
+    const isWishlisted = userWishlist.some(w => w.productId === name);
+    btn.textContent = isWishlisted ? "❤️" : "🤍";
+    btn.classList.toggle("active", isWishlisted);
+  });
+}
+
+window.toggleWishlist = async (productId, btnEl) => {
+  if (!currentUser) { openLoginModal(); return; }
+  const existing = userWishlist.find(w => w.productId === productId);
+  if (existing) {
+    // Remove from wishlist
+    try {
+      await deleteDoc(doc(db, "wishlists", existing.docId));
+      userWishlist = userWishlist.filter(w => w.productId !== productId);
+      btnEl.textContent = "🤍";
+      btnEl.classList.remove("active");
+      showWishlistToast("Removed from wishlist");
+    } catch(e) { console.log("Remove wishlist error:", e); }
+  } else {
+    // Add to wishlist
+    try {
+      const p = allP[productId];
+      const docRef = await addDoc(collection(db, "wishlists"), {
+        userId: currentUser.uid,
+        productId: productId,
+        image: p.image,
+        price: p.price,
+        unit: p.unit || "kg",
+        category: p.category,
+        createdAt: new Date()
+      });
+      userWishlist.push({ docId: docRef.id, productId, image: p.image, price: p.price, unit: p.unit||"kg", category: p.category });
+      btnEl.textContent = "❤️";
+      btnEl.classList.add("active");
+      showWishlistToast("Added to wishlist ❤️");
+    } catch(e) { console.log("Add wishlist error:", e); }
+  }
+};
+
+function showWishlistToast(msg) {
+  let toast = document.getElementById("wl-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "wl-toast";
+    Object.assign(toast.style, {
+      position:"fixed", bottom:"80px", left:"50%",
+      transform:"translateX(-50%)",
+      background:"#1a1a1a", color:"#fff",
+      padding:"10px 20px", borderRadius:"25px",
+      fontSize:"13px", fontWeight:"600",
+      zIndex:"9999", transition:"opacity 0.3s",
+      fontFamily:"'Poppins',sans-serif",
+      boxShadow:"0 4px 15px rgba(0,0,0,0.2)"
+    });
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = "1";
+  setTimeout(() => toast.style.opacity = "0", 2000);
+}
+
+window.openWishlist = async () => {
+  if (!currentUser) { openLoginModal(); return; }
+  document.getElementById("wishlistPanel").classList.add("show");
+  document.body.style.overflow = "hidden";
+  await loadWishlist();
+  renderWishlist();
+};
+
+window.closeWishlist = () => {
+  document.getElementById("wishlistPanel").classList.remove("show");
+  document.body.style.overflow = "";
+};
+
+document.getElementById("wishlistPanel").addEventListener("click", e => {
+  if (e.target === document.getElementById("wishlistPanel")) closeWishlist();
+});
+
+function renderWishlist() {
+  const body = document.getElementById("wishlistBody");
+  if (!userWishlist.length) {
+    body.innerHTML = '<div class="wl-empty"><span>❤️</span><p style="font-size:14px;font-weight:600;">Wishlist is empty!</p><p style="font-size:12px;color:#ccc;margin-top:5px;">Add products you love.</p></div>';
+    return;
+  }
+  let html = "";
+  userWishlist.forEach(w => {
+    html += '<div class="wl-card">' +
+      '<img src="' + w.image + '" alt="' + w.productId + '">' +
+      '<div class="wl-card-info">' +
+        '<div class="wl-card-name">' + w.productId + '</div>' +
+        '<div class="wl-card-price">₹' + w.price + '/' + (w.unit||"kg") + '</div>' +
+        '<div class="wl-card-btns">' +
+          '<button class="wl-add-btn" onclick="changeQty(\'' + w.productId + '\',1);closeWishlist();">🛒 Add to Cart</button>' +
+          '<button class="wl-remove-btn" onclick="removeFromWishlist(\'' + w.docId + '\',\'' + w.productId + '\')">🗑️</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  body.innerHTML = html;
+}
+
+window.removeFromWishlist = async (docId, productId) => {
+  try {
+    await deleteDoc(doc(db, "wishlists", docId));
+    userWishlist = userWishlist.filter(w => w.docId !== docId);
+    renderWishlist();
+    updateWishlistButtons();
+    showWishlistToast("Removed from wishlist");
+  } catch(e) { console.log("Remove error:", e); }
+};
 function loadProducts() {
   onSnapshot(collection(db,"products"), snap => {
     allP = {}; cats.clear();
@@ -1134,7 +1303,7 @@ function renderProducts(products) {
       ? [{v:50,l:"50g"},{v:100,l:"100g"},{v:250,l:"250g"},{v:500,l:"500g"},{v:1000,l:"1kg"}]
       : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
     const wp = units.map((u,i) => '<span class="wp' + (i===1?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
-  grid.innerHTML += '<div class="pcard fade-up" onclick="openProductDetail(\'' + id + '\')" style="cursor:pointer;"><div class="pc-img">' + (d.popular ? '<div class="badge-hot">🔥 Hot</div>' : "") + '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div><button class="wish-btn" onclick="this.textContent=this.textContent===\'🤍\'?\'❤️\':\'🤍\'">🤍</button><img src="' + d.image + '" alt="' + id + '" loading="lazy"></div><div class="pc-body"><div class="pc-name">' + id + '</div><div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div><div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div><div class="pc-unit">per ' + (d.unit||"kg") + '</div><div class="wpills">' + wp + '</div><div class="pc-actions"><div class="qty-ctrl"><button class="qbtn" onclick="changeQty(\'' + id + '\',-1)">−</button><span class="qnum" id="qty-' + id + '">' + (cart[id] ? cart[id].qty : 0) + '</span><button class="qbtn" onclick="changeQty(\'' + id + '\',1)">+</button></div><button class="add-btn" onclick="changeQty(\'' + id + '\',1)">＋ Add</button></div><div class="pc-live" id="total-' + id + '"></div></div></div>';
+  grid.innerHTML += '<div class="pcard fade-up" onclick="openProductDetail(\'' + id + '\')" style="cursor:pointer;"><div class="pc-img">' + (d.popular ? '<div class="badge-hot">🔥 Hot</div>' : "") + '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>''<button class="wish-btn" onclick="toggleWishlist(\'' + id + '\',this)">🤍</button>'<img src="' + d.image + '" alt="' + id + '" loading="lazy"></div><div class="pc-body"><div class="pc-name">' + id + '</div><div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div><div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div><div class="pc-unit">per ' + (d.unit||"kg") + '</div><div class="wpills">' + wp + '</div><div class="pc-actions"><div class="qty-ctrl"><button class="qbtn" onclick="changeQty(\'' + id + '\',-1)">−</button><span class="qnum" id="qty-' + id + '">' + (cart[id] ? cart[id].qty : 0) + '</span><button class="qbtn" onclick="changeQty(\'' + id + '\',1)">+</button></div><button class="add-btn" onclick="changeQty(\'' + id + '\',1)">＋ Add</button></div><div class="pc-live" id="total-' + id + '"></div></div></div>';
   }
   document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
 }
