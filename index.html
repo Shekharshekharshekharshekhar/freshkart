@@ -1382,8 +1382,8 @@ function calcTotal() {
       const unit = p ? (p.unit||"kg") : "kg";
       const w = cart[item].selectedWeight || 1;
       const price = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
-     total += price; ic++;
-      html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = ₹' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">−</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
+      total += price; ic++;
+     html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
     }
   }
   if (!html) html = '<div class="cart-empty-state"><span>🛒</span><p>Your cart is empty</p></div>';
@@ -1738,4 +1738,3 @@ loadProducts();
 </script>
 </body>
 </html>
-
