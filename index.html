@@ -541,6 +541,15 @@ body.dark .bnav-label{color:#555;}
   margin-top:20px; cursor:pointer;
   font-family:'Poppins',sans-serif;
 }
+  .top-bar {
+  display: block !important;
+  position: relative;
+  z-index: 901;
+}
+  .countdown-box {
+  display: inline-block !important;
+  margin-top: 16px;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -1604,8 +1613,8 @@ function renderRecommended() {
 
   // Popular products ya koi bhi 4-5 products lo
   const picks = Object.entries(allP)
-    .filter(([id, p]) => p.popular || p.rating >= 4)
-    .slice(0, 5);
+    .filter(([id, p]) => true)
+.slice(0, 5);
 
   if (!picks.length) {
     document.querySelector('.ai-sec').style.display = 'none';
@@ -2158,6 +2167,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
