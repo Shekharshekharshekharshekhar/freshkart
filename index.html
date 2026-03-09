@@ -1697,19 +1697,16 @@ function calcTotal() {
   const bb = document.getElementById("bnavBadge");
   if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
   if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
+  if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
+  saveCart(); // ← YEH ADD KARO
 }
-
+}
 window.removeItem = id => {
   if (cart[id]) cart[id].qty = 0;
   const t = document.getElementById("total-"+id); if (t) t.classList.remove("show");
   const q = document.getElementById("qty-"+id); if (q) q.textContent = 0;
- function calcTotal() {
-  // ... existing code same rehega ...
-  // Last line ke baad yeh add karo:
-  saveCart();
- }
+  calcTotal();
 };
-
 window.updateWeight = (id, weight, el) => {
   if (el && el.closest(".wpills")) el.closest(".wpills").querySelectorAll(".wp").forEach(e => e.classList.remove("sel"));
   if (el) el.classList.add("sel");
@@ -1751,7 +1748,7 @@ window.toggleCart = () => {
    PAYMENT ONLINE (Razorpay via Netlify)
    ========================================== */
 window.placeOrder = async () => {
-  if (total <= 0) { alert("Cart is empty!"); return; }
+  if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
 
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
@@ -1819,14 +1816,16 @@ if (ad.length < 10) {
             email: currentUser ? currentUser.email : ph
           });
         } catch(emailErr) { console.log("Email error:", emailErr); }
-        cart = {}; calcTotal();
+        cart = {};
+        localStorage.removeItem('fkCart_v2');  // ← ADD KARO
+        calcTotal();
       },
 
       // ✅ PAYMENT FAILED HANDLING
       modal: {
         ondismiss: function() {
-          alert("Payment cancelled. Your cart is still saved!\n\nYou can try again or choose Cash on Delivery.");
-        }
+  showToast("Payment cancelled. Cart is still saved!", "info");
+}
       }
     };
 
@@ -1848,14 +1847,7 @@ if (ad.length < 10) {
 
       const userMessage = messages[reason] || "Payment failed: " + desc;
 
-      alert(
-        "❌ Payment Failed!\n\n" +
-        "Reason: " + userMessage + "\n\n" +
-        "Options:\n" +
-        "1. Try again with a different card\n" +
-        "2. Use UPI instead\n" +
-        "3. Choose Cash on Delivery"
-      );
+     showToast("❌ Payment Failed: " + userMessage, "error", 5000);
     });
 
     rzp.open();
@@ -1962,8 +1954,9 @@ try {
 } catch(emailErr) {
   console.log("Email error:", emailErr);
 }
- showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
+  showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
   cart = {};
+  localStorage.removeItem('fkCart_v2');  // ← ADD KARO
   calcTotal();
 };
 window.trackOrder = async () => {
@@ -2106,6 +2099,7 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 };
+  loadCart();
 loadProducts();
   /* ═══ PWA INSTALL PROMPT ═══ */
 let pwaPrompt = null;
@@ -2148,6 +2142,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
