@@ -1697,8 +1697,7 @@ function calcTotal() {
   const bb = document.getElementById("bnavBadge");
   if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
   if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
-  if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
-  saveCart(); // ← YEH ADD KARO
+  saveCart();
 }
 window.removeItem = id => {
   if (cart[id]) cart[id].qty = 0;
@@ -1752,6 +1751,10 @@ window.placeOrder = async () => {
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
+  if (!nm || !ph || !ad) {
+    showToast("Please fill Name, Phone and Address!", "warning");
+    return;
+  }
   if (!/^[6-9]\d{9}$/.test(ph)) {
   showToast("Please enter a valid 10-digit Indian mobile number.", "error");
   document.getElementById('cust-phone').focus();
@@ -1866,7 +1869,21 @@ window.sendOrder = async (pm) => {
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
   if (!nm || !ph || !ad) { showToast("Please fill all customer details.", "warning"); return; }
-
+ if (!/^[6-9]\d{9}$/.test(ph)) {
+    showToast("Please enter a valid 10-digit Indian mobile number.", "error");
+    document.getElementById('cust-phone').focus();
+    document.getElementById('cust-phone').style.borderColor = '#ef4444';
+    setTimeout(() => document.getElementById('cust-phone').style.borderColor = '', 2000);
+    return;
+  }
+  if (nm.length < 3) {
+    showToast("Please enter your full name.", "warning");
+    return;
+  }
+  if (ad.length < 10) {
+    showToast("Please enter a complete delivery address.", "warning");
+    return;
+  }
   let itemsText = "";
   let grandTotal = 0;
 
@@ -2141,6 +2158,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
