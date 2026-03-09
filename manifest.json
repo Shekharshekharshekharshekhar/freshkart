@@ -7,17 +7,11 @@
   "background_color": "#f0faf4",
   "theme_color": "#27ae60",
   "orientation": "portrait",
-  "icons": [
-    {
-      "src": "https://img.icons8.com/emoji/192/herb-emoji.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://img.icons8.com/emoji/512/herb-emoji.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+ "icons": [
+  {
+    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🌿</text></svg>",
+    "sizes": "any",
+    "type": "image/svg+xml"
+  }
+]
 }
