@@ -1700,7 +1700,6 @@ function calcTotal() {
   if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
   saveCart(); // ← YEH ADD KARO
 }
-}
 window.removeItem = id => {
   if (cart[id]) cart[id].qty = 0;
   const t = document.getElementById("total-"+id); if (t) t.classList.remove("show");
@@ -2142,6 +2141,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
