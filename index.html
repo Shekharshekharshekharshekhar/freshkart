@@ -883,17 +883,12 @@ async function loadOrders() {
     const snap = await getDocs(collection(db, "orders"));
 
     const orders = [];
-    snap.forEach(d => {
-      const data = d.data();
-      if (
-        data.userId === currentUser.uid ||
-        data.userId === "guest" ||
-        !data.userId
-      ) {
-        orders.push({ id: d.id, ...data });
-      }
-    });
-
+   snap.forEach(d => {
+  const data = d.data();
+  if (data.userId === currentUser.uid) {
+    orders.push({ id: d.id, ...data });
+  }
+});
     // JavaScript mein sort karo — latest pehle
     orders.sort((a, b) => {
       const aTime = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
@@ -1346,12 +1341,7 @@ document.addEventListener("touchend", e => {
   }
 }, { passive: true });
 function loadProducts() {
-function loadProducts() {
-  showSkeletons(); // ← YEH ADD KARO
-  onSnapshot(collection(db,"products"), snap => {
-    // ... baaki code same
-  });
-}
+ showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
     allP = {}; cats.clear();
     snap.forEach(d => {
@@ -1870,6 +1860,7 @@ loadProducts();
 </script>
 </body>
 </html>
+
 
 
 
