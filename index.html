@@ -1,9 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FreshKart">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>FreshKart Pro</title>
+  <!-- ═══ SEO META TAGS ═══ -->
+<meta name="description"
+  content="FreshKart – Farm fresh vegetables delivered in 30 minutes. 100% organic, lowest prices, contactless delivery. Order now!">
+<meta name="keywords"
+  content="fresh vegetables online, organic vegetables, 30 min delivery, grocery delivery, FreshKart">
+<meta name="author" content="FreshKart">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#27ae60">
+
+<!-- Open Graph (WhatsApp / Facebook preview) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="FreshKart – Fresh Vegetables | 30 Min Delivery">
+<meta property="og:description"
+  content="Order fresh vegetables online. Farm direct, 100% organic, delivered in 30 minutes!">
+<meta property="og:url" content="https://haribasket.netlify.app">
+<meta property="og:image"
+  content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FreshKart – Fresh Vegetables Delivered">
+<meta name="twitter:description" content="Farm fresh groceries in 30 minutes!">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="https://haribasket.netlify.app">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🌿</text></svg>">
@@ -427,6 +457,90 @@ body.dark .bnav-label{color:#555;}
 .img-zoom-overlay img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:16px;transform:scale(0.85);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
 .img-zoom-overlay.show img{transform:scale(1);}
 .img-zoom-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+/* ═══ TOAST NOTIFICATION SYSTEM ═══ */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+  min-width: 240px;
+  max-width: 340px;
+  pointer-events: all;
+  animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  border-left: 4px solid #22c55e;
+  font-family: 'Poppins', sans-serif;
+}
+.toast.error  { border-left-color: #ef4444; }
+.toast.warning { border-left-color: #f59e0b; }
+.toast.info    { border-left-color: #3b82f6; }
+.toast.exit    { animation: toastOut 0.3s ease forwards; }
+.toast-icon    { font-size: 18px; flex-shrink: 0; }
+.toast-msg     { flex: 1; }
+
+@keyframes toastIn {
+  from { opacity:0; transform: translateX(60px) scale(0.85); }
+  to   { opacity:1; transform: translateX(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity:1; transform: translateX(0); max-height:80px; }
+  to   { opacity:0; transform: translateX(60px); max-height:0; padding:0; margin:0; }
+}
+  /* ═══ INFO MODAL ═══ */
+#infoModal {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(8px);
+  z-index:6000;
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; visibility:hidden;
+  transition:0.3s;
+  padding:0;
+}
+#infoModal.show { opacity:1; visibility:visible; }
+.info-card {
+  background:#fff;
+  border-radius:26px 26px 0 0;
+  width:100%; max-width:600px;
+  max-height:80vh; overflow-y:auto;
+  padding:28px 26px 40px;
+  animation:slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.info-card h2 {
+  font-size:20px; font-weight:800;
+  margin-bottom:18px; color:var(--green);
+}
+.info-card p {
+  font-size:13px; color:#555;
+  line-height:1.8; margin-bottom:12px;
+}
+.info-card h3 {
+  font-size:14px; font-weight:700;
+  margin:16px 0 6px; color:#333;
+}
+.info-close-btn {
+  width:100%; padding:13px;
+  background:linear-gradient(135deg,var(--green3),var(--green));
+  color:#fff; border:none; border-radius:12px;
+  font-size:14px; font-weight:700;
+  margin-top:20px; cursor:pointer;
+  font-family:'Poppins',sans-serif;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -472,12 +586,6 @@ body.dark .bnav-label{color:#555;}
   <button class="bnav-item" id="bn-orders" onclick="openOrdersPanel()"><span class="bnav-icon">📦</span><span class="bnav-label">Orders</span></button>
   <button class="bnav-item" id="bn-profile" onclick="openProfilePanelM()"><span class="bnav-icon">👤</span><span class="bnav-label">Profile</span></button>
 </nav>
-
-<div class="ai-sec">
-  <h2>🤖 Recommended For You</h2>
-  <div class="ai-row" id="aiProducts"></div>
-</div>
-
 <section class="hero">
   <div class="hero-content">
     <h1>Freshness You Can Trust</h1>
@@ -494,7 +602,10 @@ body.dark .bnav-label{color:#555;}
     </div>
   </div>
 </section>
-
+<div class="ai-sec">
+  <h2>🤖 Recommended For You</h2>
+  <div class="ai-row" id="aiProducts"></div>
+</div>
 <div class="banner">
   <div class="slides">
     <div class="slide active">🔥 40% OFF on Leafy Vegetables</div>
@@ -531,7 +642,12 @@ body.dark .bnav-label{color:#555;}
     <div class="sum-total"><span>Grand Total</span><span>₹<span id="grandTotal">0</span></span></div>
     <h4 style="font-size:12px;margin-bottom:5px;">Customer Details</h4>
     <input class="cinput" id="cust-name" placeholder="Your Full Name">
-    <input class="cinput" id="cust-phone" placeholder="Mobile Number" type="tel">
+   <input class="cinput" id="cust-phone"
+  placeholder="10-digit Mobile Number"
+  type="tel"
+  maxlength="10"
+  pattern="[6-9][0-9]{9}"
+  inputmode="numeric">
     <textarea class="ctextarea" id="cust-address" placeholder="Delivery Address"></textarea>
     <button class="pay-btn" onclick="placeOrder()">💳 Pay Online</button>
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
@@ -551,7 +667,24 @@ body.dark .bnav-label{color:#555;}
   <div class="footer-grid">
     <div><h3>🌿 FreshKart</h3><p>Farm fresh groceries delivered in 30 minutes.</p></div>
     <div><h4>Quick Links</h4><p>Home</p><p>Categories</p><p>Contact</p></div>
-    <div><h4>Support</h4><p>Help Center</p><p>Refund Policy</p><p>Terms &amp; Conditions</p></div>
+    <div><h4>Support</h4><p onclick="openInfoModal('help')"
+   style="cursor:pointer;opacity:0.8;transition:0.2s;"
+   onmouseover="this.style.color='#2ecc71'"
+   onmouseout="this.style.color=''">
+   Help Center
+</p>
+<p onclick="openInfoModal('refund')"
+   style="cursor:pointer;opacity:0.8;transition:0.2s;"
+   onmouseover="this.style.color='#2ecc71'"
+   onmouseout="this.style.color=''">
+   Refund Policy
+</p>
+<p onclick="openInfoModal('terms')"
+   style="cursor:pointer;opacity:0.8;transition:0.2s;"
+   onmouseover="this.style.color='#2ecc71'"
+   onmouseout="this.style.color=''">
+   Terms &amp; Conditions
+</p></div>
   </div>
   <p class="footer-copy">© 2026 FreshKart | All Rights Reserved</p>
 </footer>
@@ -711,6 +844,13 @@ body.dark .bnav-label{color:#555;}
   <button class="img-zoom-close" onclick="closeZoom()">✕</button>
   <img id="zoomImg" src="" alt="">
 </div>
+  <div class="toast-container" id="toastContainer"></div>
+  <div id="infoModal" onclick="if(event.target===this)closeInfoModal()">
+  <div class="info-card">
+    <div id="infoContent"></div>
+    <button class="info-close-btn" onclick="closeInfoModal()">Close</button>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -731,7 +871,19 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const gp = new GoogleAuthProvider();
 let cart = {}, total = 0, delivery = 20, allP = {}, cats = new Set(), currentUser = null;
+/* ═══ CART PERSISTENCE ═══ */
+function saveCart() {
+  try {
+    localStorage.setItem('fkCart_v2', JSON.stringify(cart));
+  } catch(e) { /* storage full ho toh ignore */ }
+}
 
+function loadCart() {
+  try {
+    const saved = localStorage.getItem('fkCart_v2');
+    if (saved) cart = JSON.parse(saved);
+  } catch(e) { cart = {}; }
+}
 onAuthStateChanged(auth, u => {
   currentUser = u;
   const lb = document.getElementById("navLoginBtn");
@@ -832,7 +984,7 @@ window.doForgotPassword = async () => {
   catch (e) { showErr("login", "⚠️ Could not send reset email."); }
 };
 
-window.doLogout = async () => { await signOut(auth); closeProfilePanel(); closeOrdersPanel(); alert("Logged out! See you soon 👋"); };
+window.doLogout = async () => { await signOut(auth); closeProfilePanel(); closeOrdersPanel(); showToast("Logged out! See you soon 👋", "info"); };
 
 window.openProfilePanel = window.openProfilePanelM = async () => {
   if (!currentUser) { openLoginModal(); return; }
@@ -1144,7 +1296,7 @@ window.confirmCancelOrder = async () => {
   } catch(e) {
     btn.disabled = false;
     btn.textContent = "Yes, Cancel";
-    alert("⚠️ Could not cancel order. Try again!");
+   showToast("Could not cancel order. Try again!", "error");
   }
 };
 /* ── WISHLIST ── */
@@ -1340,6 +1492,43 @@ document.addEventListener("touchend", e => {
     document.getElementById("ptrIndicator").style.display = "none";
   }
 }, { passive: true });
+  const infoContent = {
+  help: `<h2>🙋 Help Center</h2>
+    <h3>📞 Contact Us</h3>
+    <p>WhatsApp: +91 78887 16909 (9am–9pm)</p>
+    <p>Email: support@freshkart.in</p>
+    <h3>📦 Order Issues</h3>
+    <p>For missing items or quality issues, contact within 2 hours of delivery.</p>
+    <h3>⏰ Delivery Time</h3>
+    <p>We deliver within 30 minutes of order confirmation.</p>`,
+
+  refund: `<h2>💰 Refund Policy</h2>
+    <h3>✅ Eligible Refunds</h3>
+    <p>Wrong item delivered, damaged product, or missing items.</p>
+    <h3>⏱️ Refund Timeline</h3>
+    <p>Online payments: 3–5 business days to original account.</p>
+    <p>COD orders: No refund applicable for accepted deliveries.</p>
+    <h3>📸 How to Claim</h3>
+    <p>Send photo on WhatsApp within 2 hours of delivery.</p>`,
+
+  terms: `<h2>📜 Terms & Conditions</h2>
+    <h3>🛒 Ordering</h3>
+    <p>Orders are subject to product availability. Prices may vary.</p>
+    <h3>🚚 Delivery</h3>
+    <p>We deliver within our service area only. Minimum order ₹99.</p>
+    <h3>⚠️ Disclaimer</h3>
+    <p>FreshKart reserves the right to cancel orders due to unforeseen circumstances.</p>`
+};
+
+window.openInfoModal = (page) => {
+  document.getElementById('infoContent').innerHTML = infoContent[page] || '';
+  document.getElementById('infoModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+};
+window.closeInfoModal = () => {
+  document.getElementById('infoModal').classList.remove('show');
+  document.body.style.overflow = '';
+};
 function loadProducts() {
  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
@@ -1354,6 +1543,7 @@ function loadProducts() {
     });
     renderPills();
     applyFilters();
+    renderRecommended(); 
   });
 }
 
@@ -1408,7 +1598,31 @@ window.applyFilters = () => {
   for (let id in allP) { const p = allP[id]; if (id.toLowerCase().includes(s) && (c===""||p.category===c)) f[id] = p; }
   renderProducts(f);
 };
+function renderRecommended() {
+  const container = document.getElementById('aiProducts');
+  if (!container) return;
 
+  // Popular products ya koi bhi 4-5 products lo
+  const picks = Object.entries(allP)
+    .filter(([id, p]) => p.popular || p.rating >= 4)
+    .slice(0, 5);
+
+  if (!picks.length) {
+    document.querySelector('.ai-sec').style.display = 'none';
+    return;
+  }
+
+  container.innerHTML = picks.map(([id, p]) => `
+    <div class="ai-card" onclick="openProductDetail('${id}')" style="cursor:pointer;">
+      <img src="${p.image}" alt="${id}" loading="lazy">
+      <div class="ai-card-body">
+        <h4>${id}</h4>
+        <p>₹${p.price}/${p.unit||'kg'}</p>
+        <button onclick="event.stopPropagation();changeQty('${id}',1)">＋ Add</button>
+      </div>
+    </div>
+  `).join('');
+}
 window.handleSearch = () => {
   const inp = document.getElementById("searchInput").value.toLowerCase();
   const box = document.getElementById("suggestions");
@@ -1427,7 +1641,7 @@ window.selectSuggestion = name => { document.getElementById("searchInput").value
 window.openSuggestions = () => { if (document.getElementById("searchInput").value) document.getElementById("suggestions").style.display = "block"; };
 window.clearSearch = () => { document.getElementById("searchInput").value = ""; document.getElementById("suggestions").style.display = "none"; applyFilters(); };
 window.startVoice = () => {
-  if (!("webkitSpeechRecognition" in window)) { alert("Voice not supported"); return; }
+  if (!("webkitSpeechRecognition" in window)) {showToast("Voice search not supported on this browser.", "warning"); return; }
   const r = new webkitSpeechRecognition();
   r.lang = "en-IN"; r.start();
   r.onresult = e => { document.getElementById("searchInput").value = e.results[0][0].transcript; handleSearch(); };
@@ -1489,7 +1703,11 @@ window.removeItem = id => {
   if (cart[id]) cart[id].qty = 0;
   const t = document.getElementById("total-"+id); if (t) t.classList.remove("show");
   const q = document.getElementById("qty-"+id); if (q) q.textContent = 0;
-  calcTotal();
+ function calcTotal() {
+  // ... existing code same rehega ...
+  // Last line ke baad yeh add karo:
+  saveCart();
+ }
 };
 
 window.updateWeight = (id, weight, el) => {
@@ -1538,7 +1756,21 @@ window.placeOrder = async () => {
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
-  if (!nm || !ph || !ad) { alert("Please fill Name, Phone and Address first!"); return; }
+  if (!/^[6-9]\d{9}$/.test(ph)) {
+  showToast("Please enter a valid 10-digit Indian mobile number.", "error");
+  document.getElementById('cust-phone').focus();
+  document.getElementById('cust-phone').style.borderColor = '#ef4444';
+  setTimeout(() => document.getElementById('cust-phone').style.borderColor = '', 2000);
+  return;
+}
+  if (nm.length < 3) {
+  showToast("Please enter your full name.", "warning");
+  return;
+}
+if (ad.length < 10) {
+  showToast("Please enter a complete delivery address.", "warning");
+  return;
+}
 
   try {
     const res = await fetch("/.netlify/functions/getkey");
@@ -1565,7 +1797,7 @@ window.placeOrder = async () => {
           status: "Pending",
           createdAt: new Date()
         });
-        alert("Payment Successful! Order ID: " + oid);
+       showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
         try {
           let itemsForEmail = "";
           for (let item in cart) {
@@ -1629,7 +1861,7 @@ window.placeOrder = async () => {
     rzp.open();
 
   } catch(e) {
-    alert("⚠️ Payment setup failed.\n\nPlease check your internet connection and try again, or use Cash on Delivery.");
+   showToast("Payment setup failed. Try Cash on Delivery.", "error");
   }
 };
 /* ==========================================
@@ -1637,12 +1869,12 @@ window.placeOrder = async () => {
    ========================================== */
 window.sendOrder = async (pm) => {
   if (!pm) pm = "Cash on Delivery";
-  if (total <= 0) { alert("Cart is empty!"); return; }
+  if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
 
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
-  if (!nm || !ph || !ad) { alert("Please fill all customer details"); return; }
+  if (!nm || !ph || !ad) { showToast("Please fill all customer details.", "warning"); return; }
 
   let itemsText = "";
   let grandTotal = 0;
@@ -1730,13 +1962,13 @@ try {
 } catch(emailErr) {
   console.log("Email error:", emailErr);
 }
-  alert("Order Placed Successfully!\nOrder ID: " + oid + "\nThank you for shopping with FreshKart!");
+ showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
   cart = {};
   calcTotal();
 };
 window.trackOrder = async () => {
   const id = document.getElementById("trackId").value.trim();
-  if (!id) { alert("Enter Order ID"); return; }
+  if (!id) { showToast("Please enter your Order ID first.", "warning"); return; }
 
   const statusEl = document.getElementById("orderStatus");
   statusEl.textContent = "🔍 Searching...";
@@ -1855,11 +2087,68 @@ setInterval(() => {
   cs = (cs + 1) % slides.length;
   slides[cs].classList.add("active");
 }, 3000);
-
+/* ═══ TOAST FUNCTION ═══ */
+window.showToast = (msg, type = 'success', duration = 3000) => {
+  const icons = {
+    success: '✅',
+    error:   '❌',
+    warning: '⚠️',
+    info:    'ℹ️'
+  };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span>
+    <span class="toast-msg">${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('exit');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+};
 loadProducts();
+  /* ═══ PWA INSTALL PROMPT ═══ */
+let pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  pwaPrompt = e;
+  // Show banner after 3 seconds
+  setTimeout(() => {
+    const banner = document.createElement('div');
+    banner.innerHTML = `
+      <div style="position:fixed;bottom:70px;left:12px;right:12px;
+        background:#fff;border:2px solid #27ae60;border-radius:16px;
+        padding:14px 16px;display:flex;align-items:center;gap:12px;
+        z-index:8888;box-shadow:0 8px 28px rgba(0,0,0,0.15);
+        font-family:'Poppins',sans-serif;" id="pwaBanner">
+        <span style="font-size:28px;">🌿</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;">Install FreshKart App</div>
+          <div style="font-size:11px;color:#888;">Add to home screen for faster ordering</div>
+        </div>
+        <button onclick="installPWA()" style="background:#27ae60;color:#fff;
+          border:none;padding:8px 14px;border-radius:10px;font-size:12px;
+          font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;">Install</button>
+        <button onclick="document.getElementById('pwaBanner').remove()"
+          style="background:none;border:none;font-size:18px;color:#aaa;cursor:pointer;">✕</button>
+      </div>`;
+    document.body.appendChild(banner);
+  }, 3000);
+});
+
+window.installPWA = async () => {
+  if (!pwaPrompt) return;
+  pwaPrompt.prompt();
+  const { outcome } = await pwaPrompt.userChoice;
+  if (outcome === 'accepted') showToast('FreshKart installed! 🎉', 'success');
+  pwaPrompt = null;
+  const b = document.getElementById('pwaBanner');
+  if (b) b.remove();
+};
 </script>
 </body>
 </html>
+
 
 
 
