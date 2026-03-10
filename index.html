@@ -557,6 +557,26 @@ body.dark .bnav-label{color:#555;}
 .stock-out{background:#fff0f0;color:#e74c3c;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
 .notify-btn{width:100%;padding:8px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:11px;font-size:12px;font-weight:700;margin-top:4px;}
+/* WHATSAPP FLOAT */
+.wa-float{position:fixed;bottom:80px;left:15px;background:#25D366;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;border:none;box-shadow:0 5px 20px rgba(37,211,102,0.5);z-index:800;text-decoration:none;animation:waPulse 2s infinite;}
+@keyframes waPulse{0%,100%{box-shadow:0 5px 20px rgba(37,211,102,0.5);}50%{box-shadow:0 5px 30px rgba(37,211,102,0.8);}}
+@media(max-width:768px){.wa-float{bottom:70px;width:48px;height:48px;font-size:22px;}}
+  /* BACK TO TOP */
+.back-top{position:fixed;bottom:145px;right:15px;background:linear-gradient(135deg,var(--green),var(--green2));width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;border:none;box-shadow:0 4px 14px rgba(39,174,96,0.4);z-index:800;opacity:0;visibility:hidden;transition:0.3s;cursor:pointer;}
+.back-top.show{opacity:1;visibility:visible;}
+@media(max-width:768px){.back-top{bottom:130px;right:12px;width:38px;height:38px;font-size:16px;}}
+/* DELIVERY PROGRESS BAR */
+.progress-wrap{margin:10px 0 6px;}
+.progress-steps{display:flex;justify-content:space-between;align-items:center;position:relative;margin-bottom:6px;}
+.progress-steps::before{content:"";position:absolute;top:12px;left:0;right:0;height:3px;background:#eee;z-index:0;}
+.progress-fill{position:absolute;top:12px;left:0;height:3px;background:linear-gradient(90deg,var(--green),var(--green2));z-index:1;transition:width 0.5s ease;}
+.pstep{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;z-index:2;}
+.pstep-dot{width:24px;height:24px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#aaa;transition:0.3s;}
+.pstep-dot.done{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;box-shadow:0 2px 8px rgba(39,174,96,0.4);}
+.pstep-dot.active{background:linear-gradient(135deg,#e67e22,#f39c12);color:#fff;animation:pulse 1.5s infinite;}
+.pstep-label{font-size:9px;color:#aaa;font-weight:600;text-align:center;white-space:nowrap;}
+.pstep-label.done{color:var(--green);}
+.pstep-label.active{color:#e67e22;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -867,6 +887,10 @@ body.dark .bnav-label{color:#555;}
     </div>
   </div>
 </div>
+  <!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/917888716909" target="_blank" class="wa-float">💬</a>
+  <!-- BACK TO TOP -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️</button>
 <!-- PULL TO REFRESH -->
 <div class="ptr-indicator" id="ptrIndicator">
   <span class="ptr-spinner"></span> Refreshing...
@@ -1115,11 +1139,35 @@ async function loadOrders() {
           }
         }
       }
+// Progress Bar
+const steps = ["Pending","Packed","Out for Delivery","Delivered"];
+const cancelledSteps = ["Pending","Cancelled"];
+const isCancel = o.status === "Cancelled";
+const activeSteps = isCancel ? cancelledSteps : steps;
+const curStep = isCancel ? 1 : steps.indexOf(o.status || "Pending");
+const fillPct = isCancel ? 100 : (curStep / (steps.length - 1)) * 100;
 
-      const cancelBtn = (o.status === "Pending" || !o.status)
-        ? '<button class="cancel-btn" onclick="openCancelModal(\'' + o.id + '\',\'' + (o.orderId||o.id) + '\')">🗑️ Cancel Order</button>'
-        : '';
+const progressBar =
+  '<div class="progress-wrap">' +
+    '<div class="progress-steps">' +
+      '<div class="progress-fill" style="width:' + fillPct + '%;background:' + (isCancel ? "linear-gradient(90deg,#e74c3c,#c0392b)" : "linear-gradient(90deg,#27ae60,#2ecc71)") + ';"></div>' +
+      activeSteps.map((s, i) => {
+        const isDone = i < curStep || (i === curStep && o.status === "Delivered");
+        const isActive = i === curStep && o.status !== "Delivered";
+        return '<div class="pstep">' +
+          '<div class="pstep-dot ' + (isDone ? "done" : isActive ? "active" : "") + '">' + (isDone ? "✓" : (i+1)) + '</div>' +
+          '<div class="pstep-label ' + (isDone ? "done" : isActive ? "active" : "") + '">' + s + '</div>' +
+        '</div>';
+      }).join("") +
+    '</div>' +
+  '</div>';
+     const cancelBtn = (o.status === "Pending" || !o.status)
+  ? '<button class="cancel-btn" onclick="openCancelModal(\'' + o.id + '\',\'' + (o.orderId||o.id) + '\')">🗑️ Cancel Order</button>'
+  : '';
 
+const orderAgainBtn = o.status === "Delivered"
+  ? '<button class="cancel-btn" style="background:linear-gradient(135deg,#27ae60,#2ecc71);margin-top:10px;" onclick="orderAgain(' + JSON.stringify(o.items).replace(/'/g,"\\'") + ')">🔄 Order Again</button>'
+  : '';
       html +=
         '<div class="ocard">' +
           '<div class="ocard-top">' +
@@ -1129,7 +1177,8 @@ async function loadOrders() {
             '</div>' +
             '<span class="o-sbadge ' + sc + '">' + (o.status||"Pending") + '</span>' +
           '</div>' +
-          (items ? '<div>' + items + '</div>' : '') +
+        (items ? '<div>' + items + '</div>' : '') +
+          progressBar +
           '<hr class="o-div">' +
           '<div class="o-foot">' +
             '<div>' +
@@ -1139,6 +1188,7 @@ async function loadOrders() {
             '<span class="o-pay">' + (o.paymentType||"COD") + '</span>' +
           '</div>' +
           cancelBtn +
+          orderAgainBtn +
         '</div>';
     });
 
@@ -1569,6 +1619,22 @@ window.closeInfoModal = () => {
   window.notifyMe = (id) => {
   if (!currentUser) { openLoginModal(); return; }
   showToast("🔔 You'll be notified when " + id + " is back in stock!", "info", 4000);
+};
+  window.orderAgain = (items) => {
+  if (!items) return;
+  let count = 0;
+  for (let item in items) {
+    if (items[item] && items[item].qty > 0 && allP[item]) {
+      if (!cart[item]) cart[item] = { qty: 0, price: allP[item].price, selectedWeight: 1 };
+      cart[item].qty = items[item].qty;
+      cart[item].selectedWeight = items[item].selectedWeight || 1;
+      count++;
+    }
+  }
+  calcTotal();
+  closeOrdersPanel();
+  toggleCart();
+  showToast("🔄 " + count + " items added to cart!", "success", 3000);
 };
 function loadProducts() {
  showSkeletons();
@@ -2174,6 +2240,11 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
   }, duration);
 };
   loadCart();
+  // Back to Top
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backTop');
+  if (btn) btn.classList.toggle('show', window.scrollY > 400);
+});
 loadProducts();
   /* ═══ PWA INSTALL PROMPT ═══ */
 let pwaPrompt = null;
@@ -2216,6 +2287,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
