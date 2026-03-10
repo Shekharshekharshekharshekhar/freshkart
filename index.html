@@ -1068,9 +1068,13 @@ async function loadOrders() {
     const snap = await getDocs(collection(db, "orders"));
 
     const orders = [];
-   snap.forEach(d => {
+  snap.forEach(d => {
   const data = d.data();
-  if (data.userId === currentUser.uid) {
+  if (
+    data.userId === currentUser.uid ||
+    data.userId === "guest" ||
+    !data.userId
+  ) {
     orders.push({ id: d.id, ...data });
   }
 });
@@ -2043,14 +2047,21 @@ window.trackOrder = async () => {
   if (!id) { showToast("Please enter your Order ID first.", "warning"); return; }
 
   const statusEl = document.getElementById("orderStatus");
-  statusEl.textContent = "🔍 Searching...";
-  statusEl.style.color = "#888";
   statusEl.innerHTML = "<span style='color:#888;font-size:13px;'>🔍 Searching your order...</span>";
 
   try {
-    const snap = await getDocs(
-      query(collection(db, "orders"), where("orderId", "==", id))
-    );
+    // Pehle orderId field se search karo
+    let snap = await getDocs(query(collection(db, "orders"), where("orderId", "==", id)));
+    
+    // Nahi mila toh document ID se try karo
+    if (snap.empty) {
+      try {
+        const docSnap = await getDoc(doc(db, "orders", id));
+        if (docSnap.exists()) {
+          snap = { empty: false, docs: [{ data: () => docSnap.data() }] };
+        }
+      } catch(e) {}
+    }
 
     if (!snap.empty) {
       const order = snap.docs[0].data();
@@ -2061,68 +2072,52 @@ window.trackOrder = async () => {
           })
         : "—";
 
-      const statusColor =
-        order.status === "Delivered" ? "#27ae60" :
-        order.status === "Cancelled" ? "#e74c3c" : "#e67e22";
-
-      const statusIcon =
-        order.status === "Delivered" ? "✅" :
-        order.status === "Cancelled" ? "❌" : "⏳";
+      const statusColor = order.status === "Delivered" ? "#27ae60" : order.status === "Cancelled" ? "#e74c3c" : "#e67e22";
+      const statusIcon = order.status === "Delivered" ? "✅" : order.status === "Cancelled" ? "❌" : "⏳";
 
       statusEl.innerHTML =
         "<div style='background:#f0fdf4;border:1px solid #e8f5e9;border-radius:14px;padding:16px;margin-top:8px;'>" +
           "<div style='font-size:15px;font-weight:800;color:#27ae60;margin-bottom:12px;'>Order Found! 🎉</div>" +
-
           "<div style='display:flex;justify-content:space-between;align-items:center;background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);'>" +
             "<span style='font-size:12px;color:#888;font-weight:600;'>ORDER ID</span>" +
             "<span style='font-size:13px;font-weight:800;color:#27ae60;'>" + (order.orderId || id) + "</span>" +
           "</div>" +
-
           "<div style='display:flex;justify-content:space-between;align-items:center;background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);'>" +
             "<span style='font-size:12px;color:#888;font-weight:600;'>STATUS</span>" +
             "<span style='font-size:13px;font-weight:800;color:" + statusColor + ";'>" + statusIcon + " " + (order.status || "Pending") + "</span>" +
           "</div>" +
-
           "<div style='display:flex;justify-content:space-between;align-items:center;background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);'>" +
             "<span style='font-size:12px;color:#888;font-weight:600;'>CUSTOMER</span>" +
             "<span style='font-size:13px;font-weight:700;color:#333;'>" + (order.name || "—") + "</span>" +
           "</div>" +
-
-          "<div style='display:flex;justify-content:space-between;align-items:center;background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);'>" +
-            "<span style='font-size:12px;color:#888;font-weight:600;'>ADDRESS</span>" +
-            "<span style='font-size:13px;font-weight:700;color:#333;text-align:right;max-width:60%;'>" + (order.address || "—") + "</span>" +
-          "</div>" +
-
           "<div style='display:flex;justify-content:space-between;align-items:center;background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);'>" +
             "<span style='font-size:12px;color:#888;font-weight:600;'>TOTAL</span>" +
             "<span style='font-size:14px;font-weight:800;color:#27ae60;'>₹" + (order.total || 0).toFixed(2) + "</span>" +
           "</div>" +
-
           "<div style='display:flex;justify-content:space-between;align-items:center;background:white;border-radius:10px;padding:10px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);'>" +
             "<span style='font-size:12px;color:#888;font-weight:600;'>PAYMENT</span>" +
             "<span style='font-size:13px;font-weight:700;color:#333;'>" + (order.paymentType || "COD") + "</span>" +
           "</div>" +
-
           "<div style='text-align:center;margin-top:10px;font-size:11px;color:#aaa;'>🕒 " + date + "</div>" +
         "</div>";
-
     } else {
       statusEl.innerHTML =
         "<div style='background:#fff0f0;border:1px solid #ffd5d5;border-radius:14px;padding:16px;margin-top:8px;text-align:center;'>" +
           "<div style='font-size:36px;margin-bottom:10px;'>❌</div>" +
-          "<div style='font-size:14px;font-weight:700;color:#e74c3c;margin-bottom:4px;'>Order Not Found!</div>" +
-          "<div style='font-size:12px;color:#888;'>Please check your Order ID and try again.</div>" +
+          "<div style='font-size:14px;font-weight:700;color:#e74c3c;'>Order Not Found!</div>" +
+          "<div style='font-size:12px;color:#888;margin-top:4px;'>Please check your Order ID and try again.</div>" +
         "</div>";
     }
-
   } catch(e) {
+    console.error(e);
     statusEl.innerHTML =
       "<div style='background:#fff8e1;border:1px solid #ffe082;border-radius:14px;padding:14px;margin-top:8px;text-align:center;'>" +
         "<div style='font-size:13px;font-weight:700;color:#e67e22;'>⚠️ Could not search order.</div>" +
         "<div style='font-size:12px;color:#888;margin-top:4px;'>Check your internet and try again.</div>" +
       "</div>";
   }
-};window.scrollToProducts = () => document.getElementById("productsSection").scrollIntoView({ behavior: "smooth" });
+};
+  window.scrollToProducts = () => document.getElementById("productsSection").scrollIntoView({ behavior: "smooth" });
 window.goHome = el => { setDNav(el); window.scrollTo({ top: 0, behavior: "smooth" }); };
 window.goHomeM = () => { setBNav("bn-home"); window.scrollTo({ top: 0, behavior: "smooth" }); };
 window.goCategories = el => { setDNav(el); document.getElementById("productsSection").scrollIntoView({ behavior: "smooth" }); };
@@ -2221,6 +2216,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
