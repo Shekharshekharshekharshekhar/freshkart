@@ -1824,6 +1824,20 @@ if (ad.length < 10) {
         const oid = "FK" + Date.now();
         await addDoc(collection(db, "orders"), {
           // Stock deduct karo
+
+          orderId: oid,
+          userId: currentUser ? currentUser.uid : "guest",
+          name: nm, phone: ph, address: ad,
+          items: cart,
+          total: total + delivery,
+          paymentType: "Online",
+          paymentId: r.razorpay_payment_id,
+          status: "Pending",
+          createdAt: new Date()
+        });
+      showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
+
+// Stock deduct karo ✅
 for (let item in cart) {
   if (cart[item] && cart[item].qty > 0) {
     try {
@@ -1835,17 +1849,6 @@ for (let item in cart) {
     } catch(e) { console.log("Stock update error:", e); }
   }
 }
-          orderId: oid,
-          userId: currentUser ? currentUser.uid : "guest",
-          name: nm, phone: ph, address: ad,
-          items: cart,
-          total: total + delivery,
-          paymentType: "Online",
-          paymentId: r.razorpay_payment_id,
-          status: "Pending",
-          createdAt: new Date()
-        });
-       showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
         try {
           let itemsForEmail = "";
           for (let item in cart) {
@@ -1992,7 +1995,7 @@ window.sendOrder = async (pm) => {
   createdAt: new Date()
 });
 
-// Stock deduct karo ← BAAD MEIN ✅
+// Stock deduct karo✅
 for (let item in cart) {
   if (cart[item] && cart[item].qty > 0) {
     try {
@@ -2230,6 +2233,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
