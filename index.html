@@ -1822,9 +1822,7 @@ if (ad.length < 10) {
       prefill: { name: nm, contact: ph },
       handler: async r => {
         const oid = "FK" + Date.now();
-        await addDoc(collection(db, "orders"), {
-          // Stock deduct karo
-
+       await addDoc(collection(db, "orders"), {
           orderId: oid,
           userId: currentUser ? currentUser.uid : "guest",
           name: nm, phone: ph, address: ad,
@@ -1984,29 +1982,6 @@ window.sendOrder = async (pm) => {
     + line;
 
  await addDoc(collection(db, "orders"), {
-  orderId: oid,
-  userId: currentUser ? currentUser.uid : "guest",
-  name: nm, phone: ph, address: ad,
-  items: cart,
-  total: total + delivery,
-  paymentType: "Online",
-  paymentId: r.razorpay_payment_id,
-  status: "Pending",
-  createdAt: new Date()
-});
-
-// Stock deduct karo✅
-for (let item in cart) {
-  if (cart[item] && cart[item].qty > 0) {
-    try {
-      const currentStock = allP[item] ? (allP[item].stock || 0) : 0;
-      if (currentStock > 0) {
-        const newStock = Math.max(0, currentStock - cart[item].qty);
-        await updateDoc(doc(db, "products", item), { stock: newStock });
-      }
-    } catch(e) { console.log("Stock update error:", e); }
-  }
-}
     orderId: oid,
     userId: currentUser ? currentUser.uid : "guest",
     name: nm, phone: ph, address: ad,
@@ -2016,6 +1991,19 @@ for (let item in cart) {
     status: "Pending",
     createdAt: new Date()
   });
+
+  // Stock deduct karo ✅
+  for (let item in cart) {
+    if (cart[item] && cart[item].qty > 0) {
+      try {
+        const currentStock = allP[item] ? (allP[item].stock || 0) : 0;
+        if (currentStock > 0) {
+          const newStock = Math.max(0, currentStock - cart[item].qty);
+          await updateDoc(doc(db, "products", item), { stock: newStock });
+        }
+      } catch(e) { console.log("Stock update error:", e); }
+    }
+  }
 
   window.open("https://wa.me/917888716909?text=" + encodeURIComponent(msg), "_blank");
 try {
@@ -2233,6 +2221,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
