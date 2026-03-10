@@ -1166,7 +1166,7 @@ const progressBar =
   : '';
 
 const orderAgainBtn = o.status === "Delivered"
-  ? '<button class="cancel-btn" style="background:linear-gradient(135deg,#27ae60,#2ecc71);margin-top:10px;" onclick="orderAgain(' + JSON.stringify(o.items).replace(/'/g,"\\'") + ')">🔄 Order Again</button>'
+  ? '<button class="cancel-btn" style="background:linear-gradient(135deg,#27ae60,#2ecc71);margin-top:10px;" onclick="orderAgain(\'' + o.id + '\')">🔄 Order Again</button>'
   : '';
       html +=
         '<div class="ocard">' +
@@ -1620,21 +1620,30 @@ window.closeInfoModal = () => {
   if (!currentUser) { openLoginModal(); return; }
   showToast("🔔 You'll be notified when " + id + " is back in stock!", "info", 4000);
 };
-  window.orderAgain = (items) => {
-  if (!items) return;
-  let count = 0;
-  for (let item in items) {
-    if (items[item] && items[item].qty > 0 && allP[item]) {
-      if (!cart[item]) cart[item] = { qty: 0, price: allP[item].price, selectedWeight: 1 };
-      cart[item].qty = items[item].qty;
-      cart[item].selectedWeight = items[item].selectedWeight || 1;
-      count++;
+ window.orderAgain = async (docId) => {
+  if (!docId) return;
+  try {
+    const orderDoc = await getDoc(doc(db, "orders", docId));
+    if (!orderDoc.exists()) { showToast("Order not found!", "error"); return; }
+    const items = orderDoc.data().items;
+    if (!items) { showToast("No items found!", "error"); return; }
+    let count = 0;
+    for (let item in items) {
+      if (items[item] && items[item].qty > 0 && allP[item]) {
+        if (!cart[item]) cart[item] = { qty: 0, price: allP[item].price, selectedWeight: 1 };
+        cart[item].qty = items[item].qty;
+        cart[item].selectedWeight = items[item].selectedWeight || 1;
+        count++;
+      }
     }
+    calcTotal();
+    closeOrdersPanel();
+    toggleCart();
+    showToast("🔄 " + count + " items added to cart!", "success", 3000);
+  } catch(e) {
+    console.log("Order again error:", e);
+    showToast("Could not load order. Try again!", "error");
   }
-  calcTotal();
-  closeOrdersPanel();
-  toggleCart();
-  showToast("🔄 " + count + " items added to cart!", "success", 3000);
 };
 function loadProducts() {
  showSkeletons();
@@ -2287,6 +2296,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
