@@ -577,6 +577,23 @@ body.dark .bnav-label{color:#555;}
 .pstep-label{font-size:9px;color:#aaa;font-weight:600;text-align:center;white-space:nowrap;}
 .pstep-label.done{color:var(--green);}
 .pstep-label.active{color:#e67e22;}
+  /* FREE DELIVERY BAR */
+.free-del-bar{background:linear-gradient(135deg,#f0fdf4,#e8f5e9);border-radius:12px;padding:10px 13px;margin-bottom:10px;border:1px solid var(--border);}
+.fdb-text{font-size:12px;font-weight:600;color:#555;margin-bottom:6px;}
+.fdb-text span{color:var(--green);font-weight:700;}
+.fdb-progress{height:6px;background:#ddd;border-radius:10px;overflow:hidden;}
+.fdb-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green2));border-radius:10px;transition:width 0.4s ease;}
+.fdb-success{font-size:12px;font-weight:700;color:var(--green);text-align:center;padding:6px;background:#e8f5e9;border-radius:10px;margin-bottom:10px;}
+/* REVIEW SYSTEM */
+.review-wrap{margin-top:10px;background:#f8fdf8;border-radius:12px;padding:12px;border:1px solid var(--border);}
+.review-title{font-size:12px;font-weight:700;color:#555;margin-bottom:8px;}
+.review-stars{display:flex;gap:6px;margin-bottom:8px;}
+.review-star{font-size:22px;cursor:pointer;color:#ddd;transition:0.2s;}
+.review-star.active{color:#f39c12;}
+.review-inp{width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid var(--border);font-size:12px;font-family:'Poppins',sans-serif;outline:none;resize:none;height:55px;margin-bottom:8px;}
+.review-inp:focus{border-color:var(--green2);}
+.review-submit{width:100%;padding:9px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
+.review-done{background:#e8f5e9;color:var(--green);font-size:12px;font-weight:700;padding:8px;border-radius:9px;text-align:center;margin-top:8px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -673,7 +690,7 @@ body.dark .bnav-label{color:#555;}
   <div class="cart-hdr"><h3>🛒 Your Cart</h3><button class="cart-x" onclick="toggleCart()">✕</button></div>
   <div class="cart-list" id="cartItems"></div>
   <div class="csummary">
-    <div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
+    <div id="freeDelBar"></div><div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
     <div class="sum-row"><span>Delivery</span><span>₹20</span></div>
     <div class="sum-total"><span>Grand Total</span><span>₹<span id="grandTotal">0</span></span></div>
     <h4 style="font-size:12px;margin-bottom:5px;">Customer Details</h4>
@@ -1164,7 +1181,22 @@ const progressBar =
      const cancelBtn = (o.status === "Pending" || !o.status)
   ? '<button class="cancel-btn" onclick="openCancelModal(\'' + o.id + '\',\'' + (o.orderId||o.id) + '\')">🗑️ Cancel Order</button>'
   : '';
-
+// Review Section
+const hasReviewed = o.reviewed === true;
+const reviewSection = o.status === "Delivered"
+  ? (hasReviewed
+    ? '<div class="review-done">✅ Review Submitted! Thank you 😊</div>'
+    : '<div class="review-wrap">' +
+        '<div class="review-title">⭐ Rate Your Order:</div>' +
+        '<div class="review-stars" id="stars-' + o.id + '">' +
+          [1,2,3,4,5].map(n =>
+            '<span class="review-star" onclick="setReviewStar(\'' + o.id + '\',' + n + ')" data-val="' + n + '">★</span>'
+          ).join("") +
+        '</div>' +
+        '<textarea class="review-inp" id="review-text-' + o.id + '" placeholder="Write your review (optional)..."></textarea>' +
+        '<button class="review-submit" onclick="submitReview(\'' + o.id + '\')">Submit Review</button>' +
+      '</div>')
+  : '';
 const orderAgainBtn = o.status === "Delivered"
   ? '<button class="cancel-btn" style="background:linear-gradient(135deg,#27ae60,#2ecc71);margin-top:10px;" onclick="orderAgain(\'' + o.id + '\')">🔄 Order Again</button>'
   : '';
@@ -1189,6 +1221,7 @@ const orderAgainBtn = o.status === "Delivered"
           '</div>' +
           cancelBtn +
           orderAgainBtn +
+          reviewSection +
         '</div>';
     });
 
@@ -1645,6 +1678,61 @@ window.closeInfoModal = () => {
     showToast("Could not load order. Try again!", "error");
   }
 };
+  /* ── REVIEW SYSTEM ── */
+window.setReviewStar = (orderId, val) => {
+  const stars = document.querySelectorAll('#stars-' + orderId + ' .review-star');
+  stars.forEach((s, i) => {
+    s.classList.toggle('active', i < val);
+  });
+  const wrap = document.getElementById('stars-' + orderId);
+  if (wrap) wrap.dataset.selected = val;
+};
+
+window.submitReview = async (orderId) => {
+  const wrap = document.getElementById('stars-' + orderId);
+  const rating = parseInt(wrap ? wrap.dataset.selected || 0 : 0);
+  const text = document.getElementById('review-text-' + orderId);
+  const reviewText = text ? text.value.trim() : '';
+
+  if (rating === 0) {
+    showToast('Please select at least 1 star!', 'warning');
+    return;
+  }
+
+  try {
+    // Order mein reviewed flag lagao
+    await updateDoc(doc(db, 'orders', orderId), {
+      reviewed: true,
+      reviewRating: rating,
+      reviewText: reviewText,
+      reviewDate: new Date()
+    });
+
+    // Order ke items ke products ki rating update karo
+    const orderSnap = await getDoc(doc(db, 'orders', orderId));
+    if (orderSnap.exists()) {
+      const items = orderSnap.data().items;
+      for (let item in items) {
+        if (items[item] && items[item].qty > 0 && allP[item]) {
+          const cur = allP[item];
+          const nc = (cur.ratingCount || 0) + 1;
+          const newRating = ((cur.rating || 0) * (nc - 1) + rating) / nc;
+          await updateDoc(doc(db, 'products', item), {
+            rating: newRating,
+            ratingCount: nc
+          });
+        }
+      }
+    }
+
+    showToast('⭐ Review submitted! Thank you!', 'success', 4000);
+    loadOrders(); // Refresh orders
+
+  } catch(e) {
+    console.log('Review error:', e);
+    showToast('Could not submit review. Try again!', 'error');
+  }
+};
 function loadProducts() {
  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
@@ -1813,6 +1901,27 @@ function calcTotal() {
   const bb = document.getElementById("bnavBadge");
   if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
   if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
+  
+// Free Delivery Bar
+  const freeDeliveryMin = 299;
+  const fdb = document.getElementById("freeDelBar");
+  if (fdb) {
+    if (total >= freeDeliveryMin) {
+      fdb.innerHTML = '<div class="fdb-success">🎉 You got FREE Delivery!</div>';
+      document.getElementById("grandTotal").textContent = (total).toFixed(2);
+      delivery = 0;
+    } else {
+      const remaining = (freeDeliveryMin - total).toFixed(0);
+      const pct = Math.min((total / freeDeliveryMin) * 100, 100);
+      fdb.innerHTML =
+        '<div class="free-del-bar">' +
+          '<div class="fdb-text">🚚 Add <span>₹' + remaining + '</span> more for FREE delivery!</div>' +
+          '<div class="fdb-progress"><div class="fdb-fill" style="width:' + pct + '%;"></div></div>' +
+        '</div>';
+      delivery = 20;
+      document.getElementById("grandTotal").textContent = (total + delivery).toFixed(2);
+    }
+  }
   saveCart();
 }
 window.removeItem = id => {
@@ -2296,6 +2405,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
