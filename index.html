@@ -614,6 +614,19 @@ body.dark .bnav-label{color:#555;}
 .pd-review-submit{width:100%;padding:10px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
 .pd-review-login{text-align:center;font-size:12px;color:#888;padding:10px;}
 .pd-review-login span{color:var(--green);font-weight:700;cursor:pointer;}
+/* MINIMUM ORDER WARNING */
+.min-order-warn{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1px solid #f39c12;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12px;font-weight:600;color:#e67e22;display:none;text-align:center;}
+.min-order-warn.show{display:block;}
+/* DELIVERY TIME SLOT */
+.slot-wrap{margin-bottom:10px;}
+.slot-title{font-size:12px;font-weight:700;color:#555;margin-bottom:7px;}
+.slot-options{display:flex;gap:8px;flex-wrap:wrap;}
+.slot-opt{flex:1;min-width:120px;padding:9px 10px;border-radius:11px;border:2px solid var(--border);background:#fafff9;font-size:11px;font-weight:700;color:#555;cursor:pointer;text-align:center;transition:0.2s;}
+.slot-opt.sel{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(39,174,96,0.28);}
+.slot-schedule{margin-top:8px;display:none;}
+.slot-schedule.show{display:block;}
+.slot-schedule select{width:100%;padding:9px 12px;border-radius:10px;border:2px solid var(--border);font-size:12px;font-weight:600;color:#555;background:#fafff9;outline:none;font-family:'Poppins',sans-serif;}
+.slot-schedule select:focus{border-color:var(--green2);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -710,10 +723,38 @@ body.dark .bnav-label{color:#555;}
   <div class="cart-hdr"><h3>🛒 Your Cart</h3><button class="cart-x" onclick="toggleCart()">✕</button></div>
   <div class="cart-list" id="cartItems"></div>
   <div class="csummary">
-    <div id="freeDelBar"></div><div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
+    <div class="min-order-warn" id="minOrderWarn">⚠️ Minimum order amount is ₹99. Add more items!</div><div id="freeDelBar"></div><div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
     <div class="sum-row"><span>Delivery</span><span>₹20</span></div>
     <div class="sum-total"><span>Grand Total</span><span>₹<span id="grandTotal">0</span></span></div>
     <h4 style="font-size:12px;margin-bottom:5px;">Customer Details</h4>
+    <div class="slot-wrap">
+  <div class="slot-title">🚚 Delivery Time:</div>
+  <div class="slot-options">
+    <div class="slot-opt sel" id="slot-asap" onclick="selectSlot('asap')">
+      ⚡ ASAP<br><span style="font-size:10px;font-weight:500;">30 Minutes</span>
+    </div>
+    <div class="slot-opt" id="slot-schedule" onclick="selectSlot('schedule')">
+      📅 Schedule<br><span style="font-size:10px;font-weight:500;">Choose Time</span>
+    </div>
+  </div>
+  <div class="slot-schedule" id="slotScheduleBox">
+    <select id="slotTime">
+      <option value="">-- Select Time Slot --</option>
+      <option value="9am-10am">🕘 9:00 AM – 10:00 AM</option>
+      <option value="10am-11am">🕙 10:00 AM – 11:00 AM</option>
+      <option value="11am-12pm">🕙 11:00 AM – 12:00 PM</option>
+      <option value="12pm-1pm">🕛 12:00 PM – 1:00 PM</option>
+      <option value="1pm-2pm">🕐 1:00 PM – 2:00 PM</option>
+      <option value="2pm-3pm">🕑 2:00 PM – 3:00 PM</option>
+      <option value="3pm-4pm">🕒 3:00 PM – 4:00 PM</option>
+      <option value="4pm-5pm">🕓 4:00 PM – 5:00 PM</option>
+      <option value="5pm-6pm">🕔 5:00 PM – 6:00 PM</option>
+      <option value="6pm-7pm">🕕 6:00 PM – 7:00 PM</option>
+      <option value="7pm-8pm">🕖 7:00 PM – 8:00 PM</option>
+      <option value="8pm-9pm">🕗 8:00 PM – 9:00 PM</option>
+    </select>
+  </div>
+</div>
     <input class="cinput" id="cust-name" placeholder="Your Full Name">
    <input class="cinput" id="cust-phone"
   placeholder="10-digit Mobile Number"
@@ -1711,6 +1752,24 @@ window.closeInfoModal = () => {
   if (!currentUser) { openLoginModal(); return; }
   showToast("🔔 You'll be notified when " + id + " is back in stock!", "info", 4000);
 };
+  /* ── DELIVERY SLOT ── */
+let selectedSlot = 'asap';
+
+window.selectSlot = (type) => {
+  selectedSlot = type;
+  document.getElementById('slot-asap').classList.toggle('sel', type === 'asap');
+  document.getElementById('slot-schedule').classList.toggle('sel', type === 'schedule');
+  const scheduleBox = document.getElementById('slotScheduleBox');
+  if (scheduleBox) scheduleBox.classList.toggle('show', type === 'schedule');
+};
+
+function getDeliverySlot() {
+  if (selectedSlot === 'asap') return 'ASAP (30 Minutes)';
+  const slotTime = document.getElementById('slotTime');
+  const val = slotTime ? slotTime.value : '';
+  if (!val) return null;
+  return 'Scheduled: ' + val;
+}
  window.orderAgain = async (docId) => {
   if (!docId) return;
   try {
@@ -2119,7 +2178,9 @@ function calcTotal() {
   const bb = document.getElementById("bnavBadge");
   if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
   if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
-  
+  // Minimum Order Warning
+  const minWarn = document.getElementById("minOrderWarn");
+  if (minWarn) minWarn.classList.toggle("show", total > 0 && total < 99);
 // Free Delivery Bar
   const freeDeliveryMin = 299;
   const fdb = document.getElementById("freeDelBar");
@@ -2189,7 +2250,8 @@ window.toggleCart = () => {
    PAYMENT ONLINE (Razorpay via Netlify)
    ========================================== */
 window.placeOrder = async () => {
-  if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
+if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
+  if (total < 99) { showToast("⚠️ Minimum order amount is ₹99!", "warning"); return; }
 
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
@@ -2210,9 +2272,16 @@ window.placeOrder = async () => {
   return;
 }
 if (ad.length < 10) {
-  showToast("Please enter a complete delivery address.", "warning");
-  return;
-}
+    showToast("Please enter a complete delivery address.", "warning");
+    return;
+  }
+
+  // Delivery slot check
+  const deliverySlot = getDeliverySlot();
+  if (selectedSlot === 'schedule' && !deliverySlot) {
+    showToast("⚠️ Please select a delivery time slot!", "warning");
+    return;
+  }
 
   try {
     const res = await fetch("/.netlify/functions/getkey");
@@ -2236,7 +2305,8 @@ if (ad.length < 10) {
           total: total + delivery,
           paymentType: "Online",
           paymentId: r.razorpay_payment_id,
-          status: "Pending",
+         status: "Pending",
+          deliverySlot: getDeliverySlot() || 'ASAP (30 Minutes)',
           createdAt: new Date()
         });
       showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
@@ -2320,6 +2390,7 @@ for (let item in cart) {
 window.sendOrder = async (pm) => {
   if (!pm) pm = "Cash on Delivery";
   if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
+  if (total < 99) { showToast("⚠️ Minimum order amount is ₹99!", "warning"); return; }
 
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
@@ -2336,10 +2407,18 @@ window.sendOrder = async (pm) => {
     showToast("Please enter your full name.", "warning");
     return;
   }
-  if (ad.length < 10) {
+ if (ad.length < 10) {
     showToast("Please enter a complete delivery address.", "warning");
     return;
   }
+
+  // Delivery slot check
+  const deliverySlot = getDeliverySlot();
+  if (selectedSlot === 'schedule' && !deliverySlot) {
+    showToast("⚠️ Please select a delivery time slot!", "warning");
+    return;
+  }
+
   let itemsText = "";
   let grandTotal = 0;
 
@@ -2381,6 +2460,7 @@ window.sendOrder = async (pm) => {
     + line + "\n"
     + "*Delivery Charge:* Rs." + delivery + "\n"
     + "*GRAND TOTAL:* Rs." + grandTotal.toFixed(2) + "\n"
+  + "*Delivery Slot:* " + (getDeliverySlot() || 'ASAP') + "\n"
     + "*Payment Mode:* " + pm + "\n\n"
     + line + "\n"
     + "Thank you for ordering from FreshKart!\n"
@@ -2395,6 +2475,7 @@ window.sendOrder = async (pm) => {
     total: grandTotal,
     paymentType: pm,
     status: "Pending",
+    deliverySlot: getDeliverySlot() || 'ASAP (30 Minutes)',
     createdAt: new Date()
   });
 
@@ -2623,6 +2704,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
