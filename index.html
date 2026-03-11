@@ -1766,25 +1766,56 @@ window.submitReview = async (orderId) => {
       reviewDate: new Date()
     });
 
-    // Order ke items ke products ki rating update karo
+    // Order ka data fetch karo
     const orderSnap = await getDoc(doc(db, 'orders', orderId));
     if (orderSnap.exists()) {
-      const items = orderSnap.data().items;
+      const orderData = orderSnap.data();
+      const items = orderData.items;
+      const userName = currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Customer';
+      const userEmail = currentUser ? currentUser.email : '—';
+
+      // Har item ke liye reviews collection mein save karo
       for (let item in items) {
-        if (items[item] && items[item].qty > 0 && allP[item]) {
-          const cur = allP[item];
-          const nc = (cur.ratingCount || 0) + 1;
-          const newRating = ((cur.rating || 0) * (nc - 1) + rating) / nc;
-          await updateDoc(doc(db, 'products', item), {
-            rating: newRating,
-            ratingCount: nc
+        if (items[item] && items[item].qty > 0) {
+
+          // Pehle check karo review already hai ya nahi
+          const existing = await getDocs(
+            query(collection(db, 'reviews'),
+              where('productId', '==', item),
+              where('userId', '==', currentUser.uid)
+            )
+          );
+          if (!existing.empty) continue; // Already reviewed
+
+          // Reviews collection mein save karo
+          await addDoc(collection(db, 'reviews'), {
+            productId: item,
+            orderId: orderId,
+            userId: currentUser ? currentUser.uid : 'guest',
+            userName: userName,
+            userEmail: userEmail,
+            rating: rating,
+            reviewText: reviewText,
+            createdAt: new Date(),
+            approved: true
           });
+
+          // Product rating update karo
+          if (allP[item]) {
+            const cur = allP[item];
+            const nc = (cur.ratingCount || 0) + 1;
+            const newRating = ((cur.rating || 0) * (nc - 1) + rating) / nc;
+            await updateDoc(doc(db, 'products', item), {
+              rating: newRating,
+              ratingCount: nc
+            });
+          }
         }
       }
     }
 
     showToast('⭐ Review submitted! Thank you!', 'success', 4000);
-    loadOrders(); // Refresh orders
+    loadOrders();
 
   } catch(e) {
     console.log('Review error:', e);
@@ -2592,6 +2623,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
