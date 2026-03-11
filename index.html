@@ -594,6 +594,26 @@ body.dark .bnav-label{color:#555;}
 .review-inp:focus{border-color:var(--green2);}
 .review-submit{width:100%;padding:9px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
 .review-done{background:#e8f5e9;color:var(--green);font-size:12px;font-weight:700;padding:8px;border-radius:9px;text-align:center;margin-top:8px;}
+/* REVIEWS IN PRODUCT DETAIL */
+.pd-reviews-section{padding:0 20px 20px;}
+.pd-reviews-title{font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
+.review-card{background:#f8fdf8;border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--border);}
+.review-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.review-card-name{font-size:12px;font-weight:700;color:var(--text);}
+.review-card-date{font-size:10px;color:#bbb;}
+.review-card-stars{color:#f39c12;font-size:13px;margin-bottom:5px;}
+.review-card-text{font-size:12px;color:#555;line-height:1.6;}
+.no-reviews{text-align:center;padding:20px;color:#ccc;font-size:13px;}
+.pd-write-review{background:#f0fdf4;border-radius:14px;padding:14px;margin:0 20px 20px;}
+.pd-review-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:10px;}
+.pd-review-stars{display:flex;gap:8px;margin-bottom:10px;}
+.pd-review-star{font-size:26px;cursor:pointer;color:#ddd;transition:0.2s;}
+.pd-review-star.active{color:#f39c12;}
+.pd-review-inp{width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:12px;font-family:'Poppins',sans-serif;outline:none;resize:none;height:60px;margin-bottom:9px;background:#fff;}
+.pd-review-inp:focus{border-color:var(--green2);}
+.pd-review-submit{width:100%;padding:10px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
+.pd-review-login{text-align:center;font-size:12px;color:#888;padding:10px;}
+.pd-review-login span{color:var(--green);font-weight:700;cursor:pointer;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -872,8 +892,29 @@ body.dark .bnav-label{color:#555;}
         </div>
         <button class="pd-add-btn" onclick="pdAddToCart()">🛒 Add to Cart</button>
       </div>
-      <div class="pd-live-total" id="pd-live-total"></div>
+     <div class="pd-live-total" id="pd-live-total"></div>
     </div>
+
+    <!-- REVIEWS SECTION -->
+    <div class="pd-reviews-section">
+      <div class="pd-reviews-title">💬 Customer Reviews</div>
+      <div id="pd-reviews-list"><div class="no-reviews">Loading reviews...</div></div>
+    </div>
+
+    <!-- WRITE REVIEW -->
+    <div class="pd-write-review" id="pd-write-review">
+      <div class="pd-review-title">⭐ Write a Review</div>
+      <div class="pd-review-stars" id="pd-review-stars">
+        <span class="pd-review-star" onclick="setPdStar(1)" data-val="1">★</span>
+        <span class="pd-review-star" onclick="setPdStar(2)" data-val="2">★</span>
+        <span class="pd-review-star" onclick="setPdStar(3)" data-val="3">★</span>
+        <span class="pd-review-star" onclick="setPdStar(4)" data-val="4">★</span>
+        <span class="pd-review-star" onclick="setPdStar(5)" data-val="5">★</span>
+      </div>
+      <textarea class="pd-review-inp" id="pd-review-text" placeholder="Share your experience with this product..."></textarea>
+      <button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>
+    </div>
+
   </div>
 </div>
 <!-- CANCEL ORDER MODAL -->
@@ -1293,7 +1334,24 @@ window.openProductDetail = (id) => {
   const qty = cart[id] ? cart[id].qty : 0;
   document.getElementById("pd-qty").textContent = qty;
   updatePdLiveTotal();
+// Reviews load karo
+pdSelectedStar = 0;
+document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
+document.getElementById('pd-review-text').value = '';
+loadPdReviews(id);
 
+// Login check
+const writeReview = document.getElementById('pd-write-review');
+if (writeReview) {
+  writeReview.innerHTML = currentUser
+    ? '<div class="pd-review-title">⭐ Write a Review</div>' +
+      '<div class="pd-review-stars" id="pd-review-stars">' +
+        [1,2,3,4,5].map(n => '<span class="pd-review-star" onclick="setPdStar(' + n + ')" data-val="' + n + '">★</span>').join('') +
+      '</div>' +
+      '<textarea class="pd-review-inp" id="pd-review-text" placeholder="Share your experience..."></textarea>' +
+      '<button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>'
+    : '<div class="pd-review-login">⭐ <span onclick="openLoginModal()">Login karo</span> to write a review!</div>';
+}
   document.getElementById("productDetail").classList.add("show");
   document.body.style.overflow = "hidden";
 };
@@ -1730,6 +1788,135 @@ window.submitReview = async (orderId) => {
 
   } catch(e) {
     console.log('Review error:', e);
+    showToast('Could not submit review. Try again!', 'error');
+  }
+};
+  /* ── PRODUCT DETAIL REVIEWS ── */
+let pdSelectedStar = 0;
+
+window.setPdStar = (val) => {
+  pdSelectedStar = val;
+  document.querySelectorAll('.pd-review-star').forEach((s, i) => {
+    s.classList.toggle('active', i < val);
+  });
+};
+
+async function loadPdReviews(productId) {
+  const list = document.getElementById('pd-reviews-list');
+  if (!list) return;
+  list.innerHTML = '<div class="no-reviews">Loading...</div>';
+  try {
+    const snap = await getDocs(
+      query(collection(db, 'reviews'),
+        where('productId', '==', productId)
+      )
+    );
+    const reviews = [];
+    snap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
+    reviews.sort((a, b) => {
+      const at = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bt = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+      return bt - at;
+    });
+    if (!reviews.length) {
+      list.innerHTML = '<div class="no-reviews">No reviews yet. Be the first to review! ⭐</div>';
+      return;
+    }
+    list.innerHTML = reviews.map(r => {
+      const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+      const date = r.createdAt && r.createdAt.toDate
+        ? r.createdAt.toDate().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+        : '—';
+      return '<div class="review-card">' +
+        '<div class="review-card-top">' +
+          '<span class="review-card-name">👤 ' + (r.userName || 'Customer') + '</span>' +
+          '<span class="review-card-date">' + date + '</span>' +
+        '</div>' +
+        '<div class="review-card-stars">' + stars + '</div>' +
+        (r.reviewText ? '<div class="review-card-text">' + r.reviewText + '</div>' : '') +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="no-reviews">Could not load reviews.</div>';
+  }
+}
+
+window.submitPdReview = async () => {
+  if (!currentUser) {
+    showToast('Please login to write a review!', 'warning');
+    openLoginModal();
+    return;
+  }
+  if (pdSelectedStar === 0) {
+    showToast('Please select stars first!', 'warning');
+    return;
+  }
+  if (!pdCurrentId) return;
+
+  const text = document.getElementById('pd-review-text').value.trim();
+  const userName = currentUser.displayName || currentUser.email.split('@')[0];
+
+  try {
+    // Check karo pehle se review diya ya nahi
+    const existing = await getDocs(
+      query(collection(db, 'reviews'),
+        where('productId', '==', pdCurrentId),
+        where('userId', '==', currentUser.uid)
+      )
+    );
+    if (!existing.empty) {
+      showToast('You have already reviewed this product!', 'warning');
+      return;
+    }
+
+    // Review save karo
+    await addDoc(collection(db, 'reviews'), {
+      productId: pdCurrentId,
+      userId: currentUser.uid,
+      userName: userName,
+      userEmail: currentUser.email,
+      rating: pdSelectedStar,
+      reviewText: text,
+      createdAt: new Date(),
+      approved: true
+    });
+
+    // Product rating update karo
+    const cur = allP[pdCurrentId];
+    const nc = (cur.ratingCount || 0) + 1;
+    const newRating = ((cur.rating || 0) * (nc - 1) + pdSelectedStar) / nc;
+    await updateDoc(doc(db, 'products', pdCurrentId), {
+      rating: newRating,
+      ratingCount: nc
+    });
+
+    // Admin ko EmailJS se notify karo
+    try {
+      await emailjs.send('service_zqcrmzh', 'template_mijiaae', {
+        order_id: 'NEW REVIEW',
+        customer_name: userName,
+        customer_phone: '—',
+        customer_address: '—',
+        order_items: '⭐ ' + pdSelectedStar + '/5 stars\n📦 Product: ' + pdCurrentId + '\n💬 ' + (text || 'No comment'),
+        total: '—',
+        order_date: new Date().toLocaleDateString('en-IN'),
+        payment_type: 'REVIEW NOTIFICATION',
+        email: 'sk3209267@gmail.com'
+      });
+    } catch(emailErr) { console.log('Email error:', emailErr); }
+
+    showToast('⭐ Review submitted! Thank you!', 'success', 4000);
+
+    // Reset form
+    pdSelectedStar = 0;
+    document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
+    document.getElementById('pd-review-text').value = '';
+
+    // Reload reviews
+    loadPdReviews(pdCurrentId);
+
+  } catch(e) {
+    console.log('Review submit error:', e);
     showToast('Could not submit review. Try again!', 'error');
   }
 };
@@ -2405,6 +2592,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
