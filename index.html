@@ -643,6 +643,18 @@ body.dark .bnav-label{color:#555;}
 .sort-label{font-size:12px;font-weight:700;color:#888;flex-shrink:0;}
 .sort-pill{flex-shrink:0;padding:6px 14px;border-radius:25px;border:2px solid var(--border);background:#fff;font-size:11px;font-weight:700;color:#555;cursor:pointer;transition:0.2s;white-space:nowrap;}
 .sort-pill.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(39,174,96,0.3);}
+/* COUPON SYSTEM */
+.coupon-wrap{margin-bottom:10px;}
+.coupon-row{display:flex;gap:8px;margin-bottom:6px;}
+.coupon-inp{flex:1;padding:10px 13px;border-radius:11px;border:2px solid var(--border);font-size:13px;outline:none;background:#fafff9;font-family:'Poppins',sans-serif;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#333;}
+.coupon-inp:focus{border-color:var(--green2);}
+.coupon-btn{padding:10px 16px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:11px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;white-space:nowrap;}
+.coupon-success{background:#f0fff4;border:1px solid #e8f5e9;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--green);display:none;}
+.coupon-success.show{display:flex;align-items:center;justify-content:space-between;}
+.coupon-remove{background:none;border:none;color:#e74c3c;font-size:13px;cursor:pointer;font-weight:700;padding:0;}
+.coupon-error{background:#fff0f0;border:1px solid #ffd5d5;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:#e74c3c;display:none;margin-top:5px;}
+.coupon-error.show{display:block;}
+.sum-row-discount{display:flex;justify-content:space-between;font-size:13px;color:var(--green);font-weight:700;margin-bottom:5px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -747,7 +759,22 @@ body.dark .bnav-label{color:#555;}
   <div class="cart-hdr"><h3>🛒 Your Cart</h3><button class="cart-x" onclick="toggleCart()">✕</button></div>
   <div class="cart-list" id="cartItems"></div>
   <div class="csummary">
-    <div class="min-order-warn" id="minOrderWarn">⚠️ Minimum order amount is ₹99. Add more items!</div><div id="freeDelBar"></div><div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
+    <div class="min-order-warn" id="minOrderWarn">⚠️ Minimum order amount is ₹99. Add more items!</div><!-- COUPON SYSTEM -->
+<div class="coupon-wrap">
+  <div class="coupon-row">
+    <input class="coupon-inp" id="couponInput" placeholder="🎟️ Enter Coupon Code" maxlength="15">
+    <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
+  </div>
+  <div class="coupon-success" id="couponSuccess">
+    <span id="couponSuccessText">✅ Coupon Applied!</span>
+    <button class="coupon-remove" onclick="removeCoupon()">✕ Remove</button>
+  </div>
+  <div class="coupon-error" id="couponError">❌ Invalid coupon code!</div>
+</div><div id="freeDelBar"></div><div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
+    <div class="sum-row-discount" id="discountRow" style="display:none;">
+  <span>🎟️ Discount (<span id="discountLabel"></span>)</span>
+  <span>- ₹<span id="discountAmount">0</span></span>
+</div>
     <div class="sum-row"><span>Delivery</span><span>₹20</span></div>
     <div class="sum-total"><span>Grand Total</span><span>₹<span id="grandTotal">0</span></span></div>
     <h4 style="font-size:12px;margin-bottom:5px;">Customer Details</h4>
@@ -1820,7 +1847,74 @@ window.selectSlot = (type) => {
   const scheduleBox = document.getElementById('slotScheduleBox');
   if (scheduleBox) scheduleBox.classList.toggle('show', type === 'schedule');
 };
+/* ── COUPON SYSTEM ── */
+// Yahan apne coupons define karo
+const COUPONS = {
+  'FRESH10':  { type: 'percent', value: 10,  desc: '10% OFF',     minOrder: 99  },
+  'FRESH20':  { type: 'percent', value: 20,  desc: '20% OFF',     minOrder: 199 },
+  'FLAT50':   { type: 'flat',    value: 50,  desc: '₹50 OFF',     minOrder: 199 },
+  'FLAT100':  { type: 'flat',    value: 100, desc: '₹100 OFF',    minOrder: 399 },
+  'FIRST':    { type: 'percent', value: 15,  desc: '15% OFF',     minOrder: 99  },
+  'WELCOME':  { type: 'flat',    value: 30,  desc: '₹30 OFF',     minOrder: 99  },
+  'SAVE25':   { type: 'percent', value: 25,  desc: '25% OFF',     minOrder: 299 },
+};
 
+let appliedCoupon = null;
+let discountAmount = 0;
+
+window.applyCoupon = () => {
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('couponError');
+  const sucEl = document.getElementById('couponSuccess');
+
+  // Reset
+  errEl.classList.remove('show');
+  sucEl.classList.remove('show');
+
+  if (!code) {
+    errEl.textContent = '❌ Please enter a coupon code!';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const coupon = COUPONS[code];
+  if (!coupon) {
+    errEl.textContent = '❌ Invalid coupon code!';
+    errEl.classList.add('show');
+    return;
+  }
+
+  if (total < coupon.minOrder) {
+    errEl.textContent = '❌ Minimum order ₹' + coupon.minOrder + ' required for this coupon!';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Coupon apply karo
+  appliedCoupon = { code, ...coupon };
+  if (coupon.type === 'percent') {
+    discountAmount = Math.floor(total * coupon.value / 100);
+  } else {
+    discountAmount = Math.min(coupon.value, total);
+  }
+
+  document.getElementById('couponSuccessText').textContent = '✅ "' + code + '" Applied! You saved ₹' + discountAmount;
+  sucEl.classList.add('show');
+  errEl.classList.remove('show');
+
+  showToast('🎟️ Coupon applied! You saved ₹' + discountAmount, 'success', 3000);
+  calcTotal();
+};
+
+window.removeCoupon = () => {
+  appliedCoupon = null;
+  discountAmount = 0;
+  document.getElementById('couponInput').value = '';
+  document.getElementById('couponSuccess').classList.remove('show');
+  document.getElementById('couponError').classList.remove('show');
+  showToast('Coupon removed!', 'info');
+  calcTotal();
+};
 function getDeliverySlot() {
   if (selectedSlot === 'asap') return 'ASAP (30 Minutes)';
   const slotTime = document.getElementById('slotTime');
@@ -2260,12 +2354,31 @@ function calcTotal() {
   if (!html) html = '<div class="cart-empty-state"><span>🛒</span><p>Your cart is empty</p></div>';
   document.getElementById("cartItems").innerHTML = html;
   document.getElementById("totalAmount").textContent = total.toFixed(2);
-  document.getElementById("grandTotal").textContent = (total+delivery).toFixed(2);
+const finalTotal = Math.max(0, total - discountAmount + delivery);
+  document.getElementById("grandTotal").textContent = finalTotal.toFixed(2);
   document.getElementById("cartCount").textContent = ic;
   const nb = document.getElementById("cartNavBadge");
   const bb = document.getElementById("bnavBadge");
   if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
   if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
+  // Coupon discount apply karo
+  const discRow = document.getElementById('discountRow');
+  const discLabel = document.getElementById('discountLabel');
+  const discAmt = document.getElementById('discountAmount');
+
+  if (appliedCoupon && total > 0) {
+    if (appliedCoupon.type === 'percent') {
+      discountAmount = Math.floor(total * appliedCoupon.value / 100);
+    } else {
+      discountAmount = Math.min(appliedCoupon.value, total);
+    }
+    if (discRow) discRow.style.display = 'flex';
+    if (discLabel) discLabel.textContent = appliedCoupon.desc;
+    if (discAmt) discAmt.textContent = discountAmount;
+  } else {
+    discountAmount = 0;
+    if (discRow) discRow.style.display = 'none';
+  }
   // Minimum Order Warning
   const minWarn = document.getElementById("minOrderWarn");
   if (minWarn) minWarn.classList.toggle("show", total > 0 && total < 99);
@@ -2395,6 +2508,8 @@ if (ad.length < 10) {
           paymentId: r.razorpay_payment_id,
          status: "Pending",
           deliverySlot: getDeliverySlot() || 'ASAP (30 Minutes)',
+          coupon: appliedCoupon ? appliedCoupon.code : null,
+          discount: discountAmount || 0,
           createdAt: new Date()
         });
       showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
@@ -2548,7 +2663,8 @@ window.sendOrder = async (pm) => {
     + line + "\n"
     + "*Delivery Charge:* Rs." + delivery + "\n"
     + "*GRAND TOTAL:* Rs." + grandTotal.toFixed(2) + "\n"
-  + "*Delivery Slot:* " + (getDeliverySlot() || 'ASAP') + "\n"
++ "*Delivery Slot:* " + (getDeliverySlot() || 'ASAP') + "\n"
+    + (appliedCoupon ? "*Coupon:* " + appliedCoupon.code + " (-Rs." + discountAmount + ")\n" : "")
     + "*Payment Mode:* " + pm + "\n\n"
     + line + "\n"
     + "Thank you for ordering from FreshKart!\n"
@@ -2562,8 +2678,10 @@ window.sendOrder = async (pm) => {
     items: cart,
     total: grandTotal,
     paymentType: pm,
-    status: "Pending",
+     status: "Pending",
     deliverySlot: getDeliverySlot() || 'ASAP (30 Minutes)',
+    coupon: appliedCoupon ? appliedCoupon.code : null,
+    discount: discountAmount || 0,
     createdAt: new Date()
   });
 
@@ -2792,6 +2910,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
