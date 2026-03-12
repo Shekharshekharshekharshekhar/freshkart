@@ -681,6 +681,11 @@ body.dark .bnav-label{color:#555;}
 .oc-grand{display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--green);margin-top:8px;padding-top:8px;border-top:2px dashed #e8f5e9;}
 .oc-close-btn{width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:4px;}
 .oc-track-btn{width:100%;padding:11px;background:#f0fdf4;color:var(--green);border:2px solid var(--green2);border-radius:12px;font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:8px;}
+/* ADDRESS SAVE */
+.saved-addr-wrap{margin-bottom:7px;}
+.saved-addr-btn{width:100%;padding:9px 13px;border-radius:11px;border:2px dashed var(--green2);background:#f0fdf4;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;text-align:left;font-family:'Poppins',sans-serif;transition:0.2s;display:none;}
+.saved-addr-btn:hover{background:#e8f5e9;}
+.saved-addr-btn.show{display:block;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -839,7 +844,12 @@ body.dark .bnav-label{color:#555;}
   maxlength="10"
   pattern="[6-9][0-9]{9}"
   inputmode="numeric">
-    <textarea class="ctextarea" id="cust-address" placeholder="Delivery Address"></textarea>
+  <div class="saved-addr-wrap">
+  <button class="saved-addr-btn" id="savedAddrBtn" onclick="useSavedAddress()">
+    📍 Use Saved Address: <span id="savedAddrText"></span>
+  </button>
+</div>
+<textarea class="ctextarea" id="cust-address" placeholder="Delivery Address"></textarea>
     <button class="pay-btn" onclick="placeOrder()">💳 Pay Online</button>
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
   </div>
@@ -1171,8 +1181,9 @@ onAuthStateChanged(auth, u => {
     const n = u.displayName || u.email.split("@")[0];
     document.getElementById("userDisplayName").textContent = n;
     document.getElementById("userAvatarLetter").textContent = n.charAt(0).toUpperCase();
-    closeLoginModal();
-loadWishlist(); 
+     closeLoginModal();
+    loadWishlist();
+    loadSavedAddress();
   } else {
     lb.style.display = "flex";
     ud.style.display = "none";
@@ -1962,6 +1973,57 @@ window.selectSlot = (type) => {
   const scheduleBox = document.getElementById('slotScheduleBox');
   if (scheduleBox) scheduleBox.classList.toggle('show', type === 'schedule');
 };
+  /* ── ADDRESS SAVE ── */
+function loadSavedAddress() {
+  if (!currentUser) return;
+  try {
+    const key = 'fkAddr_' + currentUser.uid;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const data = JSON.parse(saved);
+      const btn = document.getElementById('savedAddrBtn');
+      const txt = document.getElementById('savedAddrText');
+      if (btn && txt && data.address) {
+        txt.textContent = data.address.substring(0, 35) + (data.address.length > 35 ? '...' : '');
+        btn.classList.add('show');
+        // Name aur phone bhi auto fill karo
+        if (data.name) document.getElementById('cust-name').value = data.name;
+        if (data.phone) document.getElementById('cust-phone').value = data.phone;
+        if (data.address) document.getElementById('cust-address').value = data.address;
+      }
+    }
+  } catch(e) {}
+}
+
+window.useSavedAddress = () => {
+  if (!currentUser) return;
+  try {
+    const key = 'fkAddr_' + currentUser.uid;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.name) document.getElementById('cust-name').value = data.name;
+      if (data.phone) document.getElementById('cust-phone').value = data.phone;
+      if (data.address) document.getElementById('cust-address').value = data.address;
+      showToast('📍 Address loaded!', 'success', 2000);
+    }
+  } catch(e) {}
+};
+
+function saveAddress(nm, ph, ad) {
+  if (!currentUser) return;
+  try {
+    const key = 'fkAddr_' + currentUser.uid;
+    localStorage.setItem(key, JSON.stringify({ name: nm, phone: ph, address: ad }));
+    // Button update karo
+    const btn = document.getElementById('savedAddrBtn');
+    const txt = document.getElementById('savedAddrText');
+    if (btn && txt) {
+      txt.textContent = ad.substring(0, 35) + (ad.length > 35 ? '...' : '');
+      btn.classList.add('show');
+    }
+  } catch(e) {}
+}
 /* ── COUPON SYSTEM ── */
 // Yahan apne coupons define karo
 const COUPONS = {
@@ -2585,6 +2647,8 @@ window.toggleCart = () => {
   d.classList.toggle("open");
   o.classList.toggle("on");
   document.body.style.overflow = d.classList.contains("open") ? "hidden" : "";
+  // Cart open hone pe saved address load karo
+  if (d.classList.contains("open")) loadSavedAddress();
 };
 
 /* ==========================================
@@ -2625,12 +2689,15 @@ if (ad.length < 10) {
     return;
   }
 
-  // Delivery slot check
+ // Delivery slot check
   const deliverySlot = getDeliverySlot();
   if (selectedSlot === 'schedule' && !deliverySlot) {
     showToast("⚠️ Please select a delivery time slot!", "warning");
     return;
   }
+
+  // Address save karo
+  saveAddress(nm, ph, ad);
 
   try {
     const res = await fetch("/.netlify/functions/getkey");
@@ -2782,6 +2849,9 @@ window.sendOrder = async (pm) => {
     showToast("⚠️ Please select a delivery time slot!", "warning");
     return;
   }
+
+  // Address save karo
+  saveAddress(nm, ph, ad);
 
   let itemsText = "";
   let grandTotal = 0;
@@ -3079,6 +3149,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
