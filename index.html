@@ -2638,7 +2638,7 @@ if (ad.length < 10) {
 
     const options = {
       key: data.key,
-      amount: (total + delivery) * 100,
+     amount: (Math.max(0, total - discountAmount) + delivery) * 100,
       currency: "INR",
       name: "FreshKart",
       description: "Grocery Order",
@@ -2651,7 +2651,7 @@ if (ad.length < 10) {
           userId: currentUser ? currentUser.uid : "guest",
           name: nm, phone: ph, address: ad,
           items: cart,
-          total: total + delivery,
+         total: Math.max(0, total - discountAmount) + delivery,
           paymentType: "Online",
           paymentId: r.razorpay_payment_id,
          status: "Pending",
@@ -2800,9 +2800,8 @@ window.sendOrder = async (pm) => {
     }
   }
 
-  grandTotal += delivery;
+ grandTotal = Math.max(0, grandTotal - discountAmount) + delivery;
   const oid = "FK" + Date.now();
-
   const line = "--------------------------------";
 
   const msg = ""
@@ -2899,6 +2898,8 @@ toggleCart();
 cart = {};
 localStorage.removeItem('fkCart_v2');
 calcTotal();
+}; // ← sendOrder function close
+
 window.trackOrder = async () => {
   const id = document.getElementById("trackId").value.trim();
   if (!id) { showToast("Please enter your Order ID first.", "warning"); return; }
@@ -3078,6 +3079,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
