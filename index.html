@@ -2354,8 +2354,18 @@ function calcTotal() {
   if (!html) html = '<div class="cart-empty-state"><span>🛒</span><p>Your cart is empty</p></div>';
   document.getElementById("cartItems").innerHTML = html;
   document.getElementById("totalAmount").textContent = total.toFixed(2);
-const finalTotal = Math.max(0, total - discountAmount + delivery);
+ // Free delivery check after discount
+  const discountedTotal = Math.max(0, total - discountAmount);
+  if (discountedTotal >= 299) {
+    delivery = 0;
+    const fdb = document.getElementById("freeDelBar");
+    if (fdb) fdb.innerHTML = '<div class="fdb-success">🎉 You got FREE Delivery!</div>';
+  } else if (total < 299) {
+    delivery = 20;
+  }
+  const finalTotal = discountedTotal + delivery;
   document.getElementById("grandTotal").textContent = finalTotal.toFixed(2);
+  document.getElementById("totalAmount").textContent = total.toFixed(2);
   document.getElementById("cartCount").textContent = ic;
   const nb = document.getElementById("cartNavBadge");
   const bb = document.getElementById("bnavBadge");
@@ -2910,6 +2920,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
