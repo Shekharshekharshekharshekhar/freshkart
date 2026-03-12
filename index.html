@@ -775,7 +775,7 @@ body.dark .bnav-label{color:#555;}
   <span>🎟️ Discount (<span id="discountLabel"></span>)</span>
   <span>- ₹<span id="discountAmount">0</span></span>
 </div>
-    <div class="sum-row"><span>Delivery</span><span>₹20</span></div>
+   <div class="sum-row"><span>Delivery</span><span id="deliveryAmount">₹20</span></div>
     <div class="sum-total"><span>Grand Total</span><span>₹<span id="grandTotal">0</span></span></div>
     <h4 style="font-size:12px;margin-bottom:5px;">Customer Details</h4>
     <div class="slot-wrap">
@@ -2405,9 +2405,11 @@ function calcTotal() {
   // Step 5 — Final total calculate karo
   const finalTotal = discountedTotal + delivery;
 
-  // Step 6 — DOM update karo
+ // Step 6 — DOM update karo
   document.getElementById("totalAmount").textContent = total.toFixed(2);
   document.getElementById("grandTotal").textContent = finalTotal.toFixed(2);
+  const delAmtEl = document.getElementById("deliveryAmount");
+  if (delAmtEl) delAmtEl.textContent = delivery === 0 ? "FREE 🎉" : "₹" + delivery;
   document.getElementById("cartCount").textContent = ic;
 
   const nb = document.getElementById("cartNavBadge");
@@ -2923,6 +2925,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
