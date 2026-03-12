@@ -655,6 +655,32 @@ body.dark .bnav-label{color:#555;}
 .coupon-error{background:#fff0f0;border:1px solid #ffd5d5;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:#e74c3c;display:none;margin-top:5px;}
 .coupon-error.show{display:block;}
 .sum-row-discount{display:flex;justify-content:space-between;font-size:13px;color:var(--green);font-weight:700;margin-bottom:5px;}
+/* ORDER CONFIRMATION */
+#orderConfirm{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;visibility:hidden;transition:0.3s;}
+#orderConfirm.show{opacity:1;visibility:visible;}
+.oc-card{background:#fff;border-radius:24px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;animation:mPop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+.oc-banner{background:linear-gradient(135deg,#27ae60,#2ecc71);padding:28px 24px;text-align:center;border-radius:24px 24px 0 0;}
+.oc-icon{font-size:56px;display:block;margin-bottom:10px;animation:bounce 0.6s ease;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.oc-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;}
+.oc-subtitle{font-size:13px;color:rgba(255,255,255,0.85);}
+.oc-body{padding:20px;}
+.oc-orderid{background:linear-gradient(135deg,#f0fdf4,#e8f5e9);border-radius:12px;padding:12px 16px;text-align:center;margin-bottom:16px;border:1px solid #d4edda;}
+.oc-orderid-label{font-size:11px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;}
+.oc-orderid-val{font-size:16px;font-weight:800;color:var(--green);}
+.oc-section{margin-bottom:14px;}
+.oc-section-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;}
+.oc-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.oc-info-item{background:#f8fdf8;border-radius:10px;padding:10px;border:1px solid #e8f5e9;}
+.oc-info-label{font-size:10px;color:#aaa;font-weight:600;margin-bottom:3px;}
+.oc-info-val{font-size:12px;font-weight:700;color:#333;}
+.oc-items{background:#f8fdf8;border-radius:12px;padding:12px;margin-bottom:14px;}
+.oc-item-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #eee;color:#555;}
+.oc-item-row:last-child{border-bottom:none;}
+.oc-total-row{display:flex;justify-content:space-between;font-size:13px;color:#555;margin-bottom:4px;}
+.oc-grand{display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--green);margin-top:8px;padding-top:8px;border-top:2px dashed #e8f5e9;}
+.oc-close-btn{width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:4px;}
+.oc-track-btn{width:100%;padding:11px;background:#f0fdf4;color:var(--green);border:2px solid var(--green2);border-radius:12px;font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:8px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -1011,6 +1037,46 @@ body.dark .bnav-label{color:#555;}
       <button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>
     </div>
 
+  </div>
+</div>
+  <!-- ORDER CONFIRMATION -->
+<div id="orderConfirm">
+  <div class="oc-card">
+    <div class="oc-banner">
+      <span class="oc-icon">🎉</span>
+      <div class="oc-title">Order Placed!</div>
+      <div class="oc-subtitle">Thank you for ordering from FreshKart</div>
+    </div>
+    <div class="oc-body">
+      <div class="oc-orderid">
+        <div class="oc-orderid-label">Your Order ID</div>
+        <div class="oc-orderid-val" id="oc-orderId">—</div>
+      </div>
+      <div class="oc-section">
+        <div class="oc-section-title">Order Details</div>
+        <div class="oc-info-grid">
+          <div class="oc-info-item"><div class="oc-info-label">Customer</div><div class="oc-info-val" id="oc-name">—</div></div>
+          <div class="oc-info-item"><div class="oc-info-label">Phone</div><div class="oc-info-val" id="oc-phone">—</div></div>
+          <div class="oc-info-item"><div class="oc-info-label">Payment</div><div class="oc-info-val" id="oc-payment">—</div></div>
+          <div class="oc-info-item"><div class="oc-info-label">Delivery</div><div class="oc-info-val" id="oc-slot">—</div></div>
+        </div>
+      </div>
+      <div class="oc-section">
+        <div class="oc-section-title">Items Ordered</div>
+        <div class="oc-items" id="oc-items"></div>
+      </div>
+      <div class="oc-section">
+        <div class="oc-total-row"><span>Subtotal</span><span>₹<span id="oc-subtotal">0</span></span></div>
+        <div class="oc-total-row" id="oc-discount-row" style="display:none;color:var(--green);font-weight:700;"><span>🎟️ Discount</span><span>-₹<span id="oc-discount">0</span></span></div>
+        <div class="oc-total-row"><span>Delivery</span><span id="oc-delivery">₹20</span></div>
+        <div class="oc-grand"><span>Grand Total</span><span>₹<span id="oc-total">0</span></span></div>
+      </div>
+      <div style="background:#fff8e1;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#e67e22;font-weight:600;text-align:center;">
+        ⏰ Estimated Delivery: <strong id="oc-eta">30 Minutes</strong>
+      </div>
+      <button class="oc-track-btn" onclick="closeOrderConfirm();document.getElementById('trackId').value=document.getElementById('oc-orderId').textContent;trackOrder();document.querySelector('.track-sec').scrollIntoView({behavior:'smooth'});">📍 Track My Order</button>
+      <button class="oc-close-btn" onclick="closeOrderConfirm()">Continue Shopping 🛒</button>
+    </div>
   </div>
 </div>
 <!-- CANCEL ORDER MODAL -->
@@ -1544,7 +1610,56 @@ window.closeCancelModal = () => {
   cancelOrderDocId = null;
   cancelOrderId = null;
 };
+/* ── ORDER CONFIRMATION ── */
+function showOrderConfirm(oid, nm, ph, payType, slot, itemsObj, subtotal, disc, del, grandTotal) {
+  document.getElementById('oc-orderId').textContent = oid;
+  document.getElementById('oc-name').textContent = nm;
+  document.getElementById('oc-phone').textContent = ph;
+  document.getElementById('oc-payment').textContent = payType;
+  document.getElementById('oc-slot').textContent = slot || 'ASAP (30 Min)';
+  document.getElementById('oc-subtotal').textContent = subtotal.toFixed(2);
+  document.getElementById('oc-total').textContent = grandTotal.toFixed(2);
+  document.getElementById('oc-delivery').textContent = del === 0 ? 'FREE 🎉' : '₹' + del;
 
+  // Discount row
+  const discRow = document.getElementById('oc-discount-row');
+  if (disc > 0) {
+    discRow.style.display = 'flex';
+    document.getElementById('oc-discount').textContent = disc;
+  } else {
+    discRow.style.display = 'none';
+  }
+
+  // ETA
+  const etaEl = document.getElementById('oc-eta');
+  if (slot && slot !== 'ASAP (30 Minutes)') {
+    etaEl.textContent = slot.replace('Scheduled: ', '');
+  } else {
+    etaEl.textContent = '30 Minutes';
+  }
+
+  // Items
+  let itemsHtml = '';
+  for (let item in itemsObj) {
+    if (itemsObj[item] && itemsObj[item].qty > 0) {
+      const p = allP[item];
+      const qty = itemsObj[item].qty;
+      const w = itemsObj[item].selectedWeight || 1;
+      const unit = p ? (p.unit || 'kg') : 'kg';
+      const pr = unit === 'g' ? (p.price/1000)*w*qty : p.price*w*qty;
+      itemsHtml += '<div class="oc-item-row"><span>🥬 ' + item + ' x ' + qty + ' (' + w + unit + ')</span><span>₹' + pr.toFixed(2) + '</span></div>';
+    }
+  }
+  document.getElementById('oc-items').innerHTML = itemsHtml || '<div style="color:#aaa;font-size:12px;">No items</div>';
+
+  document.getElementById('orderConfirm').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+window.closeOrderConfirm = () => {
+  document.getElementById('orderConfirm').classList.remove('show');
+  document.body.style.overflow = '';
+};
 document.getElementById("cancelModal").addEventListener("click", e => {
   if (e.target === document.getElementById("cancelModal")) closeCancelModal();
 });
@@ -2312,9 +2427,19 @@ window.startVoice = () => {
 
 window.changeQty = (id, val) => {
   const p = allP[id];
+  // Out of stock check
+  if (val > 0 && p.stock === 0) {
+    showToast("❌ " + id + " is Out of Stock!", "error");
+    return;
+  }
   if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: 1 };
-  cart[id].qty += val;
+ cart[id].qty += val;
   if (cart[id].qty < 0) cart[id].qty = 0;
+  // Stock limit check
+  if (p.stock > 0 && cart[id].qty > p.stock) {
+    cart[id].qty = p.stock;
+    showToast("⚠️ Only " + p.stock + " left in stock!", "warning");
+  }
   if (cart[id].qty > (p.maxQty||100)) cart[id].qty = p.maxQty||100;
   const qEl = document.getElementById("qty-" + id);
   if (qEl) qEl.textContent = cart[id].qty;
@@ -2468,7 +2593,15 @@ window.toggleCart = () => {
 window.placeOrder = async () => {
 if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
   if (total < 99) { showToast("⚠️ Minimum order amount is ₹99!", "warning"); return; }
-
+// Out of stock items check
+  for (let item in cart) {
+    if (cart[item] && cart[item].qty > 0) {
+      if (allP[item] && allP[item].stock === 0) {
+        showToast("❌ " + item + " is Out of Stock! Please remove it.", "error");
+        return;
+      }
+    }
+  }
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
@@ -2527,7 +2660,12 @@ if (ad.length < 10) {
           discount: discountAmount || 0,
           createdAt: new Date()
         });
-      showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
+    showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
+// Order confirmation show karo
+const savedCart = { ...cart };
+showOrderConfirm(oid, nm, ph, "Online Payment", getDeliverySlot(), savedCart, total, discountAmount, delivery, total + delivery - discountAmount);
+// Cart band karo
+toggleCart();
 
 // Stock deduct karo ✅
 for (let item in cart) {
@@ -2609,7 +2747,15 @@ window.sendOrder = async (pm) => {
   if (!pm) pm = "Cash on Delivery";
   if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
   if (total < 99) { showToast("⚠️ Minimum order amount is ₹99!", "warning"); return; }
-
+// Out of stock items check
+  for (let item in cart) {
+    if (cart[item] && cart[item].qty > 0) {
+      if (allP[item] && allP[item].stock === 0) {
+        showToast("❌ " + item + " is Out of Stock! Please remove it.", "error");
+        return;
+      }
+    }
+  }
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
@@ -2741,11 +2887,18 @@ try {
 } catch(emailErr) {
   console.log("Email error:", emailErr);
 }
-  showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
-  cart = {};
-  localStorage.removeItem('fkCart_v2');  // ← ADD KARO
-  calcTotal();
-};
+ showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
+// Order confirmation show karo
+const savedCart2 = { ...cart };
+const savedTotal = total;
+const savedDiscount = discountAmount;
+const savedDelivery = delivery;
+showOrderConfirm(oid, nm, ph, pm, getDeliverySlot(), savedCart2, savedTotal, savedDiscount, savedDelivery, grandTotal);
+// Cart band karo
+toggleCart();
+cart = {};
+localStorage.removeItem('fkCart_v2');
+calcTotal();
 window.trackOrder = async () => {
   const id = document.getElementById("trackId").value.trim();
   if (!id) { showToast("Please enter your Order ID first.", "warning"); return; }
@@ -2925,6 +3078,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
