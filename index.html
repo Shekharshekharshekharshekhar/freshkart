@@ -2340,6 +2340,8 @@ window.changeQty = (id, val) => {
 
 function calcTotal() {
   total = 0; let html = ""; let ic = 0;
+
+  // Cart items calculate karo
   for (let item in cart) {
     if (cart[item] && cart[item].qty > 0) {
       const p = allP[item];
@@ -2348,30 +2350,14 @@ function calcTotal() {
       const w = cart[item].selectedWeight || 1;
       const price = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
       total += price; ic++;
-     html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
+      html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
     }
   }
+
   if (!html) html = '<div class="cart-empty-state"><span>🛒</span><p>Your cart is empty</p></div>';
   document.getElementById("cartItems").innerHTML = html;
-  document.getElementById("totalAmount").textContent = total.toFixed(2);
- // Free delivery check after discount
-  const discountedTotal = Math.max(0, total - discountAmount);
-  if (discountedTotal >= 299) {
-    delivery = 0;
-    const fdb = document.getElementById("freeDelBar");
-    if (fdb) fdb.innerHTML = '<div class="fdb-success">🎉 You got FREE Delivery!</div>';
-  } else if (total < 299) {
-    delivery = 20;
-  }
-  const finalTotal = discountedTotal + delivery;
-  document.getElementById("grandTotal").textContent = finalTotal.toFixed(2);
-  document.getElementById("totalAmount").textContent = total.toFixed(2);
-  document.getElementById("cartCount").textContent = ic;
-  const nb = document.getElementById("cartNavBadge");
-  const bb = document.getElementById("bnavBadge");
-  if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
-  if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
-  // Coupon discount apply karo
+
+  // Step 1 — Coupon discount calculate karo
   const discRow = document.getElementById('discountRow');
   const discLabel = document.getElementById('discountLabel');
   const discAmt = document.getElementById('discountAmount');
@@ -2389,29 +2375,46 @@ function calcTotal() {
     discountAmount = 0;
     if (discRow) discRow.style.display = 'none';
   }
-  // Minimum Order Warning
+
+  // Step 2 — Discounted total calculate karo
+  const discountedTotal = Math.max(0, total - discountAmount);
+
+  // Step 3 — Free delivery check karo (discount ke baad)
+  const fdb = document.getElementById("freeDelBar");
+  if (total <= 0) {
+    delivery = 20;
+    if (fdb) fdb.innerHTML = '';
+  } else if (discountedTotal >= 299) {
+    delivery = 0;
+    if (fdb) fdb.innerHTML = '<div class="fdb-success">🎉 You got FREE Delivery!</div>';
+  } else {
+    delivery = 20;
+    const remaining = (299 - discountedTotal).toFixed(0);
+    const pct = Math.min((discountedTotal / 299) * 100, 100);
+    if (fdb) fdb.innerHTML =
+      '<div class="free-del-bar">' +
+        '<div class="fdb-text">🚚 Add <span>₹' + remaining + '</span> more for FREE delivery!</div>' +
+        '<div class="fdb-progress"><div class="fdb-fill" style="width:' + pct + '%;"></div></div>' +
+      '</div>';
+  }
+
+  // Step 4 — Minimum order warning
   const minWarn = document.getElementById("minOrderWarn");
   if (minWarn) minWarn.classList.toggle("show", total > 0 && total < 99);
-// Free Delivery Bar
-  const freeDeliveryMin = 299;
-  const fdb = document.getElementById("freeDelBar");
-  if (fdb) {
-    if (total >= freeDeliveryMin) {
-      fdb.innerHTML = '<div class="fdb-success">🎉 You got FREE Delivery!</div>';
-      document.getElementById("grandTotal").textContent = (total).toFixed(2);
-      delivery = 0;
-    } else {
-      const remaining = (freeDeliveryMin - total).toFixed(0);
-      const pct = Math.min((total / freeDeliveryMin) * 100, 100);
-      fdb.innerHTML =
-        '<div class="free-del-bar">' +
-          '<div class="fdb-text">🚚 Add <span>₹' + remaining + '</span> more for FREE delivery!</div>' +
-          '<div class="fdb-progress"><div class="fdb-fill" style="width:' + pct + '%;"></div></div>' +
-        '</div>';
-      delivery = 20;
-      document.getElementById("grandTotal").textContent = (total + delivery).toFixed(2);
-    }
-  }
+
+  // Step 5 — Final total calculate karo
+  const finalTotal = discountedTotal + delivery;
+
+  // Step 6 — DOM update karo
+  document.getElementById("totalAmount").textContent = total.toFixed(2);
+  document.getElementById("grandTotal").textContent = finalTotal.toFixed(2);
+  document.getElementById("cartCount").textContent = ic;
+
+  const nb = document.getElementById("cartNavBadge");
+  const bb = document.getElementById("bnavBadge");
+  if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
+  if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
+
   saveCart();
 }
 window.removeItem = id => {
@@ -2920,6 +2923,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
