@@ -627,6 +627,22 @@ body.dark .bnav-label{color:#555;}
 .slot-schedule.show{display:block;}
 .slot-schedule select{width:100%;padding:9px 12px;border-radius:10px;border:2px solid var(--border);font-size:12px;font-weight:600;color:#555;background:#fafff9;outline:none;font-family:'Poppins',sans-serif;}
 .slot-schedule select:focus{border-color:var(--green2);}
+/* RECENTLY VIEWED */
+.rv-sec{background:#fff;margin:14px;padding:18px;border-radius:16px;box-shadow:var(--shadow);display:none;}
+.rv-sec.show{display:block;}
+.rv-title{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text);}
+.rv-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.rv-row::-webkit-scrollbar{display:none;}
+.rv-card{flex-shrink:0;width:90px;cursor:pointer;text-align:center;}
+.rv-card img{width:90px;height:90px;object-fit:cover;border-radius:12px;margin-bottom:5px;border:2px solid var(--border);}
+.rv-card-name{font-size:10px;font-weight:700;color:var(--text);line-height:1.3;}
+.rv-card-price{font-size:11px;color:var(--green);font-weight:700;}
+/* SORT FILTER */
+.sort-bar{display:flex;gap:8px;padding:4px 12px 10px;overflow-x:auto;scrollbar-width:none;align-items:center;flex-wrap:wrap;}
+.sort-bar::-webkit-scrollbar{display:none;}
+.sort-label{font-size:12px;font-weight:700;color:#888;flex-shrink:0;}
+.sort-pill{flex-shrink:0;padding:6px 14px;border-radius:25px;border:2px solid var(--border);background:#fff;font-size:11px;font-weight:700;color:#555;cursor:pointer;transition:0.2s;white-space:nowrap;}
+.sort-pill.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(39,174,96,0.3);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -712,7 +728,15 @@ body.dark .bnav-label{color:#555;}
 
 <div class="cat-pills" id="catPills"><div class="cpill active" onclick="selectPill(this,'')">All</div></div>
 <select id="categoryFilter" onchange="applyFilters()"></select>
-
+<!-- SORT BAR -->
+<div class="sort-bar">
+  <span class="sort-label">Sort:</span>
+  <div class="sort-pill active" onclick="setSort('default',this)">Default</div>
+  <div class="sort-pill" onclick="setSort('price-low',this)">Price: Low to High</div>
+  <div class="sort-pill" onclick="setSort('price-high',this)">Price: High to Low</div>
+  <div class="sort-pill" onclick="setSort('rating',this)">Top Rated</div>
+  <div class="sort-pill" onclick="setSort('popular',this)">Popular</div>
+</div>
 <h2 class="sec-title" id="productsSection">Fresh Vegetables</h2>
 <div class="products-grid" id="productsGrid"></div>
 
@@ -767,7 +791,11 @@ body.dark .bnav-label{color:#555;}
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
   </div>
 </div>
-
+<!-- RECENTLY VIEWED -->
+<div class="rv-sec" id="rvSection">
+  <div class="rv-title">👁️ Recently Viewed</div>
+  <div class="rv-row" id="rvRow"></div>
+</div>
 <div class="track-sec">
   <h3>📍 Track Your Order</h3>
   <div class="track-row">
@@ -1375,6 +1403,8 @@ window.openProductDetail = (id) => {
   const qty = cart[id] ? cart[id].qty : 0;
   document.getElementById("pd-qty").textContent = qty;
   updatePdLiveTotal();
+  // Recently viewed mein add karo
+addToRecentlyViewed(id);
 // Reviews load karo
 pdSelectedStar = 0;
 document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
@@ -1752,6 +1782,34 @@ window.closeInfoModal = () => {
   if (!currentUser) { openLoginModal(); return; }
   showToast("🔔 You'll be notified when " + id + " is back in stock!", "info", 4000);
 };
+  /* ── RECENTLY VIEWED ── */
+let recentlyViewed = JSON.parse(localStorage.getItem('fkRecentViewed') || '[]');
+
+function addToRecentlyViewed(id) {
+  if (!allP[id]) return;
+  recentlyViewed = recentlyViewed.filter(i => i !== id);
+  recentlyViewed.unshift(id);
+  if (recentlyViewed.length > 10) recentlyViewed = recentlyViewed.slice(0, 10);
+  localStorage.setItem('fkRecentViewed', JSON.stringify(recentlyViewed));
+  renderRecentlyViewed();
+}
+
+function renderRecentlyViewed() {
+  const sec = document.getElementById('rvSection');
+  const row = document.getElementById('rvRow');
+  if (!sec || !row) return;
+  const valid = recentlyViewed.filter(id => allP[id]);
+  if (valid.length < 2) { sec.classList.remove('show'); return; }
+  sec.classList.add('show');
+  row.innerHTML = valid.map(id => {
+    const p = allP[id];
+    return '<div class="rv-card" onclick="openProductDetail(\'' + id + '\')">' +
+      '<img src="' + p.image + '" alt="' + id + '" loading="lazy">' +
+      '<div class="rv-card-name">' + id + '</div>' +
+      '<div class="rv-card-price">₹' + p.price + '</div>' +
+    '</div>';
+  }).join('');
+}
   /* ── DELIVERY SLOT ── */
 let selectedSlot = 'asap';
 
@@ -2043,7 +2101,15 @@ window.selectPill = (el, cat) => {
   document.getElementById("categoryFilter").value = cat;
   applyFilters();
 };
+/* ── SORT FILTER ── */
+let currentSort = 'default';
 
+window.setSort = (sort, el) => {
+  currentSort = sort;
+  document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  applyFilters();
+};
 function getCatColor(cat) {
   return { Leafy:"#2ecc71", Root:"#e67e22", Premium:"#9b59b6", Seasonal:"#3498db", Vegetables:"#27ae60" }[cat] || "#27ae60";
 }
@@ -2075,8 +2141,30 @@ window.rateProduct = async (id, stars) => {
 window.applyFilters = () => {
   const s = document.getElementById("searchInput").value.toLowerCase();
   const c = document.getElementById("categoryFilter").value;
+
+  // Filter karo
+  let filtered = [];
+  for (let id in allP) {
+    const p = allP[id];
+    if (id.toLowerCase().includes(s) && (c === "" || p.category === c)) {
+      filtered.push({ id, ...p });
+    }
+  }
+
+  // Sort karo
+  if (currentSort === 'price-low') {
+    filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+  } else if (currentSort === 'price-high') {
+    filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+  } else if (currentSort === 'rating') {
+    filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else if (currentSort === 'popular') {
+    filtered.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
+  }
+
+  // Object mein convert karo
   let f = {};
-  for (let id in allP) { const p = allP[id]; if (id.toLowerCase().includes(s) && (c===""||p.category===c)) f[id] = p; }
+  filtered.forEach(p => { f[p.id] = allP[p.id]; });
   renderProducts(f);
 };
 function renderRecommended() {
@@ -2704,6 +2792,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
