@@ -696,20 +696,27 @@ body.dark .bnav-label{color:#555;}
 .points-remove-btn{width:100%;padding:8px;background:#f5f5f5;color:#e67e22;border:1px solid #f39c12;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:5px;display:none;}
 .sum-row-points{display:flex;justify-content:space-between;font-size:13px;color:#e67e22;font-weight:700;margin-bottom:5px;}
 /* OFFERS BANNER */
+/* OFFERS BANNER */
 .offers-banner-sec{margin:14px;border-radius:18px;overflow:hidden;}
-.offers-banner-track{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;scroll-snap-type:x mandatory;}
-.offers-banner-track::-webkit-scrollbar{display:none;}
-.offer-banner-card{flex-shrink:0;width:100%;max-width:100%;border-radius:16px;overflow:hidden;position:relative;min-height:140px;display:flex;align-items:center;scroll-snap-align:start;cursor:pointer;}
-.ob-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
-.ob-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);}
-.ob-content{position:relative;z-index:1;padding:20px;color:#fff;}
-.ob-tag{background:var(--green2);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;letter-spacing:0.5px;}
-.ob-title{font-size:20px;font-weight:800;line-height:1.2;margin-bottom:6px;}
-.ob-desc{font-size:12px;opacity:0.9;margin-bottom:12px;}
-.ob-btn{background:#fff;color:var(--green3);padding:7px 16px;border-radius:25px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Poppins',sans-serif;}
-.ob-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
-.ob-dot{width:7px;height:7px;border-radius:50%;background:#ddd;cursor:pointer;transition:0.3s;}
-.ob-dot.active{background:var(--green);width:20px;border-radius:5px;}
+.pb-track{position:relative;border-radius:16px;overflow:hidden;height:160px;}
+.pb-slide{position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease;display:flex;align-items:center;padding:24px;}
+.pb-slide.active{opacity:1;}
+.pb-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+.pb-shade{position:absolute;inset:0;}
+.pb-content{position:relative;z-index:2;color:#fff;max-width:320px;}
+.pb-tag{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:8px;letter-spacing:0.8px;text-transform:uppercase;background:rgba(255,255,255,0.25);backdrop-filter:blur(4px);border:0.5px solid rgba(255,255,255,0.3);}
+.pb-title{font-size:20px;font-weight:800;line-height:1.2;margin-bottom:6px;}
+.pb-desc{font-size:12px;opacity:0.85;margin-bottom:14px;}
+.pb-cta{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1a1a1a;padding:7px 16px;border-radius:25px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Poppins',sans-serif;}
+.pb-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(4px);border:0.5px solid rgba(255,255,255,0.3);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.pb-prev{left:10px;}
+.pb-next{right:10px;}
+.pb-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
+.pb-dot{height:4px;border-radius:4px;background:#ddd;cursor:pointer;transition:all 0.3s ease;}
+.pb-dot.active{background:var(--green);width:20px;}
+.pb-dot:not(.active){width:4px;}
+.pb-counter{position:absolute;top:12px;right:12px;z-index:3;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.2);font-weight:600;}
+@media(max-width:768px){.pb-title{font-size:16px;}.pb-track{height:140px;}}
 /* PRODUCT IMAGES GALLERY */
 .pd-gallery{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 20px;background:#f8fdf8;}
 .pd-gallery::-webkit-scrollbar{display:none;}
@@ -779,8 +786,8 @@ body.dark .bnav-label{color:#555;}
 </section>
   <!-- OFFERS BANNER -->
 <div class="offers-banner-sec" id="offersBannerSec">
-  <div class="offers-banner-track" id="offersBannerTrack"></div>
-  <div class="ob-dots" id="obDots"></div>
+  <div class="pb-track" id="pbTrack"></div>
+  <div class="pb-dots" id="pbDots"></div>
 </div>
 <div class="ai-sec">
 <h2 class="sec-title">🤖 Recommended For You</h2>
@@ -2037,89 +2044,100 @@ window.closeInfoModal = () => {
   if (!currentUser) { openLoginModal(); return; }
   showToast("🔔 You'll be notified when " + id + " is back in stock!", "info", 4000);
 };
-  /* ── OFFERS BANNER ── */
+ /* ── OFFERS BANNER ── */
 const defaultBanners = [
   {
     tag: "LIMITED TIME",
-    title: "40% OFF on Leafy Vegetables!",
+    title: "40% OFF on Leafy<br>Vegetables!",
     desc: "Fresh spinach, coriander & more at amazing prices",
     bg: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=80",
-    color: "linear-gradient(135deg,#27ae60,#2ecc71)",
+    shade: "linear-gradient(105deg,rgba(39,174,96,0.9) 0%,rgba(26,158,80,0.7) 50%,transparent 100%)",
+    btn: "Shop Now",
     action: "Leafy"
   },
   {
     tag: "FREE DELIVERY",
-    title: "Order Above ₹299 Get FREE Delivery!",
-    desc: "No delivery charges on orders above ₹299",
+    title: "Order Above ₹299<br>Zero Delivery Charge!",
+    desc: "No extra cost on orders above ₹299",
     bg: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80",
-    color: "linear-gradient(135deg,#2196f3,#21cbf3)",
+    shade: "linear-gradient(105deg,rgba(33,150,243,0.9) 0%,rgba(21,101,192,0.7) 50%,transparent 100%)",
+    btn: "Order Now",
     action: ""
   },
   {
     tag: "NEW COUPON",
-    title: "Use Code FRESH10 & Save 10%!",
-    desc: "Apply coupon at checkout to get instant discount",
+    title: "Use FRESH10 &<br>Save 10% Today!",
+    desc: "Apply at checkout for instant discount",
     bg: "https://images.unsplash.com/photo-1518977822534-7049a61ee0c2?w=800&q=80",
-    color: "linear-gradient(135deg,#e67e22,#f39c12)",
+    shade: "linear-gradient(105deg,rgba(230,126,34,0.9) 0%,rgba(211,84,0,0.7) 50%,transparent 100%)",
+    btn: "Grab Deal",
     action: ""
   },
   {
     tag: "FARM FRESH",
-    title: "100% Organic Vegetables Daily!",
-    desc: "Delivered fresh from farm to your doorstep in 30 min",
+    title: "100% Organic<br>Delivered in 30 Min!",
+    desc: "From farm directly to your doorstep",
     bg: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=800&q=80",
-    color: "linear-gradient(135deg,#9b59b6,#8e44ad)",
+    shade: "linear-gradient(105deg,rgba(155,89,182,0.9) 0%,rgba(142,68,173,0.7) 50%,transparent 100%)",
+    btn: "Explore",
     action: ""
   }
 ];
 
-let obCurrentSlide = 0;
-let obInterval = null;
+let pbCurrent = 0;
+let pbAutoTimer = null;
 
 function renderOffersBanner(banners) {
-  const track = document.getElementById('offersBannerTrack');
-  const dots = document.getElementById('obDots');
+  const track = document.getElementById('pbTrack');
+  const dots = document.getElementById('pbDots');
   if (!track || !dots) return;
 
   track.innerHTML = banners.map((b, i) =>
-    '<div class="offer-banner-card" onclick="bannerClick(\'' + (b.action || '') + '\')">' +
-      '<div class="ob-bg" style="background-image:url(\'' + b.bg + '\');"></div>' +
-      '<div class="ob-overlay" style="background:' + b.color + ';opacity:0.7;"></div>' +
-      '<div class="ob-content">' +
-        '<span class="ob-tag">' + b.tag + '</span>' +
-        '<div class="ob-title">' + b.title + '</div>' +
-        '<div class="ob-desc">' + b.desc + '</div>' +
-        '<button class="ob-btn" onclick="event.stopPropagation();bannerClick(\'' + (b.action || '') + '\')">Shop Now →</button>' +
+    '<div class="pb-slide' + (i === 0 ? ' active' : '') + '">' +
+      '<div class="pb-bg" style="background-image:url(\'' + b.bg + '\');"></div>' +
+      '<div class="pb-shade" style="background:' + b.shade + ';"></div>' +
+      '<div class="pb-content">' +
+        '<span class="pb-tag">' + b.tag + '</span>' +
+        '<div class="pb-title">' + b.title + '</div>' +
+        '<div class="pb-desc">' + b.desc + '</div>' +
+        '<button class="pb-cta" onclick="bannerClick(\'' + (b.action||'') + '\')">' + b.btn + ' →</button>' +
       '</div>' +
     '</div>'
-  ).join('');
+  ).join('') +
+  '<div class="pb-counter" id="pbCounter">1 / ' + banners.length + '</div>' +
+  '<button class="pb-arrow pb-prev" onclick="pbChange(-1)">‹</button>' +
+  '<button class="pb-arrow pb-next" onclick="pbChange(1)">›</button>';
 
   dots.innerHTML = banners.map((_, i) =>
-    '<div class="ob-dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></div>'
+    '<div class="pb-dot' + (i === 0 ? ' active' : '') + '" onclick="pbGo(' + i + ')"></div>'
   ).join('');
 
   startBannerAuto(banners.length);
 }
 
 function startBannerAuto(total) {
-  if (obInterval) clearInterval(obInterval);
-  obInterval = setInterval(() => {
-    obCurrentSlide = (obCurrentSlide + 1) % total;
-    goToSlide(obCurrentSlide);
-  }, 3500);
+  if (pbAutoTimer) clearInterval(pbAutoTimer);
+  pbAutoTimer = setInterval(() => pbChange(1), 3500);
 }
 
-window.goToSlide = (idx) => {
-  obCurrentSlide = idx;
-  const track = document.getElementById('offersBannerTrack');
-  if (track) {
-    // scrollIntoView ki jagah scrollLeft use karo
-    const cardWidth = track.offsetWidth;
-    track.scrollLeft = idx * (cardWidth + 12);
-  }
-  document.querySelectorAll('.ob-dot').forEach((d, i) => {
-    d.classList.toggle('active', i === idx);
-  });
+window.pbGo = (idx) => {
+  const slides = document.querySelectorAll('.pb-slide');
+  const dots = document.querySelectorAll('.pb-dot');
+  const total = slides.length;
+  if (!slides.length) return;
+  slides[pbCurrent].classList.remove('active');
+  dots[pbCurrent].classList.remove('active');
+  pbCurrent = ((idx % total) + total) % total;
+  slides[pbCurrent].classList.add('active');
+  dots[pbCurrent].classList.add('active');
+  const counter = document.getElementById('pbCounter');
+  if (counter) counter.textContent = (pbCurrent + 1) + ' / ' + total;
+};
+
+window.pbChange = (dir) => {
+  if (pbAutoTimer) clearInterval(pbAutoTimer);
+  pbGo(pbCurrent + dir);
+  startBannerAuto(defaultBanners.length);
 };
 
 window.bannerClick = (category) => {
@@ -2133,6 +2151,9 @@ window.bannerClick = (category) => {
   }
 };
 
+window.goToSlide = window.pbGo;
+
+renderOffersBanner(defaultBanners);
 // Banners load karo
 renderOffersBanner(defaultBanners);
   /* ── RECENTLY VIEWED ── */
@@ -3500,6 +3521,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
