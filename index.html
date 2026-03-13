@@ -695,6 +695,21 @@ body.dark .bnav-label{color:#555;}
 .points-use-btn{width:100%;padding:8px;background:linear-gradient(135deg,#e67e22,#f39c12);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
 .points-remove-btn{width:100%;padding:8px;background:#f5f5f5;color:#e67e22;border:1px solid #f39c12;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:5px;display:none;}
 .sum-row-points{display:flex;justify-content:space-between;font-size:13px;color:#e67e22;font-weight:700;margin-bottom:5px;}
+/* OFFERS BANNER */
+.offers-banner-sec{margin:14px;border-radius:18px;overflow:hidden;}
+.offers-banner-track{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;scroll-snap-type:x mandatory;}
+.offers-banner-track::-webkit-scrollbar{display:none;}
+.offer-banner-card{flex-shrink:0;width:100%;max-width:100%;border-radius:16px;overflow:hidden;position:relative;min-height:140px;display:flex;align-items:center;scroll-snap-align:start;cursor:pointer;}
+.ob-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+.ob-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);}
+.ob-content{position:relative;z-index:1;padding:20px;color:#fff;}
+.ob-tag{background:var(--green2);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;letter-spacing:0.5px;}
+.ob-title{font-size:20px;font-weight:800;line-height:1.2;margin-bottom:6px;}
+.ob-desc{font-size:12px;opacity:0.9;margin-bottom:12px;}
+.ob-btn{background:#fff;color:var(--green3);padding:7px 16px;border-radius:25px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Poppins',sans-serif;}
+.ob-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:#ddd;cursor:pointer;transition:0.3s;}
+.ob-dot.active{background:var(--green);width:20px;border-radius:5px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -756,6 +771,11 @@ body.dark .bnav-label{color:#555;}
     </div>
   </div>
 </section>
+  <!-- OFFERS BANNER -->
+<div class="offers-banner-sec" id="offersBannerSec">
+  <div class="offers-banner-track" id="offersBannerTrack"></div>
+  <div class="ob-dots" id="obDots"></div>
+</div>
 <div class="ai-sec">
 <h2 class="sec-title">🤖 Recommended For You</h2>
   <div class="ai-row" id="aiProducts"></div>
@@ -1960,6 +1980,103 @@ window.closeInfoModal = () => {
   if (!currentUser) { openLoginModal(); return; }
   showToast("🔔 You'll be notified when " + id + " is back in stock!", "info", 4000);
 };
+  /* ── OFFERS BANNER ── */
+const defaultBanners = [
+  {
+    tag: "LIMITED TIME",
+    title: "40% OFF on Leafy Vegetables!",
+    desc: "Fresh spinach, coriander & more at amazing prices",
+    bg: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=80",
+    color: "linear-gradient(135deg,#27ae60,#2ecc71)",
+    action: "Leafy"
+  },
+  {
+    tag: "FREE DELIVERY",
+    title: "Order Above ₹299 Get FREE Delivery!",
+    desc: "No delivery charges on orders above ₹299",
+    bg: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80",
+    color: "linear-gradient(135deg,#2196f3,#21cbf3)",
+    action: ""
+  },
+  {
+    tag: "NEW COUPON",
+    title: "Use Code FRESH10 & Save 10%!",
+    desc: "Apply coupon at checkout to get instant discount",
+    bg: "https://images.unsplash.com/photo-1518977822534-7049a61ee0c2?w=800&q=80",
+    color: "linear-gradient(135deg,#e67e22,#f39c12)",
+    action: ""
+  },
+  {
+    tag: "FARM FRESH",
+    title: "100% Organic Vegetables Daily!",
+    desc: "Delivered fresh from farm to your doorstep in 30 min",
+    bg: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=800&q=80",
+    color: "linear-gradient(135deg,#9b59b6,#8e44ad)",
+    action: ""
+  }
+];
+
+let obCurrentSlide = 0;
+let obInterval = null;
+
+function renderOffersBanner(banners) {
+  const track = document.getElementById('offersBannerTrack');
+  const dots = document.getElementById('obDots');
+  if (!track || !dots) return;
+
+  track.innerHTML = banners.map((b, i) =>
+    '<div class="offer-banner-card" onclick="bannerClick(\'' + (b.action || '') + '\')">' +
+      '<div class="ob-bg" style="background-image:url(\'' + b.bg + '\');"></div>' +
+      '<div class="ob-overlay" style="background:' + b.color + ';opacity:0.7;"></div>' +
+      '<div class="ob-content">' +
+        '<span class="ob-tag">' + b.tag + '</span>' +
+        '<div class="ob-title">' + b.title + '</div>' +
+        '<div class="ob-desc">' + b.desc + '</div>' +
+        '<button class="ob-btn" onclick="event.stopPropagation();bannerClick(\'' + (b.action || '') + '\')">Shop Now →</button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+
+  dots.innerHTML = banners.map((_, i) =>
+    '<div class="ob-dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></div>'
+  ).join('');
+
+  startBannerAuto(banners.length);
+}
+
+function startBannerAuto(total) {
+  if (obInterval) clearInterval(obInterval);
+  obInterval = setInterval(() => {
+    obCurrentSlide = (obCurrentSlide + 1) % total;
+    goToSlide(obCurrentSlide);
+  }, 3500);
+}
+
+window.goToSlide = (idx) => {
+  obCurrentSlide = idx;
+  const track = document.getElementById('offersBannerTrack');
+  if (track) {
+    const card = track.children[idx];
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+  }
+  document.querySelectorAll('.ob-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+};
+
+window.bannerClick = (category) => {
+  if (category) {
+    document.querySelectorAll('.cpill').forEach(p => p.classList.remove('active'));
+    document.getElementById('categoryFilter').value = category;
+    applyFilters();
+    document.getElementById('productsSection').scrollIntoView({ behavior: 'smooth' });
+  } else {
+    document.getElementById('productsSection').scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// Banners load karo
+renderOffersBanner(defaultBanners);
   /* ── RECENTLY VIEWED ── */
 let recentlyViewed = JSON.parse(localStorage.getItem('fkRecentViewed') || '[]');
 
@@ -3325,6 +3442,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
