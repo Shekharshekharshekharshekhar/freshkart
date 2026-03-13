@@ -1586,6 +1586,30 @@ if (writeReview) {
   document.getElementById("productDetail").classList.add("show");
   document.body.style.overflow = "hidden";
 };
+
+window.closeProductDetail = () => {
+  document.getElementById("productDetail").classList.remove("show");
+  document.body.style.overflow = "";
+  pdCurrentId = null;
+};
+
+document.getElementById("productDetail").addEventListener("click", e => {
+  if (e.target === document.getElementById("productDetail")) closeProductDetail();
+});
+
+window.pdSelectWeight = (weight, el) => {
+  pdSelectedWeight = weight;
+  document.querySelectorAll(".pd-wp").forEach(e => e.classList.remove("sel"));
+  el.classList.add("sel");
+  if (pdCurrentId) {
+    cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
+    cart[pdCurrentId].selectedWeight = weight;
+    const p = allP[pdCurrentId];
+    const newPrice = p.unit === "g" ? (p.price / 1000) * weight : p.price * weight;
+    document.getElementById("pd-price").textContent = newPrice.toFixed(0);
+    updatePdLiveTotal();
+  }
+};
 /* ── PRODUCT GALLERY ── */
 function renderPdGallery(p, id) {
   // Purani gallery remove karo
@@ -1626,30 +1650,6 @@ function renderPdGallery(p, id) {
   const imgWrap = document.querySelector('.pd-img-wrap');
   if (imgWrap) imgWrap.after(gallery);
 }
-window.closeProductDetail = () => {
-  document.getElementById("productDetail").classList.remove("show");
-  document.body.style.overflow = "";
-  pdCurrentId = null;
-};
-
-document.getElementById("productDetail").addEventListener("click", e => {
-  if (e.target === document.getElementById("productDetail")) closeProductDetail();
-});
-
-window.pdSelectWeight = (weight, el) => {
-  pdSelectedWeight = weight;
-  document.querySelectorAll(".pd-wp").forEach(e => e.classList.remove("sel"));
-  el.classList.add("sel");
-  if (pdCurrentId) {
-    cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
-    cart[pdCurrentId].selectedWeight = weight;
-    const p = allP[pdCurrentId];
-    const newPrice = p.unit === "g" ? (p.price / 1000) * weight : p.price * weight;
-    document.getElementById("pd-price").textContent = newPrice.toFixed(0);
-    updatePdLiveTotal();
-  }
-};
-
 window.pdChangeQty = (val) => {
   if (!pdCurrentId) return;
   const p = allP[pdCurrentId];
@@ -3492,6 +3492,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
