@@ -1568,7 +1568,8 @@ addToRecentlyViewed(id);
 // Reviews load karo
 pdSelectedStar = 0;
 document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
-document.getElementById('pd-review-text').value = '';
+const reviewTextEl = document.getElementById('pd-review-text');
+if (reviewTextEl) reviewTextEl.value = '';
 loadPdReviews(id);
 
 // Login check
@@ -3499,6 +3500,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
