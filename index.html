@@ -686,6 +686,15 @@ body.dark .bnav-label{color:#555;}
 .saved-addr-btn{width:100%;padding:9px 13px;border-radius:11px;border:2px dashed var(--green2);background:#f0fdf4;font-size:12px;font-weight:600;color:var(--green);cursor:pointer;text-align:left;font-family:'Poppins',sans-serif;transition:0.2s;display:none;}
 .saved-addr-btn:hover{background:#e8f5e9;}
 .saved-addr-btn.show{display:block;}
+  /* LOYALTY POINTS */
+.points-wrap{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1px solid #f39c12;border-radius:12px;padding:10px 13px;margin-bottom:10px;display:none;}
+.points-wrap.show{display:block;}
+.points-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.points-title{font-size:12px;font-weight:700;color:#e67e22;}
+.points-badge{background:#e67e22;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.points-use-btn{width:100%;padding:8px;background:linear-gradient(135deg,#e67e22,#f39c12);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
+.points-remove-btn{width:100%;padding:8px;background:#f5f5f5;color:#e67e22;border:1px solid #f39c12;border-radius:9px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:5px;display:none;}
+.sum-row-points{display:flex;justify-content:space-between;font-size:13px;color:#e67e22;font-weight:700;margin-bottom:5px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -790,6 +799,16 @@ body.dark .bnav-label{color:#555;}
   <div class="cart-hdr"><h3>🛒 Your Cart</h3><button class="cart-x" onclick="toggleCart()">✕</button></div>
   <div class="cart-list" id="cartItems"></div>
   <div class="csummary">
+    <!-- LOYALTY POINTS -->
+<div class="points-wrap" id="pointsWrap">
+  <div class="points-header">
+    <span class="points-title">🏆 Your Loyalty Points</span>
+    <span class="points-badge" id="pointsBadge">0 pts</span>
+  </div>
+  <div style="font-size:11px;color:#888;margin-bottom:8px;">1 Point = ₹1 discount • Min 10 points to redeem</div>
+  <button class="points-use-btn" id="pointsUseBtn" onclick="redeemPoints()">🏆 Use Points for Discount</button>
+  <button class="points-remove-btn" id="pointsRemoveBtn" onclick="removePointsDiscount()">✕ Remove Points Discount</button>
+</div>
     <div class="min-order-warn" id="minOrderWarn">⚠️ Minimum order amount is ₹99. Add more items!</div><!-- COUPON SYSTEM -->
 <div class="coupon-wrap">
   <div class="coupon-row">
@@ -802,6 +821,10 @@ body.dark .bnav-label{color:#555;}
   </div>
   <div class="coupon-error" id="couponError">❌ Invalid coupon code!</div>
 </div><div id="freeDelBar"></div><div class="sum-row"><span>Subtotal</span><span>₹<span id="totalAmount">0</span></span></div>
+    <div class="sum-row-points" id="pointsDiscountRow" style="display:none;">
+  <span>🏆 Points Discount</span>
+  <span>- ₹<span id="pointsDiscountAmt">0</span></span>
+</div>
     <div class="sum-row-discount" id="discountRow" style="display:none;">
   <span>🎟️ Discount (<span id="discountLabel"></span>)</span>
   <span>- ₹<span id="discountAmount">0</span></span>
@@ -964,7 +987,7 @@ body.dark .bnav-label{color:#555;}
       <div class="p-stats">
         <div class="stat-box"><div class="sn" id="statOrders">0</div><div class="sl">Orders</div></div>
         <div class="stat-box"><div class="sn" id="statSpent">₹0</div><div class="sl">Spent</div></div>
-        <div class="stat-box"><div class="sn">🌿</div><div class="sl">Fresh Only</div></div>
+       <div class="stat-box"><div class="sn" id="statPoints">0</div><div class="sl">🏆 Points</div></div>
       </div>
       <div class="p-sec-title">📋 Account Info</div>
       <div class="p-info-grid">
@@ -1181,9 +1204,10 @@ onAuthStateChanged(auth, u => {
     const n = u.displayName || u.email.split("@")[0];
     document.getElementById("userDisplayName").textContent = n;
     document.getElementById("userAvatarLetter").textContent = n.charAt(0).toUpperCase();
-     closeLoginModal();
+   closeLoginModal();
     loadWishlist();
     loadSavedAddress();
+    loadUserPoints();
   } else {
     lb.style.display = "flex";
     ud.style.display = "none";
@@ -1295,8 +1319,9 @@ window.openProfilePanel = window.openProfilePanelM = async () => {
     const allOrders = await getDocs(query(collection(db,"orders"), where("userId","==",u.uid)));
     let c = 0, s = 0;
     allOrders.forEach(d => { c++; s += d.data().total || 0; });
-    document.getElementById("statOrders").textContent = c;
+     document.getElementById("statOrders").textContent = c;
     document.getElementById("statSpent").textContent = "₹" + s.toFixed(0);
+    document.getElementById("statPoints").textContent = userPoints || 0;
   } catch(e) {}
 };
 window.closeProfilePanel = () => { document.getElementById("profilePanel").classList.remove("show"); document.body.style.overflow = ""; };
@@ -2009,7 +2034,123 @@ window.useSavedAddress = () => {
     }
   } catch(e) {}
 };
+/* ── LOYALTY POINTS ── */
+let userPoints = 0;
+let pointsDiscount = 0;
+let pointsRedeemed = false;
 
+async function loadUserPoints() {
+  if (!currentUser) return;
+  try {
+    const snap = await getDocs(
+      query(collection(db, 'loyaltyPoints'),
+        where('userId', '==', currentUser.uid))
+    );
+    if (!snap.empty) {
+      userPoints = snap.docs[0].data().points || 0;
+    } else {
+      userPoints = 0;
+    }
+    updatePointsUI();
+  } catch(e) { console.log('Points load error:', e); }
+}
+
+function updatePointsUI() {
+  const wrap = document.getElementById('pointsWrap');
+  const badge = document.getElementById('pointsBadge');
+  const useBtn = document.getElementById('pointsUseBtn');
+  const removeBtn = document.getElementById('pointsRemoveBtn');
+
+  if (!wrap) return;
+
+  if (currentUser && userPoints >= 10) {
+    wrap.classList.add('show');
+    badge.textContent = userPoints + ' pts = ₹' + userPoints;
+    useBtn.textContent = '🏆 Use ' + userPoints + ' Points = ₹' + userPoints + ' OFF';
+    if (pointsRedeemed) {
+      useBtn.style.display = 'none';
+      removeBtn.style.display = 'block';
+    } else {
+      useBtn.style.display = 'block';
+      removeBtn.style.display = 'none';
+    }
+  } else {
+    wrap.classList.remove('show');
+  }
+}
+
+window.redeemPoints = () => {
+  if (!currentUser) { openLoginModal(); return; }
+  if (userPoints < 10) { showToast('Minimum 10 points required!', 'warning'); return; }
+  if (appliedCoupon) { showToast('Remove coupon first to use points!', 'warning'); return; }
+
+  pointsDiscount = userPoints;
+  pointsRedeemed = true;
+  updatePointsUI();
+  showToast('🏆 ' + userPoints + ' points applied! ₹' + userPoints + ' OFF', 'success', 3000);
+  calcTotal();
+};
+
+window.removePointsDiscount = () => {
+  pointsDiscount = 0;
+  pointsRedeemed = false;
+  updatePointsUI();
+  showToast('Points discount removed!', 'info');
+  calcTotal();
+};
+
+async function addLoyaltyPoints(orderTotal) {
+  if (!currentUser) return;
+  try {
+    const pointsEarned = Math.floor(orderTotal / 100); // ₹100 = 1 point
+    if (pointsEarned <= 0) return;
+
+    const snap = await getDocs(
+      query(collection(db, 'loyaltyPoints'),
+        where('userId', '==', currentUser.uid))
+    );
+
+    if (!snap.empty) {
+      const docId = snap.docs[0].id;
+      const currentPts = snap.docs[0].data().points || 0;
+      await updateDoc(doc(db, 'loyaltyPoints', docId), {
+        points: currentPts + pointsEarned,
+        lastUpdated: new Date()
+      });
+    } else {
+      await addDoc(collection(db, 'loyaltyPoints'), {
+        userId: currentUser.uid,
+        points: pointsEarned,
+        createdAt: new Date(),
+        lastUpdated: new Date()
+      });
+    }
+    userPoints += pointsEarned;
+    showToast('🏆 You earned ' + pointsEarned + ' loyalty points!', 'info', 4000);
+  } catch(e) { console.log('Points add error:', e); }
+}
+
+async function deductLoyaltyPoints() {
+  if (!currentUser || !pointsRedeemed || pointsDiscount <= 0) return;
+  try {
+    const snap = await getDocs(
+      query(collection(db, 'loyaltyPoints'),
+        where('userId', '==', currentUser.uid))
+    );
+    if (!snap.empty) {
+      const docId = snap.docs[0].id;
+      const currentPts = snap.docs[0].data().points || 0;
+      const newPts = Math.max(0, currentPts - pointsDiscount);
+      await updateDoc(doc(db, 'loyaltyPoints', docId), {
+        points: newPts,
+        lastUpdated: new Date()
+      });
+      userPoints = newPts;
+    }
+    pointsRedeemed = false;
+    pointsDiscount = 0;
+  } catch(e) { console.log('Points deduct error:', e); }
+}
 function saveAddress(nm, ph, ad) {
   if (!currentUser) return;
   try {
@@ -2025,19 +2166,29 @@ function saveAddress(nm, ph, ad) {
   } catch(e) {}
 }
 /* ── COUPON SYSTEM ── */
-// Yahan apne coupons define karo
-const COUPONS = {
-  'FRESH10':  { type: 'percent', value: 10,  desc: '10% OFF',     minOrder: 99  },
-  'FRESH20':  { type: 'percent', value: 20,  desc: '20% OFF',     minOrder: 199 },
-  'FLAT50':   { type: 'flat',    value: 50,  desc: '₹50 OFF',     minOrder: 199 },
-  'FLAT100':  { type: 'flat',    value: 100, desc: '₹100 OFF',    minOrder: 399 },
-  'FIRST':    { type: 'percent', value: 15,  desc: '15% OFF',     minOrder: 99  },
-  'WELCOME':  { type: 'flat',    value: 30,  desc: '₹30 OFF',     minOrder: 99  },
-  'SAVE25':   { type: 'percent', value: 25,  desc: '25% OFF',     minOrder: 299 },
-};
-
+// Coupons Firebase se aayenge
+let COUPONS = {};
 let appliedCoupon = null;
 let discountAmount = 0;
+
+// Firebase se coupons load karo
+async function loadCouponsFromFirebase() {
+  try {
+    const snap = await getDocs(collection(db, 'coupons'));
+    COUPONS = {};
+    snap.forEach(d => {
+      const data = d.data();
+      COUPONS[data.code] = {
+        type: data.type,
+        value: data.value,
+        desc: data.desc,
+        minOrder: data.minOrder || 99
+      };
+    });
+  } catch(e) {
+    console.log('Coupons load error:', e);
+  }
+}
 
 window.applyCoupon = () => {
   const code = document.getElementById('couponInput').value.trim().toUpperCase();
@@ -2563,8 +2714,21 @@ function calcTotal() {
     if (discRow) discRow.style.display = 'none';
   }
 
-  // Step 2 — Discounted total calculate karo
-  const discountedTotal = Math.max(0, total - discountAmount);
+// Step 2 — Discounted total calculate karo (coupon + points)
+  const totalDiscount = discountAmount + (pointsRedeemed ? pointsDiscount : 0);
+  const discountedTotal = Math.max(0, total - totalDiscount);
+
+  // Points discount row update karo
+  const pdRow = document.getElementById('pointsDiscountRow');
+  const pdAmt = document.getElementById('pointsDiscountAmt');
+  if (pdRow && pdAmt) {
+    if (pointsRedeemed && pointsDiscount > 0 && total > 0) {
+      pdRow.style.display = 'flex';
+      pdAmt.textContent = pointsDiscount;
+    } else {
+      pdRow.style.display = 'none';
+    }
+  }
 
   // Step 3 — Free delivery check karo (discount ke baad)
   const fdb = document.getElementById("freeDelBar");
@@ -2647,8 +2811,11 @@ window.toggleCart = () => {
   d.classList.toggle("open");
   o.classList.toggle("on");
   document.body.style.overflow = d.classList.contains("open") ? "hidden" : "";
-  // Cart open hone pe saved address load karo
-  if (d.classList.contains("open")) loadSavedAddress();
+// Cart open hone pe saved address aur points load karo
+  if (d.classList.contains("open")) {
+    loadSavedAddress();
+    loadUserPoints();
+  }
 };
 
 /* ==========================================
@@ -2728,6 +2895,10 @@ if (ad.length < 10) {
           createdAt: new Date()
         });
     showToast("🎉 Payment Successful! Order ID: " + oid, "success", 5000);
+    // Points deduct karo (agar redeemed)
+    await deductLoyaltyPoints();
+    // Points earn karo
+    await addLoyaltyPoints(total + delivery - discountAmount - (pointsRedeemed ? pointsDiscount : 0));
 // Order confirmation show karo
 const savedCart = { ...cart };
 showOrderConfirm(oid, nm, ph, "Online Payment", getDeliverySlot(), savedCart, total, discountAmount, delivery, total + delivery - discountAmount);
@@ -2956,7 +3127,11 @@ try {
 } catch(emailErr) {
   console.log("Email error:", emailErr);
 }
- showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
+showToast("🎉 Order Placed! ID: " + oid, "success", 5000);
+// Points deduct karo (agar redeemed)
+await deductLoyaltyPoints();
+// Points earn karo
+await addLoyaltyPoints(grandTotal);
 // Order confirmation show karo
 const savedCart2 = { ...cart };
 const savedTotal = total;
@@ -3101,7 +3276,8 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 };
-  loadCart();
+loadCart();
+  loadCouponsFromFirebase();
   // Back to Top
 window.addEventListener('scroll', () => {
   const btn = document.getElementById('backTop');
@@ -3149,6 +3325,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
