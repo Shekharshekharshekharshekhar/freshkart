@@ -710,6 +710,12 @@ body.dark .bnav-label{color:#555;}
 .ob-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;}
 .ob-dot{width:7px;height:7px;border-radius:50%;background:#ddd;cursor:pointer;transition:0.3s;}
 .ob-dot.active{background:var(--green);width:20px;border-radius:5px;}
+/* PRODUCT IMAGES GALLERY */
+.pd-gallery{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 20px;background:#f8fdf8;}
+.pd-gallery::-webkit-scrollbar{display:none;}
+.pd-thumb{width:60px;height:60px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:0.2s;flex-shrink:0;}
+.pd-thumb.active{border-color:var(--green);box-shadow:0 2px 8px rgba(39,174,96,0.4);}
+.pd-main-img{width:100%;height:100%;object-fit:cover;transition:opacity 0.3s;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -1501,8 +1507,13 @@ window.openProductDetail = (id) => {
   pdCurrentId = id;
   pdSelectedWeight = cart[id] ? cart[id].selectedWeight || 1 : 1;
 
-  document.getElementById("pd-image").src = p.image;
-  document.getElementById("pd-image").alt = id;
+ // Main image set karo
+  const mainImg = document.getElementById("pd-image");
+  mainImg.src = p.image;
+  mainImg.alt = id;
+
+  // Gallery render karo
+  renderPdGallery(p, id);
   document.getElementById("pd-category").textContent = p.category || "Vegetables";
   document.getElementById("pd-name").textContent = id;
   document.getElementById("pd-unit").textContent = p.unit || "kg";
@@ -1575,7 +1586,46 @@ if (writeReview) {
   document.getElementById("productDetail").classList.add("show");
   document.body.style.overflow = "hidden";
 };
+/* ── PRODUCT GALLERY ── */
+function renderPdGallery(p, id) {
+  // Purani gallery remove karo
+  const oldGallery = document.getElementById('pd-gallery');
+  if (oldGallery) oldGallery.remove();
 
+  // Images array banao
+  const images = p.images && p.images.length > 0
+    ? p.images
+    : [p.image]; // Sirf 1 image hai toh gallery mat dikhao
+
+  if (images.length <= 1) return; // 1 se zyada images hone pe gallery dikhao
+
+  // Gallery create karo
+  const gallery = document.createElement('div');
+  gallery.id = 'pd-gallery';
+  gallery.className = 'pd-gallery';
+
+  images.forEach((img, i) => {
+    const thumb = document.createElement('img');
+    thumb.src = img;
+    thumb.alt = id + ' ' + (i + 1);
+    thumb.className = 'pd-thumb' + (i === 0 ? ' active' : '');
+    thumb.loading = 'lazy';
+    thumb.onclick = () => {
+      document.getElementById('pd-image').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('pd-image').src = img;
+        document.getElementById('pd-image').style.opacity = '1';
+      }, 200);
+      document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+    };
+    gallery.appendChild(thumb);
+  });
+
+  // Image wrap ke baad insert karo
+  const imgWrap = document.querySelector('.pd-img-wrap');
+  if (imgWrap) imgWrap.after(gallery);
+}
 window.closeProductDetail = () => {
   document.getElementById("productDetail").classList.remove("show");
   document.body.style.overflow = "";
@@ -3442,6 +3492,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
