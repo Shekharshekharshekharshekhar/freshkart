@@ -1,17 +1,24 @@
 {
-  "name": "FreshKart – Fresh Vegetables",
-  "short_name": "FreshKart",
+  "name": "HariBasket - Fresh Vegetables",
+  "short_name": "HariBasket",
   "description": "Farm fresh vegetables delivered in 30 minutes",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0faf4",
-  "theme_color": "#27ae60",
+  "background_color": "#1a4a2e",
+  "theme_color": "#1a4a2e",
   "orientation": "portrait",
- "icons": [
-  {
-    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🌿</text></svg>",
-    "sizes": "any",
-    "type": "image/svg+xml"
-  }
-]
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
