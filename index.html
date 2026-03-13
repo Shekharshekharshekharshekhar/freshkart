@@ -1617,11 +1617,12 @@ function renderPdGallery(p, id) {
   if (oldGallery) oldGallery.remove();
 
   // Images array banao
-  const images = p.images && p.images.length > 0
+  const images = p.images && Array.isArray(p.images) && p.images.length > 1
     ? p.images
-    : [p.image]; // Sirf 1 image hai toh gallery mat dikhao
+    : null;
 
-  if (images.length <= 1) return; // 1 se zyada images hone pe gallery dikhao
+  // 1 ya koi image nahi toh gallery mat dikhao
+  if (!images) return;
 
   // Gallery create karo
   const gallery = document.createElement('div');
@@ -1635,10 +1636,12 @@ function renderPdGallery(p, id) {
     thumb.className = 'pd-thumb' + (i === 0 ? ' active' : '');
     thumb.loading = 'lazy';
     thumb.onclick = () => {
-      document.getElementById('pd-image').style.opacity = '0';
+      const mainImg = document.getElementById('pd-image');
+      if (!mainImg) return;
+      mainImg.style.opacity = '0';
       setTimeout(() => {
-        document.getElementById('pd-image').src = img;
-        document.getElementById('pd-image').style.opacity = '1';
+        mainImg.src = img;
+        mainImg.style.opacity = '1';
       }, 200);
       document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
       thumb.classList.add('active');
@@ -1646,9 +1649,12 @@ function renderPdGallery(p, id) {
     gallery.appendChild(thumb);
   });
 
-  // Image wrap ke baad insert karo
-  const imgWrap = document.querySelector('.pd-img-wrap');
-  if (imgWrap) imgWrap.after(gallery);
+  // pd-card ke andar pd-img-wrap ke baad insert karo
+  const pdCard = document.querySelector('.pd-card');
+  const imgWrap = pdCard ? pdCard.querySelector('.pd-img-wrap') : null;
+  if (imgWrap) {
+    imgWrap.insertAdjacentElement('afterend', gallery);
+  }
 }
 window.pdChangeQty = (val) => {
   if (!pdCurrentId) return;
@@ -2106,8 +2112,9 @@ window.goToSlide = (idx) => {
   obCurrentSlide = idx;
   const track = document.getElementById('offersBannerTrack');
   if (track) {
-    const card = track.children[idx];
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    // scrollIntoView ki jagah scrollLeft use karo
+    const cardWidth = track.offsetWidth;
+    track.scrollLeft = idx * (cardWidth + 12);
   }
   document.querySelectorAll('.ob-dot').forEach((d, i) => {
     d.classList.toggle('active', i === idx);
@@ -3492,6 +3499,7 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
+
 
 
 
