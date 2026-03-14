@@ -1759,9 +1759,12 @@ window.openProductDetail = (id) => {
   const p = allP[id];
   if (!p) return;
   pdCurrentId = id;
-const baseUnit = parseInt(p.unit) || 1;
-pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
- // Main image set karo
+
+  // baseUnit — sirf ek baar declare karo
+  const baseUnit = parseInt(p.unit) || 1;
+  pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
+
+  // Main image set karo
   const mainImg = document.getElementById("pd-image");
   mainImg.src = p.image;
   mainImg.alt = id;
@@ -1775,7 +1778,7 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
   const hot = document.getElementById("pd-hot");
   hot.style.display = p.popular ? "block" : "none";
 
-  // Price
+  // Price — baseUnit already declared hai upar
   const priceEl = document.getElementById("pd-price");
   const basePrice = p.unit === "g" ? (p.price / 1000) * pdSelectedWeight : p.price * pdSelectedWeight;
   priceEl.textContent = basePrice.toFixed(0);
@@ -1787,22 +1790,20 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
   document.getElementById("pd-stars").innerHTML = sh;
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
- // Weight pills
-const baseUnit = parseInt(p.unit) || 1;
-pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
-const units = p.unit === "g"
-  ? [
-      {v: baseUnit,     l: baseUnit + "g"},
-      {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
-      {v: baseUnit * 4, l: (baseUnit * 4) + "g"},
-      {v: 1000,         l: "1kg"},
-      {v: 2000,         l: "2kg"}
-    ]
-  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-const wpHtml = units.map(u =>
-  '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
-).join("");
-document.getElementById("pd-wpills").innerHTML = wpHtml;
+  // Weight pills — baseUnit upar se aa raha hai, dobara declare nahi
+  const units = p.unit === "g"
+    ? [
+        {v: baseUnit,     l: baseUnit + "g"},
+        {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
+        {v: baseUnit * 4, l: (baseUnit * 4) + "g"},
+        {v: 1000,         l: "1kg"},
+        {v: 2000,         l: "2kg"}
+      ]
+    : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+  const wpHtml = units.map(u =>
+    '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
+  ).join("");
+  document.getElementById("pd-wpills").innerHTML = wpHtml;
 
   // Description
   const desc = p.description ||
@@ -1825,53 +1826,32 @@ document.getElementById("pd-wpills").innerHTML = wpHtml;
   const qty = cart[id] ? cart[id].qty : 0;
   document.getElementById("pd-qty").textContent = qty;
   updatePdLiveTotal();
-  // Recently viewed mein add karo
-addToRecentlyViewed(id);
-// Reviews load karo
-pdSelectedStar = 0;
-document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
-const reviewTextEl = document.getElementById('pd-review-text');
-if (reviewTextEl) reviewTextEl.value = '';
-loadPdReviews(id);
 
-// Login check
-const writeReview = document.getElementById('pd-write-review');
-if (writeReview) {
-  writeReview.innerHTML = currentUser
-    ? '<div class="pd-review-title">⭐ Write a Review</div>' +
-      '<div class="pd-review-stars" id="pd-review-stars">' +
-        [1,2,3,4,5].map(n => '<span class="pd-review-star" onclick="setPdStar(' + n + ')" data-val="' + n + '">★</span>').join('') +
-      '</div>' +
-      '<textarea class="pd-review-inp" id="pd-review-text" placeholder="Share your experience..."></textarea>' +
-      '<button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>'
-    : '<div class="pd-review-login">⭐ <span onclick="openLoginModal()">Login karo</span> to write a review!</div>';
-}
+  // Recently viewed mein add karo
+  addToRecentlyViewed(id);
+
+  // Reviews load karo
+  pdSelectedStar = 0;
+  document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
+  const reviewTextEl = document.getElementById('pd-review-text');
+  if (reviewTextEl) reviewTextEl.value = '';
+  loadPdReviews(id);
+
+  // Login check
+  const writeReview = document.getElementById('pd-write-review');
+  if (writeReview) {
+    writeReview.innerHTML = currentUser
+      ? '<div class="pd-review-title">⭐ Write a Review</div>' +
+        '<div class="pd-review-stars" id="pd-review-stars">' +
+          [1,2,3,4,5].map(n => '<span class="pd-review-star" onclick="setPdStar(' + n + ')" data-val="' + n + '">★</span>').join('') +
+        '</div>' +
+        '<textarea class="pd-review-inp" id="pd-review-text" placeholder="Share your experience..."></textarea>' +
+        '<button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>'
+      : '<div class="pd-review-login">⭐ <span onclick="openLoginModal()">Login karo</span> to write a review!</div>';
+  }
+
   document.getElementById("productDetail").classList.add("show");
   document.body.style.overflow = "hidden";
-};
-
-window.closeProductDetail = () => {
-  document.getElementById("productDetail").classList.remove("show");
-  document.body.style.overflow = "";
-  pdCurrentId = null;
-};
-
-document.getElementById("productDetail").addEventListener("click", e => {
-  if (e.target === document.getElementById("productDetail")) closeProductDetail();
-});
-
-window.pdSelectWeight = (weight, el) => {
-  pdSelectedWeight = weight;
-  document.querySelectorAll(".pd-wp").forEach(e => e.classList.remove("sel"));
-  el.classList.add("sel");
-  if (pdCurrentId) {
-    cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
-    cart[pdCurrentId].selectedWeight = weight;
-    const p = allP[pdCurrentId];
-    const newPrice = p.unit === "g" ? (p.price / 1000) * weight : p.price * weight;
-    document.getElementById("pd-price").textContent = newPrice.toFixed(0);
-    updatePdLiveTotal();
-  }
 };
 /* ── PRODUCT GALLERY ── */
 function renderPdGallery(p, id) {
