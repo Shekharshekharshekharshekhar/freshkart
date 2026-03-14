@@ -1760,7 +1760,7 @@ window.openProductDetail = (id) => {
   if (!p) return;
   pdCurrentId = id;
  const baseUnit = parseInt(p.unit) || 1;
-
+pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
 
  // Main image set karo
   const mainImg = document.getElementById("pd-image");
