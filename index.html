@@ -3043,7 +3043,6 @@ if (!cart[id]) {
   if (!cart[id].selectedWeight) cart[id].selectedWeight = baseUnit;
 }
 const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
-    const baseUnit = parseInt(d.unit) || 1;
 
 if (!cart[id]) {
   cart[id] = { qty: 0, price: d.price, selectedWeight: baseUnit };
