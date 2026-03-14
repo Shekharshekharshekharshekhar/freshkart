@@ -1787,15 +1787,16 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
   document.getElementById("pd-stars").innerHTML = sh;
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
-  // Weight pills
-  cconst baseUnit = parseInt(p.unit) || 1;
+ // Weight pills
+const baseUnit = parseInt(p.unit) || 1;
+pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
 const units = p.unit === "g"
   ? [{v:baseUnit,l:baseUnit+"g"},{v:baseUnit*2,l:(baseUnit*2)+"g"},{v:baseUnit*4,l:(baseUnit*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
   : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-  const wpHtml = units.map(u =>
-    '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
-  ).join("");
-  document.getElementById("pd-wpills").innerHTML = wpHtml;
+const wpHtml = units.map(u =>
+  '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
+).join("");
+document.getElementById("pd-wpills").innerHTML = wpHtml;
 
   // Description
   const desc = p.description ||
