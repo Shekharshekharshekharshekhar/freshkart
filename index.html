@@ -856,6 +856,41 @@ body.dark .bnav-label{color:#555;}
 .pd-thumb{width:60px;height:60px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:0.2s;flex-shrink:0;}
 .pd-thumb.active{border-color:var(--green);box-shadow:0 2px 8px rgba(39,174,96,0.4);}
 .pd-main-img{width:100%;height:100%;object-fit:cover;transition:opacity 0.3s;}
+  /* SOCIAL PROOF */
+.sp-section{background:#fff;margin:14px;border-radius:18px;padding:18px;box-shadow:var(--shadow);}
+.sp-main-title{font-size:16px;font-weight:800;text-align:center;margin-bottom:14px;color:var(--text);}
+.sp-main-title::after{content:"";width:40px;height:3px;background:linear-gradient(90deg,var(--green),var(--green2));display:block;margin:6px auto 0;border-radius:10px;}
+.sp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.sp-stat{background:linear-gradient(135deg,#f0fdf4,#e8f5e9);border-radius:12px;padding:12px 6px;text-align:center;border:1px solid var(--border);}
+.sp-stat-num{font-size:20px;font-weight:800;color:var(--green);margin-bottom:2px;}
+.sp-stat-label{font-size:9px;color:#666;line-height:1.3;font-weight:600;}
+.sp-trust{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;justify-content:center;}
+.trust-chip{display:flex;align-items:center;gap:5px;background:#f8fdf8;border:1.5px solid var(--border);border-radius:25px;padding:6px 12px;}
+.trust-chip-icon{font-size:13px;}
+.trust-chip-text{font-size:11px;font-weight:700;color:#444;}
+.sp-reviews-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;}
+.sp-reviews-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.sp-reviews-row::-webkit-scrollbar{display:none;}
+.sp-review-card{flex-shrink:0;width:240px;background:#f8fdf8;border-radius:14px;padding:13px;border:1px solid var(--border);}
+.sp-rc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.sp-rc-user{display:flex;align-items:center;gap:7px;}
+.sp-rc-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.sp-rc-name{font-size:12px;font-weight:700;color:var(--text);}
+.sp-rc-date{font-size:10px;color:#bbb;}
+.sp-rc-badge{font-size:9px;background:#e8f5e9;color:var(--green3);padding:2px 7px;border-radius:20px;font-weight:700;}
+.sp-rc-stars{color:#f39c12;font-size:12px;margin-bottom:5px;}
+.sp-rc-text{font-size:11px;color:#555;line-height:1.6;}
+.sp-live{background:linear-gradient(135deg,#f0fdf4,#e8f5e9);border-radius:12px;padding:13px;border:1px solid var(--border);margin-top:14px;}
+.sp-live-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sp-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green2);animation:pulse 1.5s infinite;display:inline-block;}
+.sp-live-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(39,174,96,0.1);}
+.sp-live-item:last-child{border-bottom:none;padding-bottom:0;}
+.sp-live-text{font-size:11px;color:#444;flex:1;font-weight:500;}
+.sp-live-time{font-size:10px;color:#aaa;}
+@media(max-width:768px){
+  .sp-stats{grid-template-columns:repeat(2,1fr);}
+  .sp-stat-num{font-size:18px;}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -1044,6 +1079,81 @@ body.dark .bnav-label{color:#555;}
 <textarea class="ctextarea" id="cust-address" placeholder="Delivery Address"></textarea>
     <button class="pay-btn" onclick="placeOrder()">💳 Pay Online</button>
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
+  </div>
+</div>
+  <!-- SOCIAL PROOF -->
+<div class="sp-section">
+  <div class="sp-main-title">Trusted by Thousands</div>
+
+  <div class="sp-stats">
+    <div class="sp-stat"><div class="sp-stat-num" id="spN1">0</div><div class="sp-stat-label">Happy Customers</div></div>
+    <div class="sp-stat"><div class="sp-stat-num" id="spN2">0</div><div class="sp-stat-label">Orders Delivered</div></div>
+    <div class="sp-stat"><div class="sp-stat-num" id="spN3">0</div><div class="sp-stat-label">Avg Rating</div></div>
+    <div class="sp-stat"><div class="sp-stat-num" id="spN4">0</div><div class="sp-stat-label">Min Delivery</div></div>
+  </div>
+
+  <div class="sp-trust">
+    <div class="trust-chip"><span class="trust-chip-icon">✅</span><span class="trust-chip-text">100% Fresh</span></div>
+    <div class="trust-chip"><span class="trust-chip-icon">🔒</span><span class="trust-chip-text">Secure Payment</span></div>
+    <div class="trust-chip"><span class="trust-chip-icon">↩️</span><span class="trust-chip-text">Easy Returns</span></div>
+    <div class="trust-chip"><span class="trust-chip-icon">🌱</span><span class="trust-chip-text">Farm Direct</span></div>
+  </div>
+
+  <div class="sp-reviews-title">Customer Reviews</div>
+  <div class="sp-reviews-row">
+    <div class="sp-review-card">
+      <div class="sp-rc-top">
+        <div class="sp-rc-user">
+          <div class="sp-rc-avatar">R</div>
+          <div><div class="sp-rc-name">Rahul Sharma</div><div class="sp-rc-date">2 days ago</div></div>
+        </div>
+        <span class="sp-rc-badge">✓ Verified</span>
+      </div>
+      <div class="sp-rc-stars">★★★★★</div>
+      <div class="sp-rc-text">Vegetables bahut fresh aaye! Delivery bhi 25 min mein ho gayi. Ekdum farm jaisi quality!</div>
+    </div>
+    <div class="sp-review-card">
+      <div class="sp-rc-top">
+        <div class="sp-rc-user">
+          <div class="sp-rc-avatar">P</div>
+          <div><div class="sp-rc-name">Priya Mehta</div><div class="sp-rc-date">5 days ago</div></div>
+        </div>
+        <span class="sp-rc-badge">✓ Verified</span>
+      </div>
+      <div class="sp-rc-stars">★★★★★</div>
+      <div class="sp-rc-text">Best grocery app! Prices reasonable hain aur quality top class. Daily use karti hu!</div>
+    </div>
+    <div class="sp-review-card">
+      <div class="sp-rc-top">
+        <div class="sp-rc-user">
+          <div class="sp-rc-avatar">A</div>
+          <div><div class="sp-rc-name">Amit Singh</div><div class="sp-rc-date">1 week ago</div></div>
+        </div>
+        <span class="sp-rc-badge">✓ Verified</span>
+      </div>
+      <div class="sp-rc-stars">★★★★☆</div>
+      <div class="sp-rc-text">COD option bahut convenient hai. Packaging bhi acchi thi. Zaroor recommend karunga!</div>
+    </div>
+    <div class="sp-review-card">
+      <div class="sp-rc-top">
+        <div class="sp-rc-user">
+          <div class="sp-rc-avatar">S</div>
+          <div><div class="sp-rc-name">Sunita Devi</div><div class="sp-rc-date">2 weeks ago</div></div>
+        </div>
+        <span class="sp-rc-badge">✓ Verified</span>
+      </div>
+      <div class="sp-rc-stars">★★★★★</div>
+      <div class="sp-rc-text">Pehli baar order kiya tha — bilkul fresh sabzi mili! Ab toh roz order karte hain ghar mein.</div>
+    </div>
+  </div>
+
+  <div class="sp-live">
+    <div class="sp-live-title"><span class="sp-live-dot"></span> Live Orders</div>
+    <div id="spLiveOrders">
+      <div class="sp-live-item"><span class="sp-live-text">Someone from Sector 22 ordered Tomato + Onion</span><span class="sp-live-time">2 min ago</span></div>
+      <div class="sp-live-item"><span class="sp-live-text">Someone from Model Town ordered Spinach Bundle</span><span class="sp-live-time">5 min ago</span></div>
+      <div class="sp-live-item"><span class="sp-live-text">Someone from Sector 8 ordered Fresh Vegetables</span><span class="sp-live-time">8 min ago</span></div>
+    </div>
   </div>
 </div>
 <!-- RECENTLY VIEWED -->
@@ -2840,7 +2950,51 @@ function loadProducts() {
     renderRecommended(); 
   });
 }
+/* ── SOCIAL PROOF ── */
+function animCount(id, target, suffix, duration) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = (start >= target ? target : Math.floor(start)) + suffix;
+    if (start >= target) clearInterval(timer);
+  }, 16);
+}
 
+// Numbers animate karo page load pe
+setTimeout(() => {
+  animCount('spN1', 10000, '+', 1500);
+  animCount('spN2', 25000, '+', 1800);
+  animCount('spN3', 4.8, '★', 1000);
+  animCount('spN4', 30, ' min', 800);
+}, 500);
+
+// Live orders rotate karo
+const liveOrders = [
+  "Someone from Sector 22 ordered Tomato + Onion",
+  "Someone from Model Town ordered Spinach Bundle",
+  "Someone from Sector 8 ordered Fresh Vegetables",
+  "Someone from Sector 15 ordered Garlic + Ginger",
+  "Someone from Civil Lines ordered Vegetable Pack",
+  "Someone from Sector 35 ordered Coriander + Mint",
+  "Someone from Panchkula ordered Potato + Onion",
+];
+let liveIdx = 0;
+setInterval(() => {
+  const container = document.getElementById('spLiveOrders');
+  if (!container) return;
+  liveIdx = (liveIdx + 1) % liveOrders.length;
+  const times = ['Just now', '1 min ago', '3 min ago'];
+  const items = container.querySelectorAll('.sp-live-item');
+  if (items.length) {
+    items[0].querySelector('.sp-live-text').textContent = liveOrders[liveIdx];
+    items[0].querySelector('.sp-live-time').textContent = times[0];
+    items[1].querySelector('.sp-live-time').textContent = times[1];
+    items[2].querySelector('.sp-live-time').textContent = times[2];
+  }
+}, 4000);
 function renderPills() {
   const pills = document.getElementById("catPills");
   pills.innerHTML = '<div class="cpill active" onclick="selectPill(this,\'\')">All</div>';
