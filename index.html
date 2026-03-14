@@ -12,7 +12,7 @@ photo-1542838132-92c53300491e
 <meta name="apple-mobile-web-app-title" content="HariBasket">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HariBasket Pro</title>
   <!-- ═══ SEO META TAGS ═══ -->
 <meta name="description"
@@ -30,7 +30,7 @@ photo-1542838132-92c53300491e
   content="Order fresh vegetables online. Farm direct, 100% organic, delivered in 30 minutes!">
 <meta property="og:url" content="https://haribasket.netlify.app">
 <meta property="og:image"
-  content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80">
+  content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
@@ -39,14 +39,15 @@ photo-1542838132-92c53300491e
 
 <!-- Canonical URL -->
 <link rel="canonical" href="https://haribasket.netlify.app">
-<script src="https://checkout.razorpay.com/
-v1/checkout.js" defer></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
   <link rel="preconnect" 
   href="https://fonts.googleapis.com">
 <link rel="preconnect" 
   href="https://fonts.gstatic.com" 
   crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
@@ -96,7 +97,7 @@ input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
 .bnav-item.active .bnav-label{color:var(--green);}
 .bnav-cart{position:relative;}
 .bnav-cart-badge{position:absolute;top:-1px;right:4px;background:#e74c3c;color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:8px;min-width:15px;text-align:center;display:none;}
-.hero{min-height:72vh;background:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('https://images.unsplash.com/photo-1542838132-92c53300491e');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:28px 18px;}
+.hero{min-height:72vh;background:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:28px 18px;}
 .hero-content{max-width:580px;width:100%;}
 .hero h1{font-size:clamp(26px,6vw,54px);font-weight:800;line-height:1.1;}
 .hero p{margin-top:10px;font-size:clamp(13px,3.5vw,19px);opacity:0.9;}
@@ -789,6 +790,9 @@ body.dark .bnav-label{color:#555;}
 <script>
   emailjs.init("aL9YJ8DDVAsK33ZTv");
 </script>
+  <link rel="preload" as="image"
+  href="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop"
+  fetchpriority="high">
 </head>
 <body>
 
