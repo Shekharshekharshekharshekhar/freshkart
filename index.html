@@ -56,12 +56,19 @@ photo-1542838132-92c53300491e
   --green:#27ae60;--green2:#2ecc71;--green3:#1a9e50;
   --bg:#f0faf4;--text:#1a1a1a;--muted:#888;--border:#e8f5e9;
   --shadow:0 6px 24px rgba(0,0,0,0.08);
-  --nh:62px;--bnh:60px;
+--nh:62px;--bnh:65px;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);overflow-x:hidden;}
-button{cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.22s ease;}
+button{
+  cursor:pointer;
+  font-family:'Poppins',sans-serif;
+  transition:all 0.22s ease;
+  min-height:36px;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
 button:active{transform:scale(0.96);}
 img{display:block;max-width:100%;}
 input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
@@ -357,9 +364,73 @@ body.dark .bnav-label{color:#555;}
   .user-name-nav{display:none;}
   .bottom-nav{display:flex;}
   .float-cart{display:none;}
-  .products-grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 10px 14px;}
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 10px 80px;}
   .hero{min-height:62vh;}
   body{padding-bottom:var(--bnh);}
+
+  /* BUTTONS TOUCH FRIENDLY */
+  .qbtn{width:36px;height:36px;font-size:18px;}
+  .add-btn{padding:10px;font-size:13px;border-radius:12px;}
+  .btn-primary,.btn-secondary{padding:14px 28px;font-size:15px;}
+
+  /* PRODUCT CARD */
+  .pc-img{height:140px;}
+  .pc-name{font-size:14px;}
+  .pc-price{font-size:18px;}
+  .pc-unit{font-size:11px;}
+
+  /* BOTTOM NAV */
+  .bnav-icon{font-size:22px;}
+  .bnav-label{font-size:11px;}
+  .bnav-item{padding:8px 6px;}
+
+  /* SEARCH */
+  .search-box input{padding:16px 90px 16px 46px;font-size:15px;}
+
+  /* CART DRAWER */
+  .cart-hdr h3{font-size:18px;}
+  .citem h4{font-size:14px;}
+  .citem p{font-size:13px;}
+  .pay-btn,.cod-btn{padding:15px;font-size:15px;margin-bottom:8px;}
+  .cinput{padding:13px 15px;font-size:14px;}
+  .ctextarea{font-size:14px;padding:13px 15px;}
+
+  /* TRACK SECTION */
+  .track-inp{padding:13px 15px;font-size:14px;}
+  .track-btn{padding:13px 18px;font-size:14px;}
+
+  /* HERO TEXT */
+  .hero h1{font-size:28px;}
+  .hero p{font-size:15px;}
+
+  /* CAT PILLS */
+  .cpill{padding:9px 18px;font-size:13px;}
+
+  /* SORT PILLS */
+  .sort-pill{padding:8px 16px;font-size:12px;}
+
+  /* PRODUCT DETAIL */
+  .pd-qbtn{width:42px;height:42px;font-size:22px;}
+  .pd-add-btn{padding:16px;font-size:16px;}
+  .pd-name{font-size:24px;}
+  .pd-price{font-size:32px;}
+
+  /* MODALS */
+  .mcard{border-radius:20px;}
+  .m-cta{padding:15px;font-size:15px;}
+  .igrp input{padding:14px 14px 14px 38px;font-size:14px;}
+
+  /* COUPON */
+  .coupon-inp{padding:13px 15px;font-size:13px;}
+  .coupon-btn{padding:13px 18px;font-size:13px;}
+
+  /* SLOT OPTIONS */
+  .slot-opt{padding:12px;font-size:12px;}
+
+  /* ORDER CARDS */
+  .ocard{padding:16px;}
+  .o-total{font-size:17px;}
+  .cancel-btn{padding:12px;font-size:13px;}
 }
 @media(min-width:769px){
   .bottom-nav{display:none!important;}
