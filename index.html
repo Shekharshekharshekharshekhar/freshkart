@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- head mein add karo -->
+<link rel="preload" as="image"
+  href="https://images.unsplash.com/
+photo-1542838132-92c53300491e
+?w=800&q=60">
   <link rel="manifest" href="/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1107,7 +1112,7 @@ body.dark .bnav-label{color:#555;}
     <div class="pd-img-wrap">
       <button class="pd-close" onclick="closeProductDetail()">✕</button>
       <div class="pd-hot" id="pd-hot" style="display:none;">🔥 Hot</div>
-      <img id="pd-image" src="" alt="">
+     <img id="pd-image" src="" alt="" loading="lazy">
     </div>
     <div class="pd-body">
       <div class="pd-category" id="pd-category"></div>
@@ -1976,7 +1981,7 @@ function renderWishlist() {
   let html = "";
   userWishlist.forEach(w => {
     html += '<div class="wl-card">' +
-      '<img src="' + w.image + '" alt="' + w.productId + '">' +
+     '<img src="' + w.image + '" alt="' + w.productId + '" loading="lazy">'
       '<div class="wl-card-info">' +
         '<div class="wl-card-name">' + w.productId + '</div>' +
         '<div class="wl-card-price">₹' + w.price + '/' + (w.unit||"kg") + '</div>' +
