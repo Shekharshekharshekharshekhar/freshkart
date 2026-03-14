@@ -1759,9 +1759,8 @@ window.openProductDetail = (id) => {
   const p = allP[id];
   if (!p) return;
   pdCurrentId = id;
- const baseUnit = parseInt(p.unit) || 1;
+const baseUnit = parseInt(p.unit) || 1;
 pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
-
  // Main image set karo
   const mainImg = document.getElementById("pd-image");
   mainImg.src = p.image;
@@ -3036,10 +3035,17 @@ function renderProducts(products) {
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
    const baseUnit = parseInt(d.unit) || 1;
 const baseUnit = parseInt(d.unit) || 1;
+const baseUnit = parseInt(d.unit) || 1;
 const units = d.unit === "g"
   ? [{v:baseUnit,l:baseUnit+"g"},{v:baseUnit*2,l:(baseUnit*2)+"g"},{v:baseUnit*4,l:(baseUnit*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
   : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-  const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
+if (!cart[id]) {
+  cart[id] = { qty: 0, price: d.price, selectedWeight: baseUnit };
+} else {
+  cart[id].price = d.price;
+  if (!cart[id].selectedWeight) cart[id].selectedWeight = baseUnit;
+}
+const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
     const baseUnit = parseInt(d.unit) || 1;
 
 if (!cart[id]) {
