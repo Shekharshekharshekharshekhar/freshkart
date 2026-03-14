@@ -3032,8 +3032,6 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-   const baseUnit = parseInt(d.unit) || 1;
-const baseUnit = parseInt(d.unit) || 1;
 const baseUnit = parseInt(d.unit) || 1;
 const units = d.unit === "g"
   ? [{v:baseUnit,l:baseUnit+"g"},{v:baseUnit*2,l:(baseUnit*2)+"g"},{v:baseUnit*4,l:(baseUnit*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
