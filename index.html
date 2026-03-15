@@ -1938,8 +1938,9 @@ function updatePdLiveTotal() {
   const p = allP[pdCurrentId];
   const qty = cart[pdCurrentId] ? cart[pdCurrentId].qty : 0;
   const w = pdSelectedWeight;
-  const unit = p.unit || "kg";
-  const pr = unit === "g" ? (p.price / 1000) * w : p.price * w;
+  const isGram = p.unit && p.unit.toString().includes("g") && !p.unit.toString().includes("kg");
+  const bUnit = isGram ? (parseInt(p.unit) || 100) : 1;
+  const pr = isGram ? (p.price / bUnit) * w : p.price * w;
   const liveEl = document.getElementById("pd-live-total");
   if (liveEl) {
     liveEl.textContent = qty > 0 ? "Cart Total: ₹" + (pr * qty).toFixed(2) : "";
@@ -2002,7 +2003,9 @@ function showOrderConfirm(oid, nm, ph, payType, slot, itemsObj, subtotal, disc, 
       const qty = itemsObj[item].qty;
       const w = itemsObj[item].selectedWeight || 1;
       const unit = p ? (p.unit || 'kg') : 'kg';
-      const pr = unit === 'g' ? (p.price/1000)*w*qty : p.price*w*qty;
+     const isGramO = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
+const bUnitO = isGramO ? (parseInt(unit) || 100) : 1;
+const pr = isGramO ? (p.price / bUnitO) * w * qty : p.price * w * qty;
       itemsHtml += '<div class="oc-item-row"><span>🥬 ' + item + ' x ' + qty + ' (' + w + unit + ')</span><span>₹' + pr.toFixed(2) + '</span></div>';
     }
   }
@@ -3152,7 +3155,9 @@ window.changeQty = (id, val) => {
     if (cart[id].qty > 0) {
       const unit = p.unit || "kg";
       const w = cart[id].selectedWeight || 1;
-      const pr = unit === "g" ? (p.price/1000)*w : p.price*w;
+     const isGramQ = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
+const bUnitQ = isGramQ ? (parseInt(unit) || 100) : 1;
+const pr = isGramQ ? (p.price / bUnitQ) * w : p.price * w;
       tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
     } else { tEl.classList.remove("show"); }
@@ -3177,7 +3182,9 @@ function calcTotal() {
       const qty = cart[item].qty;
       const unit = p ? (p.unit||"kg") : "kg";
       const w = cart[item].selectedWeight || 1;
-      const price = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
+   const isGramC = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
+const bUnitC = isGramC ? (parseInt(unit) || 100) : 1;
+const price = isGramC ? (p.price / bUnitC) * w * qty : p.price * w * qty;
       total += price; ic++;
       html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
     }
@@ -3418,7 +3425,9 @@ for (let item in cart) {
               const qty = cart[item].qty;
               const unit = p ? (p.unit||"kg") : "kg";
               const w = cart[item].selectedWeight || 1;
-              const pr = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
+            const isGramE = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
+const bUnitE = isGramE ? (parseInt(unit) || 100) : 1;
+const pr = isGramE ? (p.price / bUnitE) * w * qty : p.price * w * qty;
               itemsForEmail += "- " + item + " | " + qty + " x " + w + unit + " = Rs." + pr.toFixed(2) + "\n";
             }
           }
@@ -3526,7 +3535,9 @@ window.sendOrder = async (pm) => {
       const qty = cart[item].qty;
       const unit = p ? (p.unit || "kg") : "kg";
       const w = cart[item].selectedWeight || 1;
-      const pr = unit === "g" ? (p.price / 1000) * w * qty : p.price * w * qty;
+   const isGramE = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
+const bUnitE = isGramE ? (parseInt(unit) || 100) : 1;
+const pr = isGramE ? (p.price / bUnitE) * w * qty : p.price * w * qty;
       grandTotal += pr;
       itemsText += "   " + item + "\n"
         + "   Qty: " + qty + " x " + w + unit + "\n"
