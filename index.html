@@ -1761,8 +1761,9 @@ window.openProductDetail = (id) => {
   pdCurrentId = id;
 
   // baseUnit — sirf ek baar declare karo
-  const baseUnit = parseInt(p.unit) || 1;
-  pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
+const isGram = p.unit && p.unit.toString().includes("g") && !p.unit.toString().includes("kg");
+const baseUnit = isGram ? (parseInt(p.unit) || 100) : 1;
+pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
 
   // Main image set karo
   const mainImg = document.getElementById("pd-image");
@@ -1780,7 +1781,7 @@ window.openProductDetail = (id) => {
 
   // Price — baseUnit already declared hai upar
   const priceEl = document.getElementById("pd-price");
-  const basePrice = p.unit === "g" ? (p.price / 1000) * pdSelectedWeight : p.price * pdSelectedWeight;
+const basePrice = isGram ? (p.price / baseUnit) * pdSelectedWeight : p.price * pdSelectedWeight;
   priceEl.textContent = basePrice.toFixed(0);
 
   // Stars
@@ -1791,15 +1792,15 @@ window.openProductDetail = (id) => {
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
   // Weight pills — baseUnit upar se aa raha hai, dobara declare nahi
-  const units = p.unit === "g"
-    ? [
-        {v: baseUnit,     l: baseUnit + "g"},
-        {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
-        {v: baseUnit * 4, l: (baseUnit * 4) + "g"},
-        {v: 1000,         l: "1kg"},
-        {v: 2000,         l: "2kg"}
-      ]
-    : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+ const units = isGram
+  ? [
+      {v: baseUnit,     l: baseUnit + "g"},
+      {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
+      {v: baseUnit * 4, l: (baseUnit * 4) + "g"},
+      {v: 1000,         l: "1kg"},
+      {v: 2000,         l: "2kg"}
+    ]
+  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
   const wpHtml = units.map(u =>
     '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
   ).join("");
@@ -3020,8 +3021,9 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-const baseUnit = parseInt(d.unit) || 1;
-const units = d.unit === "g"
+const isGram = d.unit && d.unit.toString().includes("g") && !d.unit.toString().includes("kg");
+const baseUnit = isGram ? (parseInt(d.unit) || 100) : 1;
+const units = isGram
   ? [
       {v: baseUnit,     l: baseUnit + "g"},
       {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
@@ -3271,7 +3273,9 @@ window.updateWeight = (id, weight, el) => {
   if (!cart[id]) cart[id] = { qty: 0, price: allP[id].price, selectedWeight: 1 };
   cart[id].selectedWeight = parseFloat(weight);
   const p = allP[id];
-  animatePrice(id, p.unit==="g" ? (p.price/1000)*weight : p.price*weight);
+const isGramU = p.unit && p.unit.toString().includes("g") && !p.unit.toString().includes("kg");
+const bUnit = isGramU ? (parseInt(p.unit) || 100) : 1;
+animatePrice(id, isGramU ? (p.price / bUnit) * weight : p.price * weight);
   calcTotal();
 };
 
