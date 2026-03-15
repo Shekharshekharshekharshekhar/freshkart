@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- head mein add karo -->
-<link rel="preload" as="image"
-  href="https://images.unsplash.com/
-photo-1542838132-92c53300491e
-?w=800&q=60">
   <link rel="manifest" href="/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HariBasket">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>HariBasket Pro</title>
   <!-- ═══ SEO META TAGS ═══ -->
 <meta name="description"
@@ -30,7 +25,7 @@ photo-1542838132-92c53300491e
   content="Order fresh vegetables online. Farm direct, 100% organic, delivered in 30 minutes!">
 <meta property="og:url" content="https://haribasket.netlify.app">
 <meta property="og:image"
-  content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop">
+  content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
@@ -39,15 +34,8 @@ photo-1542838132-92c53300491e
 
 <!-- Canonical URL -->
 <link rel="canonical" href="https://haribasket.netlify.app">
-<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
-  <link rel="preconnect" 
-  href="https://fonts.googleapis.com">
-<link rel="preconnect" 
-  href="https://fonts.gstatic.com" 
-  crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
@@ -56,19 +44,12 @@ photo-1542838132-92c53300491e
   --green:#27ae60;--green2:#2ecc71;--green3:#1a9e50;
   --bg:#f0faf4;--text:#1a1a1a;--muted:#888;--border:#e8f5e9;
   --shadow:0 6px 24px rgba(0,0,0,0.08);
---nh:62px;--bnh:65px;
+  --nh:62px;--bnh:60px;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);overflow-x:hidden;}
-button{
-  cursor:pointer;
-  font-family:'Poppins',sans-serif;
-  transition:all 0.22s ease;
-  min-height:36px;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-}
+button{cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.22s ease;}
 button:active{transform:scale(0.96);}
 img{display:block;max-width:100%;}
 input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
@@ -104,7 +85,7 @@ input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
 .bnav-item.active .bnav-label{color:var(--green);}
 .bnav-cart{position:relative;}
 .bnav-cart-badge{position:absolute;top:-1px;right:4px;background:#e74c3c;color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:8px;min-width:15px;text-align:center;display:none;}
-.hero{min-height:72vh;background:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:28px 18px;}
+.hero{min-height:72vh;background:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('https://images.unsplash.com/photo-1542838132-92c53300491e');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:28px 18px;}
 .hero-content{max-width:580px;width:100%;}
 .hero h1{font-size:clamp(26px,6vw,54px);font-weight:800;line-height:1.1;}
 .hero p{margin-top:10px;font-size:clamp(13px,3.5vw,19px);opacity:0.9;}
@@ -170,69 +151,21 @@ input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
 .shaking{animation:shake 0.35s ease;}
 .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);z-index:1999;display:none;}
 .cart-overlay.on{display:block;}
-.cart-drawer{
-  position:fixed;
-  top:0;right:-100%;
-  width:min(400px,100vw);
-  height:100%;
-  background:rgba(255,255,255,0.97);
-  backdrop-filter:blur(20px);
-  border-left:3px solid var(--green2);
-  box-shadow:-5px 0 35px rgba(0,0,0,0.18);
-  transition:right 0.38s cubic-bezier(0.4,0,0.2,1);
-  z-index:2000;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
+.cart-drawer{position:fixed;top:0;right:-100%;width:min(400px,100vw);height:100%;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);border-left:3px solid var(--green2);box-shadow:-5px 0 35px rgba(0,0,0,0.18);transition:right 0.38s cubic-bezier(0.4,0,0.2,1);z-index:2000;display:flex;flex-direction:column;}
 .cart-drawer.open{right:0;}
 .cart-hdr{background:linear-gradient(135deg,var(--green3),var(--green));color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;}
 .cart-hdr h3{font-size:16px;font-weight:700;}
 .cart-x{background:rgba(255,255,255,0.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;}
-.cart-list{
-  flex:1;
-  overflow-y:auto;
-  padding:12px;
-  -webkit-overflow-scrolling:touch;
-  max-height:calc(100vh - 420px);
-  min-height:80px;
-  scroll-behavior:smooth;
-}
-.cart-list::-webkit-scrollbar{width:3px;}
-.cart-list::-webkit-scrollbar-track{background:transparent;}
-.cart-list::-webkit-scrollbar-thumb{background:var(--green2);border-radius:10px;}
-.citem{
-  background:#fff;
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:8px;
-  border:1px solid var(--border);
-  box-shadow:0 2px 8px rgba(0,0,0,0.04);
-  transition:0.2s;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.citem:hover{box-shadow:0 4px 14px rgba(39,174,96,0.1);border-color:var(--green2);}
-.citem h4{font-size:13px;font-weight:700;color:var(--text);margin:0;}
-.citem p{font-size:12px;color:#888;margin:0;}
+.cart-list{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch;}
+.citem{background:#f9fdf9;border-radius:13px;padding:11px;margin-bottom:9px;}
+.citem h4{font-size:13px;margin-bottom:2px;}
+.citem p{font-size:12px;color:#666;margin-bottom:6px;}
 .citm-ctrl{display:flex;align-items:center;gap:7px;}
 .citm-ctrl button{width:28px;height:28px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;}
 .citm-ctrl .rm-btn{background:linear-gradient(135deg,#e74c3c,#c0392b)!important;border-radius:9px!important;width:auto!important;padding:0 10px!important;font-size:11px!important;}
 .cart-empty-state{text-align:center;padding:40px 20px;color:#ccc;}
 .cart-empty-state span{font-size:48px;display:block;margin-bottom:10px;}
-.csummary{
-  padding:15px;
-  border-top:1px solid #eee;
-  background:#f9fdf9;
-  flex-shrink:0;
-  overflow-y:auto;
-  max-height:60vh;
-  -webkit-overflow-scrolling:touch;
-}
-.csummary::-webkit-scrollbar{width:3px;}
-.csummary::-webkit-scrollbar-track{background:transparent;}
-.csummary::-webkit-scrollbar-thumb{background:var(--green2);border-radius:10px;}
+.csummary{padding:15px;border-top:1px solid #eee;background:#f9fdf9;}
 .sum-row{display:flex;justify-content:space-between;font-size:13px;color:#555;margin-bottom:5px;}
 .sum-total{display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--green3);margin:8px 0 12px;}
 .cinput{width:100%;margin-bottom:7px;padding:10px 13px;border-radius:11px;border:2px solid var(--border);font-size:13px;outline:none;transition:0.2s;background:#fafff9;}
@@ -364,73 +297,9 @@ body.dark .bnav-label{color:#555;}
   .user-name-nav{display:none;}
   .bottom-nav{display:flex;}
   .float-cart{display:none;}
-  .products-grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 10px 80px;}
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 10px 14px;}
   .hero{min-height:62vh;}
   body{padding-bottom:var(--bnh);}
-
-  /* BUTTONS TOUCH FRIENDLY */
-  .qbtn{width:36px;height:36px;font-size:18px;}
-  .add-btn{padding:10px;font-size:13px;border-radius:12px;}
-  .btn-primary,.btn-secondary{padding:14px 28px;font-size:15px;}
-
-  /* PRODUCT CARD */
-  .pc-img{height:140px;}
-  .pc-name{font-size:14px;}
-  .pc-price{font-size:18px;}
-  .pc-unit{font-size:11px;}
-
-  /* BOTTOM NAV */
-  .bnav-icon{font-size:22px;}
-  .bnav-label{font-size:11px;}
-  .bnav-item{padding:8px 6px;}
-
-  /* SEARCH */
-  .search-box input{padding:16px 90px 16px 46px;font-size:15px;}
-
-  /* CART DRAWER */
-  .cart-hdr h3{font-size:18px;}
-  .citem h4{font-size:14px;}
-  .citem p{font-size:13px;}
-  .pay-btn,.cod-btn{padding:15px;font-size:15px;margin-bottom:8px;}
-  .cinput{padding:13px 15px;font-size:14px;}
-  .ctextarea{font-size:14px;padding:13px 15px;}
-
-  /* TRACK SECTION */
-  .track-inp{padding:13px 15px;font-size:14px;}
-  .track-btn{padding:13px 18px;font-size:14px;}
-
-  /* HERO TEXT */
-  .hero h1{font-size:28px;}
-  .hero p{font-size:15px;}
-
-  /* CAT PILLS */
-  .cpill{padding:9px 18px;font-size:13px;}
-
-  /* SORT PILLS */
-  .sort-pill{padding:8px 16px;font-size:12px;}
-
-  /* PRODUCT DETAIL */
-  .pd-qbtn{width:42px;height:42px;font-size:22px;}
-  .pd-add-btn{padding:16px;font-size:16px;}
-  .pd-name{font-size:24px;}
-  .pd-price{font-size:32px;}
-
-  /* MODALS */
-  .mcard{border-radius:20px;}
-  .m-cta{padding:15px;font-size:15px;}
-  .igrp input{padding:14px 14px 14px 38px;font-size:14px;}
-
-  /* COUPON */
-  .coupon-inp{padding:13px 15px;font-size:13px;}
-  .coupon-btn{padding:13px 18px;font-size:13px;}
-
-  /* SLOT OPTIONS */
-  .slot-opt{padding:12px;font-size:12px;}
-
-  /* ORDER CARDS */
-  .ocard{padding:16px;}
-  .o-total{font-size:17px;}
-  .cancel-btn{padding:12px;font-size:13px;}
 }
 @media(min-width:769px){
   .bottom-nav{display:none!important;}
@@ -856,49 +725,11 @@ body.dark .bnav-label{color:#555;}
 .pd-thumb{width:60px;height:60px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:0.2s;flex-shrink:0;}
 .pd-thumb.active{border-color:var(--green);box-shadow:0 2px 8px rgba(39,174,96,0.4);}
 .pd-main-img{width:100%;height:100%;object-fit:cover;transition:opacity 0.3s;}
-  /* SOCIAL PROOF */
-.sp-section{background:#fff;margin:14px;border-radius:18px;padding:18px;box-shadow:var(--shadow);}
-.sp-main-title{font-size:16px;font-weight:800;text-align:center;margin-bottom:14px;color:var(--text);}
-.sp-main-title::after{content:"";width:40px;height:3px;background:linear-gradient(90deg,var(--green),var(--green2));display:block;margin:6px auto 0;border-radius:10px;}
-.sp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
-.sp-stat{background:linear-gradient(135deg,#f0fdf4,#e8f5e9);border-radius:12px;padding:12px 6px;text-align:center;border:1px solid var(--border);}
-.sp-stat-num{font-size:20px;font-weight:800;color:var(--green);margin-bottom:2px;}
-.sp-stat-label{font-size:9px;color:#666;line-height:1.3;font-weight:600;}
-.sp-trust{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;justify-content:center;}
-.trust-chip{display:flex;align-items:center;gap:5px;background:#f8fdf8;border:1.5px solid var(--border);border-radius:25px;padding:6px 12px;}
-.trust-chip-icon{font-size:13px;}
-.trust-chip-text{font-size:11px;font-weight:700;color:#444;}
-.sp-reviews-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;}
-.sp-reviews-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
-.sp-reviews-row::-webkit-scrollbar{display:none;}
-.sp-review-card{flex-shrink:0;width:240px;background:#f8fdf8;border-radius:14px;padding:13px;border:1px solid var(--border);}
-.sp-rc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.sp-rc-user{display:flex;align-items:center;gap:7px;}
-.sp-rc-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
-.sp-rc-name{font-size:12px;font-weight:700;color:var(--text);}
-.sp-rc-date{font-size:10px;color:#bbb;}
-.sp-rc-badge{font-size:9px;background:#e8f5e9;color:var(--green3);padding:2px 7px;border-radius:20px;font-weight:700;}
-.sp-rc-stars{color:#f39c12;font-size:12px;margin-bottom:5px;}
-.sp-rc-text{font-size:11px;color:#555;line-height:1.6;}
-.sp-live{background:linear-gradient(135deg,#f0fdf4,#e8f5e9);border-radius:12px;padding:13px;border:1px solid var(--border);margin-top:14px;}
-.sp-live-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.sp-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green2);animation:pulse 1.5s infinite;display:inline-block;}
-.sp-live-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(39,174,96,0.1);}
-.sp-live-item:last-child{border-bottom:none;padding-bottom:0;}
-.sp-live-text{font-size:11px;color:#444;flex:1;font-weight:500;}
-.sp-live-time{font-size:10px;color:#aaa;}
-@media(max-width:768px){
-  .sp-stats{grid-template-columns:repeat(2,1fr);}
-  .sp-stat-num{font-size:18px;}
-}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
   emailjs.init("aL9YJ8DDVAsK33ZTv");
 </script>
-  <link rel="preload" as="image"
-  href="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop"
-  fetchpriority="high">
 </head>
 <body>
 
@@ -1081,81 +912,6 @@ body.dark .bnav-label{color:#555;}
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
   </div>
 </div>
-  <!-- SOCIAL PROOF -->
-<div class="sp-section">
-  <div class="sp-main-title">Trusted by Thousands</div>
-
-  <div class="sp-stats">
-    <div class="sp-stat"><div class="sp-stat-num" id="spN1">0</div><div class="sp-stat-label">Happy Customers</div></div>
-    <div class="sp-stat"><div class="sp-stat-num" id="spN2">0</div><div class="sp-stat-label">Orders Delivered</div></div>
-    <div class="sp-stat"><div class="sp-stat-num" id="spN3">0</div><div class="sp-stat-label">Avg Rating</div></div>
-    <div class="sp-stat"><div class="sp-stat-num" id="spN4">0</div><div class="sp-stat-label">Min Delivery</div></div>
-  </div>
-
-  <div class="sp-trust">
-    <div class="trust-chip"><span class="trust-chip-icon">✅</span><span class="trust-chip-text">100% Fresh</span></div>
-    <div class="trust-chip"><span class="trust-chip-icon">🔒</span><span class="trust-chip-text">Secure Payment</span></div>
-    <div class="trust-chip"><span class="trust-chip-icon">↩️</span><span class="trust-chip-text">Easy Returns</span></div>
-    <div class="trust-chip"><span class="trust-chip-icon">🌱</span><span class="trust-chip-text">Farm Direct</span></div>
-  </div>
-
-  <div class="sp-reviews-title">Customer Reviews</div>
-  <div class="sp-reviews-row">
-    <div class="sp-review-card">
-      <div class="sp-rc-top">
-        <div class="sp-rc-user">
-          <div class="sp-rc-avatar">R</div>
-          <div><div class="sp-rc-name">Rahul Sharma</div><div class="sp-rc-date">2 days ago</div></div>
-        </div>
-        <span class="sp-rc-badge">✓ Verified</span>
-      </div>
-      <div class="sp-rc-stars">★★★★★</div>
-      <div class="sp-rc-text">Vegetables bahut fresh aaye! Delivery bhi 25 min mein ho gayi. Ekdum farm jaisi quality!</div>
-    </div>
-    <div class="sp-review-card">
-      <div class="sp-rc-top">
-        <div class="sp-rc-user">
-          <div class="sp-rc-avatar">P</div>
-          <div><div class="sp-rc-name">Priya Mehta</div><div class="sp-rc-date">5 days ago</div></div>
-        </div>
-        <span class="sp-rc-badge">✓ Verified</span>
-      </div>
-      <div class="sp-rc-stars">★★★★★</div>
-      <div class="sp-rc-text">Best grocery app! Prices reasonable hain aur quality top class. Daily use karti hu!</div>
-    </div>
-    <div class="sp-review-card">
-      <div class="sp-rc-top">
-        <div class="sp-rc-user">
-          <div class="sp-rc-avatar">A</div>
-          <div><div class="sp-rc-name">Amit Singh</div><div class="sp-rc-date">1 week ago</div></div>
-        </div>
-        <span class="sp-rc-badge">✓ Verified</span>
-      </div>
-      <div class="sp-rc-stars">★★★★☆</div>
-      <div class="sp-rc-text">COD option bahut convenient hai. Packaging bhi acchi thi. Zaroor recommend karunga!</div>
-    </div>
-    <div class="sp-review-card">
-      <div class="sp-rc-top">
-        <div class="sp-rc-user">
-          <div class="sp-rc-avatar">S</div>
-          <div><div class="sp-rc-name">Sunita Devi</div><div class="sp-rc-date">2 weeks ago</div></div>
-        </div>
-        <span class="sp-rc-badge">✓ Verified</span>
-      </div>
-      <div class="sp-rc-stars">★★★★★</div>
-      <div class="sp-rc-text">Pehli baar order kiya tha — bilkul fresh sabzi mili! Ab toh roz order karte hain ghar mein.</div>
-    </div>
-  </div>
-
-  <div class="sp-live">
-    <div class="sp-live-title"><span class="sp-live-dot"></span> Live Orders</div>
-    <div id="spLiveOrders">
-      <div class="sp-live-item"><span class="sp-live-text">Someone from Rasulpur ordered Tomato + Onion</span><span class="sp-live-time">2 min ago</span></div>
-      <div class="sp-live-item"><span class="sp-live-text">Someone from Gurbax Colony ordered Spinach Bundle</span><span class="sp-live-time">5 min ago</span></div>
-      <div class="sp-live-item"><span class="sp-live-text">Someone from Chinar Bagh ordered Fresh Vegetables</span><span class="sp-live-time">8 min ago</span></div>
-    </div>
-  </div>
-</div>
 <!-- RECENTLY VIEWED -->
 <div class="rv-sec" id="rvSection">
   <div class="rv-title">👁️ Recently Viewed</div>
@@ -1297,7 +1053,7 @@ body.dark .bnav-label{color:#555;}
     <div class="pd-img-wrap">
       <button class="pd-close" onclick="closeProductDetail()">✕</button>
       <div class="pd-hot" id="pd-hot" style="display:none;">🔥 Hot</div>
-     <img id="pd-image" src="" alt="" loading="lazy">
+      <img id="pd-image" src="" alt="">
     </div>
     <div class="pd-body">
       <div class="pd-category" id="pd-category"></div>
@@ -1759,13 +1515,9 @@ window.openProductDetail = (id) => {
   const p = allP[id];
   if (!p) return;
   pdCurrentId = id;
+  pdSelectedWeight = cart[id] ? cart[id].selectedWeight || 1 : 1;
 
-  // baseUnit — sirf ek baar declare karo
-const isGram = p.unit && p.unit.toString().includes("g") && !p.unit.toString().includes("kg");
-const baseUnit = isGram ? (parseInt(p.unit) || 100) : 1;
-pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
-
-  // Main image set karo
+ // Main image set karo
   const mainImg = document.getElementById("pd-image");
   mainImg.src = p.image;
   mainImg.alt = id;
@@ -1779,9 +1531,9 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || baseUnit : baseUnit;
   const hot = document.getElementById("pd-hot");
   hot.style.display = p.popular ? "block" : "none";
 
-  // Price — baseUnit already declared hai upar
+  // Price
   const priceEl = document.getElementById("pd-price");
-const basePrice = isGram ? (p.price / baseUnit) * pdSelectedWeight : p.price * pdSelectedWeight;
+  const basePrice = p.unit === "g" ? (p.price / 1000) * pdSelectedWeight : p.price * pdSelectedWeight;
   priceEl.textContent = basePrice.toFixed(0);
 
   // Stars
@@ -1791,16 +1543,10 @@ const basePrice = isGram ? (p.price / baseUnit) * pdSelectedWeight : p.price * p
   document.getElementById("pd-stars").innerHTML = sh;
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
-  // Weight pills — baseUnit upar se aa raha hai, dobara declare nahi
- const units = isGram
-  ? [
-      {v: baseUnit,     l: baseUnit + "g"},
-      {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
-      {v: baseUnit * 4, l: (baseUnit * 4) + "g"},
-      {v: 1000,         l: "1kg"},
-      {v: 2000,         l: "2kg"}
-    ]
-  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+  // Weight pills
+  const units = p.unit === "g"
+    ? [{v:50,l:"50g"},{v:100,l:"100g"},{v:250,l:"250g"},{v:500,l:"500g"},{v:1000,l:"1kg"}]
+    : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
   const wpHtml = units.map(u =>
     '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
   ).join("");
@@ -1827,32 +1573,53 @@ const basePrice = isGram ? (p.price / baseUnit) * pdSelectedWeight : p.price * p
   const qty = cart[id] ? cart[id].qty : 0;
   document.getElementById("pd-qty").textContent = qty;
   updatePdLiveTotal();
-
   // Recently viewed mein add karo
-  addToRecentlyViewed(id);
+addToRecentlyViewed(id);
+// Reviews load karo
+pdSelectedStar = 0;
+document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
+const reviewTextEl = document.getElementById('pd-review-text');
+if (reviewTextEl) reviewTextEl.value = '';
+loadPdReviews(id);
 
-  // Reviews load karo
-  pdSelectedStar = 0;
-  document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('active'));
-  const reviewTextEl = document.getElementById('pd-review-text');
-  if (reviewTextEl) reviewTextEl.value = '';
-  loadPdReviews(id);
-
-  // Login check
-  const writeReview = document.getElementById('pd-write-review');
-  if (writeReview) {
-    writeReview.innerHTML = currentUser
-      ? '<div class="pd-review-title">⭐ Write a Review</div>' +
-        '<div class="pd-review-stars" id="pd-review-stars">' +
-          [1,2,3,4,5].map(n => '<span class="pd-review-star" onclick="setPdStar(' + n + ')" data-val="' + n + '">★</span>').join('') +
-        '</div>' +
-        '<textarea class="pd-review-inp" id="pd-review-text" placeholder="Share your experience..."></textarea>' +
-        '<button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>'
-      : '<div class="pd-review-login">⭐ <span onclick="openLoginModal()">Login karo</span> to write a review!</div>';
-  }
-
+// Login check
+const writeReview = document.getElementById('pd-write-review');
+if (writeReview) {
+  writeReview.innerHTML = currentUser
+    ? '<div class="pd-review-title">⭐ Write a Review</div>' +
+      '<div class="pd-review-stars" id="pd-review-stars">' +
+        [1,2,3,4,5].map(n => '<span class="pd-review-star" onclick="setPdStar(' + n + ')" data-val="' + n + '">★</span>').join('') +
+      '</div>' +
+      '<textarea class="pd-review-inp" id="pd-review-text" placeholder="Share your experience..."></textarea>' +
+      '<button class="pd-review-submit" onclick="submitPdReview()">Submit Review ⭐</button>'
+    : '<div class="pd-review-login">⭐ <span onclick="openLoginModal()">Login karo</span> to write a review!</div>';
+}
   document.getElementById("productDetail").classList.add("show");
   document.body.style.overflow = "hidden";
+};
+
+window.closeProductDetail = () => {
+  document.getElementById("productDetail").classList.remove("show");
+  document.body.style.overflow = "";
+  pdCurrentId = null;
+};
+
+document.getElementById("productDetail").addEventListener("click", e => {
+  if (e.target === document.getElementById("productDetail")) closeProductDetail();
+});
+
+window.pdSelectWeight = (weight, el) => {
+  pdSelectedWeight = weight;
+  document.querySelectorAll(".pd-wp").forEach(e => e.classList.remove("sel"));
+  el.classList.add("sel");
+  if (pdCurrentId) {
+    cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
+    cart[pdCurrentId].selectedWeight = weight;
+    const p = allP[pdCurrentId];
+    const newPrice = p.unit === "g" ? (p.price / 1000) * weight : p.price * weight;
+    document.getElementById("pd-price").textContent = newPrice.toFixed(0);
+    updatePdLiveTotal();
+  }
 };
 /* ── PRODUCT GALLERY ── */
 function renderPdGallery(p, id) {
@@ -1938,9 +1705,8 @@ function updatePdLiveTotal() {
   const p = allP[pdCurrentId];
   const qty = cart[pdCurrentId] ? cart[pdCurrentId].qty : 0;
   const w = pdSelectedWeight;
-  const isGram = p.unit && p.unit.toString().includes("g") && !p.unit.toString().includes("kg");
-  const bUnit = isGram ? (parseInt(p.unit) || 100) : 1;
-  const pr = isGram ? (p.price / bUnit) * w : p.price * w;
+  const unit = p.unit || "kg";
+  const pr = unit === "g" ? (p.price / 1000) * w : p.price * w;
   const liveEl = document.getElementById("pd-live-total");
   if (liveEl) {
     liveEl.textContent = qty > 0 ? "Cart Total: ₹" + (pr * qty).toFixed(2) : "";
@@ -2003,9 +1769,7 @@ function showOrderConfirm(oid, nm, ph, payType, slot, itemsObj, subtotal, disc, 
       const qty = itemsObj[item].qty;
       const w = itemsObj[item].selectedWeight || 1;
       const unit = p ? (p.unit || 'kg') : 'kg';
-     const isGramO = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
-const bUnitO = isGramO ? (parseInt(unit) || 100) : 1;
-const pr = isGramO ? (p.price / bUnitO) * w * qty : p.price * w * qty;
+      const pr = unit === 'g' ? (p.price/1000)*w*qty : p.price*w*qty;
       itemsHtml += '<div class="oc-item-row"><span>🥬 ' + item + ' x ' + qty + ' (' + w + unit + ')</span><span>₹' + pr.toFixed(2) + '</span></div>';
     }
   }
@@ -2158,7 +1922,7 @@ function renderWishlist() {
   let html = "";
   userWishlist.forEach(w => {
     html += '<div class="wl-card">' +
-     '<img src="' + w.image + '" alt="' + w.productId + '" loading="lazy">'
+      '<img src="' + w.image + '" alt="' + w.productId + '">' +
       '<div class="wl-card-info">' +
         '<div class="wl-card-name">' + w.productId + '</div>' +
         '<div class="wl-card-price">₹' + w.price + '/' + (w.unit||"kg") + '</div>' +
@@ -2289,7 +2053,7 @@ const defaultBanners = [
     tag: "LIMITED TIME",
     title: "40% OFF on Leafy<br>Vegetables!",
     desc: "Fresh spinach, coriander & more at amazing prices",
-    bg: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=60&auto=format&fit=crop",
+    bg: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=80",
     shade: "linear-gradient(105deg,rgba(39,174,96,0.9) 0%,rgba(26,158,80,0.7) 50%,transparent 100%)",
     btn: "Shop Now",
     action: "Leafy"
@@ -2298,7 +2062,7 @@ const defaultBanners = [
     tag: "FREE DELIVERY",
     title: "Order Above ₹299<br>Zero Delivery Charge!",
     desc: "No extra cost on orders above ₹299",
-    bg: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=60&auto=format&fit=crop",
+    bg: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80",
     shade: "linear-gradient(105deg,rgba(33,150,243,0.9) 0%,rgba(21,101,192,0.7) 50%,transparent 100%)",
     btn: "Order Now",
     action: ""
@@ -2307,7 +2071,7 @@ const defaultBanners = [
     tag: "NEW COUPON",
     title: "Use FRESH10 &<br>Save 10% Today!",
     desc: "Apply at checkout for instant discount",
-    bg: "https://images.unsplash.com/photo-1518977822534-7049a61ee0c2?w=400&q=60&auto=format&fit=crop",
+    bg: "https://images.unsplash.com/photo-1518977822534-7049a61ee0c2?w=800&q=80",
     shade: "linear-gradient(105deg,rgba(230,126,34,0.9) 0%,rgba(211,84,0,0.7) 50%,transparent 100%)",
     btn: "Grab Deal",
     action: ""
@@ -2316,7 +2080,7 @@ const defaultBanners = [
     tag: "FARM FRESH",
     title: "100% Organic<br>Delivered in 30 Min!",
     desc: "From farm directly to your doorstep",
-    bg: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=400&q=60&auto=format&fit=crop",
+    bg: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=800&q=80",
     shade: "linear-gradient(105deg,rgba(155,89,182,0.9) 0%,rgba(142,68,173,0.7) 50%,transparent 100%)",
     btn: "Explore",
     action: ""
@@ -2942,51 +2706,7 @@ function loadProducts() {
     renderRecommended(); 
   });
 }
-/* ── SOCIAL PROOF ── */
-function animCount(id, target, suffix, duration) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  let start = 0;
-  const step = target / (duration / 16);
-  const timer = setInterval(() => {
-    start = Math.min(start + step, target);
-    el.textContent = (start >= target ? target : Math.floor(start)) + suffix;
-    if (start >= target) clearInterval(timer);
-  }, 16);
-}
 
-// Numbers animate karo page load pe
-setTimeout(() => {
-  animCount('spN1', 500, '+', 1500);
-  animCount('spN2', 2500, '+', 1800);
-  animCount('spN3', 4.8, '★', 1000);
-  animCount('spN4', 30, ' min', 800);
-}, 500);
-
-// Live orders rotate karo
-const liveOrders = [
-  "Someone from Urban State ordered Tomato + Onion",
-  "Someone from Gurbax Colony ordered Spinach Bundle",
-  "Someone from Bajwa Colony ordered Fresh Vegetables",
-  "Someone from Patiala Heights ordered Garlic + Ginger",
-  "Someone from DCW Colony ordered Vegetable Pack",
-  "Someone from Officer Colony ordered Coriander + Mint",
-  "Someone from Friend Enclave ordered Potato + Onion",
-];
-let liveIdx = 0;
-setInterval(() => {
-  const container = document.getElementById('spLiveOrders');
-  if (!container) return;
-  liveIdx = (liveIdx + 1) % liveOrders.length;
-  const times = ['Just now', '1 min ago', '3 min ago'];
-  const items = container.querySelectorAll('.sp-live-item');
-  if (items.length) {
-    items[0].querySelector('.sp-live-text').textContent = liveOrders[liveIdx];
-    items[0].querySelector('.sp-live-time').textContent = times[0];
-    items[1].querySelector('.sp-live-time').textContent = times[1];
-    items[2].querySelector('.sp-live-time').textContent = times[2];
-  }
-}, 4000);
 function renderPills() {
   const pills = document.getElementById("catPills");
   pills.innerHTML = '<div class="cpill active" onclick="selectPill(this,\'\')">All</div>';
@@ -3024,25 +2744,10 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-const isGram = d.unit && d.unit.toString().includes("g") && !d.unit.toString().includes("kg");
-const baseUnit = isGram ? (parseInt(d.unit) || 100) : 1;
-const units = isGram
-  ? [
-      {v: baseUnit,     l: baseUnit + "g"},
-      {v: baseUnit * 2, l: (baseUnit * 2) + "g"},
-      {v: baseUnit * 4, l: (baseUnit * 4) + "g"},
-      {v: 1000,         l: "1kg"},
-      {v: 2000,         l: "2kg"}
-    ]
-  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-if (!cart[id]) {
-  cart[id] = { qty: 0, price: d.price, selectedWeight: baseUnit };
-} else {
-  cart[id].price = d.price;
-  if (!cart[id].selectedWeight) cart[id].selectedWeight = baseUnit;
-}
-const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
-
+    const units = d.unit === "g"
+      ? [{v:50,l:"50g"},{v:100,l:"100g"},{v:250,l:"250g"},{v:500,l:"500g"},{v:1000,l:"1kg"}]
+      : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+    const wp = units.map((u,i) => '<span class="wp' + (i===1?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
 grid.innerHTML += '<div class="pcard fade-up" onclick="openProductDetail(\'' + id + '\')" style="cursor:pointer;"><div class="pc-img">' + (d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '') + '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' + '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' + '<img src="' + d.image + '" alt="' + id + '" loading="lazy" onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;"></div><div class="pc-body"><div class="pc-name">' + id + '</div>' + '<div class="stock-indicator ' + (d.stock === 0 ? "stock-out" : d.stock <= 5 ? "stock-low" : "stock-in") + '">' + (d.stock === 0 ? "🔴 Out of Stock" : d.stock <= 5 ? "🟡 Only " + d.stock + " Left!" : "🟢 In Stock") + '</div>' + '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div><div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div><div class="pc-unit">per ' + (d.unit||"kg") + '</div><div class="wpills">' + wp + '</div><div class="pc-actions"><div class="qty-ctrl"><button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',-1)">−</button><span class="qnum" id="qty-' + id + '">' + (cart[id] ? cart[id].qty : 0) + '</span><button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">+</button></div>' + (d.stock === 0 ? '<button class="notify-btn" onclick="event.stopPropagation();notifyMe(\'' + id + '\')">🔔 Notify Me</button>' : '<button class="add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>') + '</div><div class="pc-live" id="total-' + id + '"></div></div></div>';
   }
   document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
@@ -3155,9 +2860,7 @@ window.changeQty = (id, val) => {
     if (cart[id].qty > 0) {
       const unit = p.unit || "kg";
       const w = cart[id].selectedWeight || 1;
-     const isGramQ = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
-const bUnitQ = isGramQ ? (parseInt(unit) || 100) : 1;
-const pr = isGramQ ? (p.price / bUnitQ) * w : p.price * w;
+      const pr = unit === "g" ? (p.price/1000)*w : p.price*w;
       tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
     } else { tEl.classList.remove("show"); }
@@ -3182,9 +2885,7 @@ function calcTotal() {
       const qty = cart[item].qty;
       const unit = p ? (p.unit||"kg") : "kg";
       const w = cart[item].selectedWeight || 1;
-   const isGramC = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
-const bUnitC = isGramC ? (parseInt(unit) || 100) : 1;
-const price = isGramC ? (p.price / bUnitC) * w * qty : p.price * w * qty;
+      const price = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
       total += price; ic++;
       html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
     }
@@ -3280,9 +2981,7 @@ window.updateWeight = (id, weight, el) => {
   if (!cart[id]) cart[id] = { qty: 0, price: allP[id].price, selectedWeight: 1 };
   cart[id].selectedWeight = parseFloat(weight);
   const p = allP[id];
-const isGramU = p.unit && p.unit.toString().includes("g") && !p.unit.toString().includes("kg");
-const bUnit = isGramU ? (parseInt(p.unit) || 100) : 1;
-animatePrice(id, isGramU ? (p.price / bUnit) * weight : p.price * weight);
+  animatePrice(id, p.unit==="g" ? (p.price/1000)*weight : p.price*weight);
   calcTotal();
 };
 
@@ -3425,9 +3124,7 @@ for (let item in cart) {
               const qty = cart[item].qty;
               const unit = p ? (p.unit||"kg") : "kg";
               const w = cart[item].selectedWeight || 1;
-            const isGramE = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
-const bUnitE = isGramE ? (parseInt(unit) || 100) : 1;
-const pr = isGramE ? (p.price / bUnitE) * w * qty : p.price * w * qty;
+              const pr = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
               itemsForEmail += "- " + item + " | " + qty + " x " + w + unit + " = Rs." + pr.toFixed(2) + "\n";
             }
           }
@@ -3535,9 +3232,7 @@ window.sendOrder = async (pm) => {
       const qty = cart[item].qty;
       const unit = p ? (p.unit || "kg") : "kg";
       const w = cart[item].selectedWeight || 1;
-   const isGramE = unit && unit.toString().includes("g") && !unit.toString().includes("kg");
-const bUnitE = isGramE ? (parseInt(unit) || 100) : 1;
-const pr = isGramE ? (p.price / bUnitE) * w * qty : p.price * w * qty;
+      const pr = unit === "g" ? (p.price / 1000) * w * qty : p.price * w * qty;
       grandTotal += pr;
       itemsText += "   " + item + "\n"
         + "   Qty: " + qty + " x " + w + unit + "\n"
@@ -3829,7 +3524,6 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
-
 
 
 
