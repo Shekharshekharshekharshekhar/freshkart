@@ -1788,7 +1788,7 @@ window.openProductDetail = (id) => {
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
   // Weight pills
-  const units = p.unit === "g"
+  const units = p.unit && p.unit.includes("g")
     ? [{v:50,l:"50g"},{v:100,l:"100g"},{v:250,l:"250g"},{v:500,l:"500g"},{v:1000,l:"1kg"}]
     : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
   const wpHtml = units.map(u =>
@@ -1860,7 +1860,7 @@ window.pdSelectWeight = (weight, el) => {
     cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
     cart[pdCurrentId].selectedWeight = weight;
     const p = allP[pdCurrentId];
-    const newPrice = p.unit === "g" ? (p.price / 1000) * weight : p.price * weight;
+   const newPrice = p.unit && p.unit.includes("g") ? (p.price / parseInt(p.unit)) * weight : p.price * weight;
     document.getElementById("pd-price").textContent = newPrice.toFixed(0);
     updatePdLiveTotal();
   }
@@ -3032,7 +3032,7 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-    const units = d.unit === "g"
+   const units = d.unit && d.unit.includes("g")
       ? [{v:50,l:"50g"},{v:100,l:"100g"},{v:250,l:"250g"},{v:500,l:"500g"},{v:1000,l:"1kg"}]
       : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
     const wp = units.map((u,i) => '<span class="wp' + (i===1?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
