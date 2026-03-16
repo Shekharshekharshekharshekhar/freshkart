@@ -1759,7 +1759,8 @@ window.openProductDetail = (id) => {
   const p = allP[id];
   if (!p) return;
   pdCurrentId = id;
-  pdSelectedWeight = cart[id] ? cart[id].selectedWeight || 1 : 1;
+const _gb = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+pdSelectedWeight = cart[id] ? cart[id].selectedWeight || (_gb||1) : (_gb||1);
 
  // Main image set karo
   const mainImg = document.getElementById("pd-image");
@@ -1777,7 +1778,8 @@ window.openProductDetail = (id) => {
 
   // Price
   const priceEl = document.getElementById("pd-price");
-  const basePrice = p.unit === "g" ? (p.price / 1000) * pdSelectedWeight : p.price * pdSelectedWeight;
+const _gb2 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+const basePrice = _gb2 > 0 ? (p.price / _gb2) * pdSelectedWeight : p.price * pdSelectedWeight;
   priceEl.textContent = basePrice.toFixed(0);
 
   // Stars
@@ -1867,7 +1869,8 @@ window.pdSelectWeight = (weight, el) => {
     cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
     cart[pdCurrentId].selectedWeight = weight;
     const p = allP[pdCurrentId];
-   const newPrice = p.unit && p.unit.includes("g") ? (p.price / parseInt(p.unit)) * weight : p.price * weight;
+   const _gb3 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+const newPrice = _gb3 > 0 ? (p.price / _gb3) * weight : p.price * weight;
     document.getElementById("pd-price").textContent = newPrice.toFixed(0);
     updatePdLiveTotal();
   }
@@ -1957,7 +1960,8 @@ function updatePdLiveTotal() {
   const qty = cart[pdCurrentId] ? cart[pdCurrentId].qty : 0;
   const w = pdSelectedWeight;
   const unit = p.unit || "kg";
-  const pr = unit === "g" ? (p.price / 1000) * w : p.price * w;
+ const _gb4 = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
+const pr = _gb4 > 0 ? (p.price / _gb4) * w : p.price * w;
   const liveEl = document.getElementById("pd-live-total");
   if (liveEl) {
     liveEl.textContent = qty > 0 ? "Cart Total: ₹" + (pr * qty).toFixed(2) : "";
@@ -3279,7 +3283,8 @@ window.updateWeight = (id, weight, el) => {
   cart[id].selectedWeight = parseFloat(weight);
   const p = allP[id];
  const gBaseW = p.unit && p.unit.includes("g") ? (parseInt(p.unit) || 100) : 0;
-animatePrice(id, gBaseW > 0 ? (p.price / gBaseW) * weight : p.price * weight);
+const _gb5 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+animatePrice(id, _gb5 > 0 ? (p.price / _gb5) * weight : p.price * weight);
   calcTotal();
 };
 
