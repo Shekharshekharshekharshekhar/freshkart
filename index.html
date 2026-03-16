@@ -1771,7 +1771,8 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || (_gb||1) : (_gb||1);
   renderPdGallery(p, id);
   document.getElementById("pd-category").textContent = p.category || "Vegetables";
   document.getElementById("pd-name").textContent = id;
-  document.getElementById("pd-unit").textContent = p.unit || "kg";
+ const _initUnit = pdSelectedWeight >= 1000 ? (pdSelectedWeight/1000)+"kg" : pdSelectedWeight+(p.unit && p.unit.includes("g") ? "g" : "kg");
+document.getElementById("pd-unit").textContent = _initUnit;
 
   const hot = document.getElementById("pd-hot");
   hot.style.display = p.popular ? "block" : "none";
