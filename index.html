@@ -3239,6 +3239,8 @@ const units = _grd > 0
   : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
 const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
 if (!cart[id]) cart[id] = { qty: 0, price: d.price, selectedWeight: _grd > 0 ? _grd : 0.5 };  // ← YEH ADD KARO
+    // Initial price calculate karo
+const _initPrice = _grd > 0 ? d.price : Math.round(d.price * 0.5);
 const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
     const discBadge = (d.originalPrice && d.originalPrice > d.price) ? '<div class="badge-discount">-' + Math.round((1 - d.price/d.originalPrice)*100) + '%</div>' : '';
     const origPrice = (d.originalPrice && d.originalPrice > d.price) ? '<span class="pc-price-original">₹' + d.originalPrice + '</span><span class="pc-discount-pct">-' + Math.round((1-d.price/d.originalPrice)*100) + '%</span>' : '';
@@ -3262,7 +3264,7 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
           '<div class="stock-indicator ' + stockBadge + '">' + stockText + '</div>' +
           '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div>' +
           '<div class="pc-price-row">' +
-          '<div class="pc-price">₹<span id="price-' + id + '">' + (_grd > 0 ? d.price : (d.price * 0.5).toFixed(0)) + '</span></div>' +
+       '<div class="pc-price">₹<span id="price-' + id + '">' + _initPrice + '</span></div>' +
             origPrice +
           '</div>' +
           '<div class="pc-unit">per ' + (d.unit||"kg") + '</div>' +
@@ -3563,12 +3565,13 @@ window.updateWeight = (id, weight, el) => {
   if (el) el.classList.add("sel");
   const p = allP[id];
   if (!p) return;
-  const unit = p.unit || "kg";
-  const _initW = unit.includes("g") ? (parseInt(unit)||100) : 0.5;
-  if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
+  const unit = p.unit || "";
+  const isGram = unit.includes("g");
+  const baseG = isGram ? (parseInt(unit)||100) : 0;
+  if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: isGram ? baseG : 0.5 };
   cart[id].selectedWeight = parseFloat(weight);
-  const _gb5 = unit.includes("g") ? (parseInt(unit)||100) : 0;
-  animatePrice(id, _gb5 > 0 ? (p.price / _gb5) * weight : p.price * weight);
+  const newPrice = baseG > 0 ? (p.price / baseG) * weight : p.price * weight;
+  animatePrice(id, newPrice);
   calcTotal();
 };
 
