@@ -3123,7 +3123,7 @@ function loadProducts() {
       const cat = data.category || "Vegetables";
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
-     const _initG = data.unit && data.unit.includes("g") ? (parseInt(data.unit)||100) : 1;
+     const _initG = data.unit && data.unit.includes("g") ? (parseInt(data.unit)||100) : 0.5;
 if (!cart[d.id]) cart[d.id] = { price: data.price, qty: 0, selectedWeight: _initG };
       else cart[d.id].price = data.price;
     });
@@ -3392,7 +3392,8 @@ window.changeQty = (id, val) => {
     showToast("❌ " + id + " is Out of Stock!", "error");
     return;
   }
-  if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: 1 };
+const _initW = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0.5;
+if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
  cart[id].qty += val;
   if (cart[id].qty < 0) cart[id].qty = 0;
   // Stock limit check
