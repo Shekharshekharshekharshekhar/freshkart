@@ -3214,12 +3214,13 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-    const _grd = d.unit && d.unit.includes("g") ? (parseInt(d.unit)||100) : 0;
-    const units = _grd > 0
-      ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
-      : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-    const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
-    const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
+   const _grd = d.unit && d.unit.includes("g") ? (parseInt(d.unit)||100) : 0;
+const units = _grd > 0
+  ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
+  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
+if (!cart[id]) cart[id] = { qty: 0, price: d.price, selectedWeight: _grd > 0 ? _grd : 0.5 };  // ← YEH ADD KARO
+const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
     const discBadge = (d.originalPrice && d.originalPrice > d.price) ? '<div class="badge-discount">-' + Math.round((1 - d.price/d.originalPrice)*100) + '%</div>' : '';
     const origPrice = (d.originalPrice && d.originalPrice > d.price) ? '<span class="pc-price-original">₹' + d.originalPrice + '</span><span class="pc-discount-pct">-' + Math.round((1-d.price/d.originalPrice)*100) + '%</span>' : '';
     const stockBadge = d.stock === 0 ? "stock-out" : d.stock <= 5 ? "stock-low" : "stock-in";
