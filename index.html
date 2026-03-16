@@ -1872,6 +1872,7 @@ window.pdSelectWeight = (weight, el) => {
    const _gb3 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
 const newPrice = _gb3 > 0 ? (p.price / _gb3) * weight : p.price * weight;
     document.getElementById("pd-price").textContent = newPrice.toFixed(0);
+    document.getElementById("pd-unit").textContent = weight >= 1000 ? (weight/1000) + "kg" : weight + (p.unit && p.unit.includes("g") ? "g" : "kg");
     updatePdLiveTotal();
   }
 };
