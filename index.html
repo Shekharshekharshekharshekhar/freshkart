@@ -3133,17 +3133,14 @@ function loadProducts() {
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
    const _unitStr = (data.unit || "");
-const _initG = _unitStr.includes("g") ? (parseInt(_unitStr)||100) : 0.5;
-if (!cart[d.id]) {
-  cart[d.id] = { price: data.price, qty: 0, selectedWeight: _initG };
+const _isGram = _unitStr.includes("g");
+const _initG = _isGram ? (parseInt(_unitStr)||100) : 0.5;
+// HAMESHA fresh set karo agar qty 0 hai
+if (!cart[d.id] || cart[d.id].qty === 0) {
+  cart[d.id] = { price: data.price, qty: cart[d.id] ? cart[d.id].qty : 0, selectedWeight: _initG };
 } else {
   cart[d.id].price = data.price;
-  if (!cart[d.id].selectedWeight || cart[d.id].selectedWeight === 1 || cart[d.id].selectedWeight === 0) {
-    cart[d.id].selectedWeight = _initG;
-  }
-}
-if (cart[d.id].qty === 0 && !_unitStr.includes("g")) {
-  cart[d.id].selectedWeight = 0.5;
+  cart[d.id].selectedWeight = parseFloat(cart[d.id].selectedWeight) || _initG;
 }
     });
     renderPills();
@@ -3431,9 +3428,9 @@ window.changeQty = (id, val) => {
 const tEl = document.getElementById("total-" + id);
   if (tEl) {
     if (cart[id].qty > 0) {
-      const w = cart[id].selectedWeight;
-      const _gq = unit.includes("g") ? (parseInt(unit)||100) : 0;
-      const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
+     const w = parseFloat(cart[id].selectedWeight) || 0.5;
+const _gq = unit.includes("g") ? (parseInt(unit)||100) : 0;
+const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
       tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
     } else {
@@ -3459,8 +3456,7 @@ function calcTotal() {
       if (!p) continue;
       const qty = cart[item].qty;
       const unit = p.unit || "kg";
-     const w = cart[item].selectedWeight;
-if (!w || w <= 0) continue;
+    const w = parseFloat(cart[item].selectedWeight) || 0.5;
       const _gct = unit.includes("g") ? (parseInt(unit)||100) : 0;
       const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
       total += price; ic++;
