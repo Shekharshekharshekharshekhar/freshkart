@@ -3412,7 +3412,7 @@ if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
       const w = cart[id].selectedWeight || 1;
     const gBaseQ = unit && unit.includes("g") ? (parseInt(unit) || 100) : 0;
 const _gq = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
-const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
+const pr = _gq > 0 ? (p.price / _gq) * w : (p.price / 1) * w;
 tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
     } else { tEl.classList.remove("show"); }
@@ -3439,7 +3439,7 @@ function calcTotal() {
       const w = cart[item].selectedWeight || 1;
      const gBaseC = unit && unit.includes("g") ? (parseInt(unit) || 100) : 0;
 const _gct = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
-const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
+const price = _gct > 0 ? (p.price / _gct) * w * qty : (p.price / 1) * w * qty;
       total += price; ic++;
       const itemImg = p ? p.image : '';
 const deliverySlotText = selectedSlot === 'asap' ? '⚡ 30 min delivery' : '📅 Scheduled';
