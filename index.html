@@ -3388,35 +3388,38 @@ window.startVoice = () => {
 
 window.changeQty = (id, val) => {
   const p = allP[id];
-  // Out of stock check
+  if (!p) return;
   if (val > 0 && p.stock === 0) {
     showToast("❌ " + id + " is Out of Stock!", "error");
     return;
   }
-const _initW = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0.5;
-if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
- cart[id].qty += val;
+  const unit = p.unit || "kg";
+  const _initW = unit.includes("g") ? (parseInt(unit)||100) : 0.5;
+  if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
+  cart[id].qty += val;
   if (cart[id].qty < 0) cart[id].qty = 0;
-  // Stock limit check
   if (p.stock > 0 && cart[id].qty > p.stock) {
     cart[id].qty = p.stock;
     showToast("⚠️ Only " + p.stock + " left in stock!", "warning");
   }
   if (cart[id].qty > (p.maxQty||100)) cart[id].qty = p.maxQty||100;
+
   const qEl = document.getElementById("qty-" + id);
   if (qEl) qEl.textContent = cart[id].qty;
+
   const tEl = document.getElementById("total-" + id);
   if (tEl) {
     if (cart[id].qty > 0) {
-      const unit = p.unit || "kg";
-      const w = cart[id].selectedWeight || 1;
-    const gBaseQ = unit && unit.includes("g") ? (parseInt(unit) || 100) : 0;
-const _gq = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
-const pr = _gq > 0 ? (p.price / _gq) * w : (p.price / 1) * w;
-tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
+      const w = cart[id].selectedWeight || _initW;
+      const _gq = unit.includes("g") ? (parseInt(unit)||100) : 0;
+      const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
+      tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
-    } else { tEl.classList.remove("show"); }
+    } else {
+      tEl.classList.remove("show");
+    }
   }
+
   if (val > 0) {
     const card = qEl && qEl.closest(".pcard");
     if (card) { const img = card.querySelector("img"); if (img) flyToCart(img); }
@@ -3426,45 +3429,43 @@ tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
   }
   calcTotal();
 };
-
 function calcTotal() {
   total = 0; let html = ""; let ic = 0;
 
-  // Cart items calculate karo
   for (let item in cart) {
     if (cart[item] && cart[item].qty > 0) {
       const p = allP[item];
+      if (!p) continue;
       const qty = cart[item].qty;
-      const unit = p ? (p.unit||"kg") : "kg";
-      const w = cart[item].selectedWeight || 1;
-     const gBaseC = unit && unit.includes("g") ? (parseInt(unit) || 100) : 0;
-const _gct = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
-const price = _gct > 0 ? (p.price / _gct) * w * qty : (p.price / 1) * w * qty;
+      const unit = p.unit || "kg";
+      const w = cart[item].selectedWeight || (unit.includes("g") ? (parseInt(unit)||100) : 0.5);
+      const _gct = unit.includes("g") ? (parseInt(unit)||100) : 0;
+      const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
       total += price; ic++;
-      const itemImg = p ? p.image : '';
-const deliverySlotText = selectedSlot === 'asap' ? '⚡ 30 min delivery' : '📅 Scheduled';
-html +=
-  '<div class="citem">' +
-    '<div class="citem-top">' +
-      (itemImg ? '<img class="citem-img" src="' + itemImg + '" alt="' + item + '" loading="lazy">' : '') +
-      '<div class="citem-info">' +
-        '<h4>' + item + '</h4>' +
-        '<p>' + qty + ' × ' + w + unit + ' = ₹' + price.toFixed(2) + '</p>' +
-        '<div class="citem-delivery"><span>' + deliverySlotText + '</span></div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="citm-ctrl">' +
-      '<button onclick="changeQty(\'' + item + '\',-1)">−</button>' +
-      '<button onclick="changeQty(\'' + item + '\',1)">+</button>' +
-      '<button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button>' +
-    '</div>' +
-  '</div>';
+      const itemImg = p.image || '';
+      const deliverySlotText = selectedSlot === 'asap' ? '⚡ 30 min delivery' : '📅 Scheduled';
+      html +=
+        '<div class="citem">' +
+          '<div class="citem-top">' +
+            (itemImg ? '<img class="citem-img" src="' + itemImg + '" alt="' + item + '" loading="lazy">' : '') +
+            '<div class="citem-info">' +
+              '<h4>' + item + '</h4>' +
+              '<p>' + qty + ' × ' + w + (unit.includes("g") ? "g" : unit) + ' = ₹' + price.toFixed(2) + '</p>' +
+              '<div class="citem-delivery"><span>' + deliverySlotText + '</span></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="citm-ctrl">' +
+            '<button onclick="changeQty(\'' + item + '\',-1)">−</button>' +
+            '<button onclick="changeQty(\'' + item + '\',1)">+</button>' +
+            '<button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button>' +
+          '</div>' +
+        '</div>';
+    }
   }
-  }
+
   if (!html) html = '<div class="cart-empty-state"><span>🛒</span><p>Your cart is empty</p></div>';
   document.getElementById("cartItems").innerHTML = html;
 
-  // Step 1 — Coupon discount calculate karo
   const discRow = document.getElementById('discountRow');
   const discLabel = document.getElementById('discountLabel');
   const discAmt = document.getElementById('discountAmount');
@@ -3483,11 +3484,9 @@ html +=
     if (discRow) discRow.style.display = 'none';
   }
 
-// Step 2 — Discounted total calculate karo (coupon + points)
   const totalDiscount = discountAmount + (pointsRedeemed ? pointsDiscount : 0);
   const discountedTotal = Math.max(0, total - totalDiscount);
 
-  // Points discount row update karo
   const pdRow = document.getElementById('pointsDiscountRow');
   const pdAmt = document.getElementById('pointsDiscountAmt');
   if (pdRow && pdAmt) {
@@ -3499,7 +3498,6 @@ html +=
     }
   }
 
-  // Step 3 — Free delivery check karo (discount ke baad)
   const fdb = document.getElementById("freeDelBar");
   if (total <= 0) {
     delivery = 20;
@@ -3518,14 +3516,10 @@ html +=
       '</div>';
   }
 
-  // Step 4 — Minimum order warning
   const minWarn = document.getElementById("minOrderWarn");
   if (minWarn) minWarn.classList.toggle("show", total > 0 && total < 99);
 
-  // Step 5 — Final total calculate karo
   const finalTotal = discountedTotal + delivery;
-
- // Step 6 — DOM update karo
   document.getElementById("totalAmount").textContent = total.toFixed(2);
   document.getElementById("grandTotal").textContent = finalTotal.toFixed(2);
   const delAmtEl = document.getElementById("deliveryAmount");
@@ -3534,8 +3528,8 @@ html +=
 
   const nb = document.getElementById("cartNavBadge");
   const bb = document.getElementById("bnavBadge");
-  if (nb) { nb.textContent = ic; nb.style.display = ic>0 ? "block" : "none"; }
-  if (bb) { bb.textContent = ic; bb.style.display = ic>0 ? "flex" : "none"; }
+  if (nb) { nb.textContent = ic; nb.style.display = ic > 0 ? "block" : "none"; }
+  if (bb) { bb.textContent = ic; bb.style.display = ic > 0 ? "flex" : "none"; }
 
   saveCart();
 }
@@ -3548,12 +3542,14 @@ window.removeItem = id => {
 window.updateWeight = (id, weight, el) => {
   if (el && el.closest(".wpills")) el.closest(".wpills").querySelectorAll(".wp").forEach(e => e.classList.remove("sel"));
   if (el) el.classList.add("sel");
-  if (!cart[id]) cart[id] = { qty: 0, price: allP[id].price, selectedWeight: 1 };
-  cart[id].selectedWeight = parseFloat(weight);
   const p = allP[id];
- const gBaseW = p.unit && p.unit.includes("g") ? (parseInt(p.unit) || 100) : 0;
-const _gb5 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
-animatePrice(id, _gb5 > 0 ? (p.price / _gb5) * weight : p.price * weight);
+  if (!p) return;
+  const unit = p.unit || "kg";
+  const _initW = unit.includes("g") ? (parseInt(unit)||100) : 0.5;
+  if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
+  cart[id].selectedWeight = parseFloat(weight);
+  const _gb5 = unit.includes("g") ? (parseInt(unit)||100) : 0;
+  animatePrice(id, _gb5 > 0 ? (p.price / _gb5) * weight : p.price * weight);
   calcTotal();
 };
 
