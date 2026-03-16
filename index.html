@@ -3123,9 +3123,15 @@ function loadProducts() {
       const cat = data.category || "Vegetables";
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
-     const _initG = data.unit && data.unit.includes("g") ? (parseInt(data.unit)||100) : 0.5;
-if (!cart[d.id]) cart[d.id] = { price: data.price, qty: 0, selectedWeight: _initG };
-      else cart[d.id].price = data.price;
+    const _initG = data.unit && data.unit.includes("g") ? (parseInt(data.unit)||100) : 0.5;
+if (!cart[d.id]) {
+  cart[d.id] = { price: data.price, qty: 0, selectedWeight: _initG };
+} else {
+  cart[d.id].price = data.price;
+  if (!cart[d.id].selectedWeight || cart[d.id].selectedWeight === 1) {
+    cart[d.id].selectedWeight = _initG;
+  }
+}
     });
     renderPills();
     applyFilters();
