@@ -1788,9 +1788,16 @@ window.openProductDetail = (id) => {
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
   // Weight pills
-  const units = p.unit && p.unit.includes("g")
-    ? [{v:50,l:"50g"},{v:100,l:"100g"},{v:250,l:"250g"},{v:500,l:"500g"},{v:1000,l:"1kg"}]
-    : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+ const gBase = p.unit && p.unit.includes("g") ? (parseInt(p.unit) || 100) : 0;
+const units = gBase > 0
+  ? [
+      {v: gBase,     l: gBase + "g"},
+      {v: gBase * 2, l: (gBase * 2) + "g"},
+      {v: gBase * 4, l: (gBase * 4) + "g"},
+      {v: 1000,      l: "1kg"},
+      {v: 2000,      l: "2kg"}
+    ]
+  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
   const wpHtml = units.map(u =>
     '<span class="pd-wp' + (u.v === pdSelectedWeight ? " sel" : "") + '" onclick="pdSelectWeight(' + u.v + ',this)">' + u.l + '</span>'
   ).join("");
@@ -3148,7 +3155,8 @@ window.changeQty = (id, val) => {
     if (cart[id].qty > 0) {
       const unit = p.unit || "kg";
       const w = cart[id].selectedWeight || 1;
-      const pr = unit === "g" ? (p.price/1000)*w : p.price*w;
+    const gBaseQ = unit && unit.includes("g") ? (parseInt(unit) || 100) : 0;
+const pr = gBaseQ > 0 ? (p.price / gBaseQ) * w : p.price * w;
       tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
     } else { tEl.classList.remove("show"); }
@@ -3173,7 +3181,8 @@ function calcTotal() {
       const qty = cart[item].qty;
       const unit = p ? (p.unit||"kg") : "kg";
       const w = cart[item].selectedWeight || 1;
-      const price = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
+     const gBaseC = unit && unit.includes("g") ? (parseInt(unit) || 100) : 0;
+const price = gBaseC > 0 ? (p.price / gBaseC) * w * qty : p.price * w * qty;
       total += price; ic++;
       html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
     }
@@ -3269,7 +3278,8 @@ window.updateWeight = (id, weight, el) => {
   if (!cart[id]) cart[id] = { qty: 0, price: allP[id].price, selectedWeight: 1 };
   cart[id].selectedWeight = parseFloat(weight);
   const p = allP[id];
-  animatePrice(id, p.unit==="g" ? (p.price/1000)*weight : p.price*weight);
+ const gBaseW = p.unit && p.unit.includes("g") ? (parseInt(p.unit) || 100) : 0;
+animatePrice(id, gBaseW > 0 ? (p.price / gBaseW) * weight : p.price * weight);
   calcTotal();
 };
 
