@@ -1594,7 +1594,16 @@ function saveCart() {
 function loadCart() {
   try {
     const saved = localStorage.getItem('fkCart_v2');
-    if (saved) cart = JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Purane carts mein selectedWeight fix karo
+      for (let id in parsed) {
+        if (parsed[id] && parsed[id].selectedWeight === 1 && parsed[id].qty === 0) {
+          delete parsed[id]; // Empty items delete karo
+        }
+      }
+      cart = parsed;
+    }
   } catch(e) { cart = {}; }
 }
 onAuthStateChanged(auth, u => {
@@ -3128,9 +3137,14 @@ if (!cart[d.id]) {
   cart[d.id] = { price: data.price, qty: 0, selectedWeight: _initG };
 } else {
   cart[d.id].price = data.price;
-  if (!cart[d.id].selectedWeight || cart[d.id].selectedWeight === 1) {
+  // Hamesha correct default weight set karo
+  if (!cart[d.id].selectedWeight || cart[d.id].selectedWeight === 1 || cart[d.id].selectedWeight === 0) {
     cart[d.id].selectedWeight = _initG;
   }
+}
+// LocalStorage mein galat weight tha toh clear karo
+if (cart[d.id].qty === 0 && !data.unit.includes("g")) {
+  cart[d.id].selectedWeight = 0.5;
 }
     });
     renderPills();
@@ -3249,7 +3263,7 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
           '<div class="stock-indicator ' + stockBadge + '">' + stockText + '</div>' +
           '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div>' +
           '<div class="pc-price-row">' +
-            '<div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div>' +
+          '<div class="pc-price">₹<span id="price-' + id + '">' + (_grd > 0 ? d.price : (d.price * 0.5).toFixed(0)) + '</span></div>' +
             origPrice +
           '</div>' +
           '<div class="pc-unit">per ' + (d.unit||"kg") + '</div>' +
