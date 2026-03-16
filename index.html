@@ -3428,10 +3428,10 @@ window.changeQty = (id, val) => {
   const qEl = document.getElementById("qty-" + id);
   if (qEl) qEl.textContent = cart[id].qty;
 
-  const tEl = document.getElementById("total-" + id);
+const tEl = document.getElementById("total-" + id);
   if (tEl) {
     if (cart[id].qty > 0) {
-      const w = cart[id].selectedWeight || _initW;
+      const w = cart[id].selectedWeight;
       const _gq = unit.includes("g") ? (parseInt(unit)||100) : 0;
       const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
       tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
@@ -3459,7 +3459,8 @@ function calcTotal() {
       if (!p) continue;
       const qty = cart[item].qty;
       const unit = p.unit || "kg";
-      const w = cart[item].selectedWeight || (unit.includes("g") ? (parseInt(unit)||100) : 0.5);
+     const w = cart[item].selectedWeight;
+if (!w || w <= 0) continue;
       const _gct = unit.includes("g") ? (parseInt(unit)||100) : 0;
       const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
       total += price; ic++;
@@ -4065,8 +4066,10 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 };
+localStorage.removeItem('fkCart_v2');
+cart = {};
 loadCart();
-  loadCouponsFromFirebase();
+loadCouponsFromFirebase();
   // Back to Top
 window.addEventListener('scroll', () => {
   const btn = document.getElementById('backTop');
