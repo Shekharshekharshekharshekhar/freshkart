@@ -2953,7 +2953,8 @@ function loadProducts() {
       const cat = data.category || "Vegetables";
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
-      if (!cart[d.id]) cart[d.id] = { price: data.price, qty: 0, selectedWeight: 1 };
+     const _initG = data.unit && data.unit.includes("g") ? (parseInt(data.unit)||100) : 1;
+if (!cart[d.id]) cart[d.id] = { price: data.price, qty: 0, selectedWeight: _initG };
       else cart[d.id].price = data.price;
     });
     renderPills();
@@ -3047,7 +3048,7 @@ function renderProducts(products) {
 const units = _grd > 0
   ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
   : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-    const wp = units.map((u,i) => '<span class="wp' + (i===1?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
+  const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
 grid.innerHTML += '<div class="pcard fade-up" onclick="openProductDetail(\'' + id + '\')" style="cursor:pointer;"><div class="pc-img">' + (d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '') + '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' + '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' + '<img src="' + d.image + '" alt="' + id + '" loading="lazy" onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;"></div><div class="pc-body"><div class="pc-name">' + id + '</div>' + '<div class="stock-indicator ' + (d.stock === 0 ? "stock-out" : d.stock <= 5 ? "stock-low" : "stock-in") + '">' + (d.stock === 0 ? "🔴 Out of Stock" : d.stock <= 5 ? "🟡 Only " + d.stock + " Left!" : "🟢 In Stock") + '</div>' + '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div><div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div><div class="pc-unit">per ' + (d.unit||"kg") + '</div><div class="wpills">' + wp + '</div><div class="pc-actions"><div class="qty-ctrl"><button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',-1)">−</button><span class="qnum" id="qty-' + id + '">' + (cart[id] ? cart[id].qty : 0) + '</span><button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">+</button></div>' + (d.stock === 0 ? '<button class="notify-btn" onclick="event.stopPropagation();notifyMe(\'' + id + '\')">🔔 Notify Me</button>' : '<button class="add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>') + '</div><div class="pc-live" id="total-' + id + '"></div></div></div>';
   }
   document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
