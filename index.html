@@ -129,6 +129,14 @@ input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
 .suggest-box{position:absolute;top:56px;width:100%;background:#fff;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,0.12);max-height:200px;overflow-y:auto;display:none;z-index:500;border:1px solid var(--border);}
 .suggest-box div{padding:10px 15px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;}
 .suggest-box div:hover,.suggest-box .active{background:#f0fdf4;color:var(--green);}
+  .search-cat-filter{display:flex;gap:6px;padding:8px 14px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.search-cat-filter::-webkit-scrollbar{display:none;}
+.search-cat-pill{flex-shrink:0;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:#fafafa;font-size:11px;font-weight:700;color:#666;cursor:pointer;transition:0.18s;}
+.search-cat-pill.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:transparent;}
+.no-results-box{padding:16px;text-align:center;}
+.no-results-box p{font-size:13px;color:#888;margin-bottom:10px;}
+.no-results-suggestions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.no-results-chip{padding:5px 12px;border-radius:20px;background:#f0fdf4;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);}
 .cat-pills{display:flex;gap:8px;padding:10px 14px 4px;overflow-x:auto;scrollbar-width:none;}
 .cat-pills::-webkit-scrollbar{display:none;}
 .cpill{flex-shrink:0;padding:7px 15px;border-radius:25px;border:2px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:#555;cursor:pointer;transition:0.2s;white-space:nowrap;}
@@ -228,6 +236,11 @@ input,textarea,select{font-family:'Poppins',sans-serif;-webkit-appearance:none;}
 .citm-ctrl{display:flex;align-items:center;gap:7px;}
 .citm-ctrl button{width:28px;height:28px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;}
 .citm-ctrl .rm-btn{background:linear-gradient(135deg,#e74c3c,#c0392b)!important;border-radius:9px!important;width:auto!important;padding:0 10px!important;font-size:11px!important;}
+  .citem-img{width:48px;height:48px;object-fit:cover;border-radius:10px;flex-shrink:0;}
+.citem-top{display:flex;gap:10px;align-items:flex-start;}
+.citem-info{flex:1;}
+.citem-delivery{font-size:10px;color:var(--green);font-weight:600;margin-top:2px;}
+.citem-delivery span{background:#e8f5e9;padding:2px 7px;border-radius:10px;}
 .cart-empty-state{text-align:center;padding:40px 20px;color:#ccc;}
 .cart-empty-state span{font-size:48px;display:block;margin-bottom:10px;}
 .csummary{
@@ -817,6 +830,29 @@ body.dark .sum-total{color:#2ecc71;}
 .pd-review-submit{width:100%;padding:10px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;}
 .pd-review-login{text-align:center;font-size:12px;color:#888;padding:10px;}
 .pd-review-login span{color:var(--green);font-weight:700;cursor:pointer;}
+  /* NUTRITIONAL TABS */
+.pd-tabs{display:flex;gap:8px;padding:0 20px;margin-bottom:16px;}
+.pd-tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:700;border-radius:12px;border:2px solid var(--border);background:#fafafa;color:#666;cursor:pointer;transition:0.2s;}
+.pd-tab.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:transparent;}
+.pd-tab-content{display:none;padding:0 20px 16px;}
+.pd-tab-content.active{display:block;}
+.nutrition-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.nutrition-item{background:#f8fdf8;border-radius:12px;padding:10px 12px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.nutrition-label{font-size:11px;color:#888;font-weight:600;}
+.nutrition-value{font-size:13px;font-weight:800;color:var(--green);}
+
+/* PEOPLE ALSO BOUGHT */
+.pab-section{padding:0 20px 20px;}
+.pab-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
+.pab-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.pab-row::-webkit-scrollbar{display:none;}
+.pab-card{flex-shrink:0;width:110px;background:#f8fdf8;border-radius:14px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:0.2s;}
+.pab-card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,0.1);}
+.pab-card img{width:100%;height:80px;object-fit:cover;}
+.pab-card-body{padding:7px 8px;}
+.pab-card-name{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pab-card-price{font-size:11px;color:var(--green);font-weight:700;}
+.pab-add-btn{width:100%;padding:5px;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;}
 /* MINIMUM ORDER WARNING */
 .min-order-warn{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1px solid #f39c12;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12px;font-weight:600;color:#e67e22;display:none;text-align:center;}
 .min-order-warn.show{display:block;}
@@ -1400,6 +1436,23 @@ body.dark .sum-total{color:#2ecc71;}
     </div>
 
     <!-- REVIEWS SECTION -->
+    <!-- TABS -->
+<div class="pd-tabs">
+  <button class="pd-tab active" onclick="switchPdTab('desc',this)">📋 Details</button>
+  <button class="pd-tab" onclick="switchPdTab('nutrition',this)">🥗 Nutrition</button>
+</div>
+<div class="pd-tab-content active" id="pd-tab-desc">
+  <!-- description aur info grid yahan move hongi — neeche JS se handle hoga -->
+</div>
+<div class="pd-tab-content" id="pd-tab-nutrition">
+  <div class="nutrition-grid" id="pd-nutrition-grid"></div>
+</div>
+
+<!-- PEOPLE ALSO BOUGHT -->
+<div class="pab-section">
+  <div class="pab-title">🛒 People Also Bought</div>
+  <div class="pab-row" id="pabRow"></div>
+</div>
     <div class="pd-reviews-section">
       <div class="pd-reviews-title">💬 Customer Reviews</div>
       <div id="pd-reviews-list"><div class="no-reviews">Loading reviews...</div></div>
@@ -1905,7 +1958,8 @@ document.querySelectorAll('.pd-review-star').forEach(s => s.classList.remove('ac
 const reviewTextEl = document.getElementById('pd-review-text');
 if (reviewTextEl) reviewTextEl.value = '';
 loadPdReviews(id);
-
+renderPdNutrition(id);
+renderPeopleAlsoBought(id);
 // Login check
 const writeReview = document.getElementById('pd-write-review');
 if (writeReview) {
@@ -1927,7 +1981,51 @@ window.closeProductDetail = () => {
   document.body.style.overflow = "";
   pdCurrentId = null;
 };
+window.switchPdTab = (tab, el) => {
+  document.querySelectorAll('.pd-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pd-tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pd-tab-' + tab).classList.add('active');
+};
 
+function renderPdNutrition(productId) {
+  const p = allP[productId];
+  const nutrition = p.nutrition || {
+    'Calories': '25 kcal',
+    'Protein': '2.1g',
+    'Carbs': '3.8g',
+    'Fiber': '1.2g',
+    'Fat': '0.3g',
+    'Vitamin C': '14mg'
+  };
+  const grid = document.getElementById('pd-nutrition-grid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(nutrition).map(([k,v]) =>
+    '<div class="nutrition-item"><span class="nutrition-label">' + k + '</span><span class="nutrition-value">' + v + '</span></div>'
+  ).join('');
+}
+
+function renderPeopleAlsoBought(productId) {
+  const row = document.getElementById('pabRow');
+  if (!row) return;
+  const p = allP[productId];
+  const others = Object.entries(allP)
+    .filter(([id]) => id !== productId)
+    .filter(([id, prod]) => prod.category === p.category)
+    .slice(0, 6);
+  if (!others.length) { row.parentElement.style.display = 'none'; return; }
+  row.parentElement.style.display = 'block';
+  row.innerHTML = others.map(([id, prod]) =>
+    '<div class="pab-card" onclick="closeProductDetail();setTimeout(()=>openProductDetail(\'' + id + '\'),300)">' +
+      '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
+      '<div class="pab-card-body">' +
+        '<div class="pab-card-name">' + id + '</div>' +
+        '<div class="pab-card-price">₹' + prod.price + '</div>' +
+      '</div>' +
+      '<button class="pab-add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>' +
+    '</div>'
+  ).join('');
+}
 document.getElementById("productDetail").addEventListener("click", e => {
   if (e.target === document.getElementById("productDetail")) closeProductDetail();
 });
@@ -3230,16 +3328,54 @@ window.handleSearch = () => {
   const box = document.getElementById("suggestions");
   box.innerHTML = "";
   if (!inp) { box.style.display="none"; applyFilters(); return; }
+
   let m = [];
   for (let id in allP) { if (id.toLowerCase().includes(inp)) m.push(id); }
+
   if (m.length) {
+    // Category filter pills
+    const matchedCats = [...new Set(m.map(id => allP[id].category))];
+    let catHtml = '<div class="search-cat-filter"><span class="search-cat-pill active" onclick="searchFilterCat(\'\',this)">All</span>';
+    matchedCats.forEach(c => { catHtml += '<span class="search-cat-pill" onclick="searchFilterCat(\'' + c + '\',this)">' + c + '</span>'; });
+    catHtml += '</div>';
+    box.innerHTML = catHtml;
+    m.forEach(item => {
+      const hl = item.replace(new RegExp(inp,"gi"), x => "<strong style='color:var(--green)'>" + x + "</strong>");
+      box.innerHTML += '<div onclick="selectSuggestion(\'' + item + '\')">' + hl + ' <span style="font-size:10px;color:#aaa;float:right;">' + (allP[item].category||'') + '</span></div>';
+    });
     box.style.display = "block";
-    m.forEach(item => { const hl = item.replace(new RegExp(inp,"gi"), x => "<strong>"+x+"</strong>"); box.innerHTML += '<div onclick="selectSuggestion(\'' + item + '\')">' + hl + '</div>'; });
-  } else box.style.display = "none";
+  } else {
+    // No results — suggestions dikhao
+    const allIds = Object.keys(allP);
+    const suggestions = allIds.slice(0, 5);
+    box.innerHTML =
+      '<div class="no-results-box">' +
+        '<p>😕 No results for "<strong>' + inp + '</strong>"</p>' +
+        '<div class="no-results-suggestions">' +
+          suggestions.map(id => '<span class="no-results-chip" onclick="selectSuggestion(\'' + id + '\')">' + id + '</span>').join('') +
+        '</div>' +
+      '</div>';
+    box.style.display = "block";
+  }
   applyFilters();
 };
 
 window.selectSuggestion = name => { document.getElementById("searchInput").value = name; document.getElementById("suggestions").style.display = "none"; applyFilters(); };
+  window.searchFilterCat = (cat, el) => {
+  document.querySelectorAll('.search-cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const inp = document.getElementById("searchInput").value.toLowerCase();
+  const box = document.getElementById("suggestions");
+  const items = box.querySelectorAll('div:not(.search-cat-filter):not(.no-results-box)');
+  items.forEach(item => {
+    const id = item.textContent.trim().split(' ')[0].toLowerCase();
+    if (!cat || (allP[id] && allP[id].category === cat)) {
+      item.style.display = 'block';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+};
 window.openSuggestions = () => { if (document.getElementById("searchInput").value) document.getElementById("suggestions").style.display = "block"; };
 window.clearSearch = () => { document.getElementById("searchInput").value = ""; document.getElementById("suggestions").style.display = "none"; applyFilters(); };
 window.startVoice = () => {
@@ -3303,8 +3439,24 @@ function calcTotal() {
 const _gct = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
 const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
       total += price; ic++;
-      html += '<div class="citem"><h4>' + item + '</h4><p>' + qty + ' x ' + w + unit + ' = Rs.' + price.toFixed(2) + '</p><div class="citm-ctrl"><button onclick="changeQty(\'' + item + '\',-1)">-</button><button onclick="changeQty(\'' + item + '\',1)">+</button><button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button></div></div>';
-    }
+      const itemImg = p ? p.image : '';
+const deliverySlotText = selectedSlot === 'asap' ? '⚡ 30 min delivery' : '📅 Scheduled';
+html +=
+  '<div class="citem">' +
+    '<div class="citem-top">' +
+      (itemImg ? '<img class="citem-img" src="' + itemImg + '" alt="' + item + '" loading="lazy">' : '') +
+      '<div class="citem-info">' +
+        '<h4>' + item + '</h4>' +
+        '<p>' + qty + ' × ' + w + unit + ' = ₹' + price.toFixed(2) + '</p>' +
+        '<div class="citem-delivery"><span>' + deliverySlotText + '</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="citm-ctrl">' +
+      '<button onclick="changeQty(\'' + item + '\',-1)">−</button>' +
+      '<button onclick="changeQty(\'' + item + '\',1)">+</button>' +
+      '<button class="rm-btn" onclick="removeItem(\'' + item + '\')">Remove</button>' +
+    '</div>' +
+  '</div>';
   }
 
   if (!html) html = '<div class="cart-empty-state"><span>🛒</span><p>Your cart is empty</p></div>';
