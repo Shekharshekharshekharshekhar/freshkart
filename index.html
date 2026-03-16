@@ -1891,7 +1891,7 @@ window.openProductDetail = (id) => {
   const p = allP[id];
   if (!p) return;
   pdCurrentId = id;
-const _gb = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+const _gb = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit)||100) : 0;
 pdSelectedWeight = cart[id] ? cart[id].selectedWeight || (_gb||1) : (_gb||1);
 
  // Main image set karo
@@ -1903,7 +1903,7 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || (_gb||1) : (_gb||1);
   renderPdGallery(p, id);
   document.getElementById("pd-category").textContent = p.category || "Vegetables";
   document.getElementById("pd-name").textContent = id;
- const _initUnit = pdSelectedWeight >= 1000 ? (pdSelectedWeight/1000)+"kg" : pdSelectedWeight+(p.unit && p.unit.includes("g") ? "g" : "kg");
+ const _initUnit = pdSelectedWeight >= 1000 ? (pdSelectedWeight/1000)+"kg" : pdSelectedWeight+(p.unit && p.isGramUnit(unit) ? "g" : "kg");
 document.getElementById("pd-unit").textContent = _initUnit;
 
   const hot = document.getElementById("pd-hot");
@@ -1911,7 +1911,7 @@ document.getElementById("pd-unit").textContent = _initUnit;
 
   // Price
   const priceEl = document.getElementById("pd-price");
-const _gb2 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+const _gb2 = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit)||100) : 0;
 const basePrice = _gb2 > 0 ? (p.price / _gb2) * pdSelectedWeight : p.price * pdSelectedWeight;
   priceEl.textContent = basePrice.toFixed(0);
 
@@ -1923,7 +1923,7 @@ const basePrice = _gb2 > 0 ? (p.price / _gb2) * pdSelectedWeight : p.price * pdS
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
   // Weight pills
- const gBase = p.unit && p.unit.includes("g") ? (parseInt(p.unit) || 100) : 0;
+ const gBase = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit) || 100) : 0;
 const units = gBase > 0
   ? [
       {v: gBase,     l: gBase + "g"},
@@ -2047,10 +2047,10 @@ window.pdSelectWeight = (weight, el) => {
     cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
     cart[pdCurrentId].selectedWeight = weight;
     const p = allP[pdCurrentId];
-   const _gb3 = p.unit && p.unit.includes("g") ? (parseInt(p.unit)||100) : 0;
+   const _gb3 = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit)||100) : 0;
 const newPrice = _gb3 > 0 ? (p.price / _gb3) * weight : p.price * weight;
     document.getElementById("pd-price").textContent = newPrice.toFixed(0);
-    document.getElementById("pd-unit").textContent = weight >= 1000 ? (weight/1000) + "kg" : weight + (p.unit && p.unit.includes("g") ? "g" : "kg");
+    document.getElementById("pd-unit").textContent = weight >= 1000 ? (weight/1000) + "kg" : weight + (p.unit && p.isGramUnit(unit) ? "g" : "kg");
     updatePdLiveTotal();
   }
 };
@@ -2139,7 +2139,7 @@ function updatePdLiveTotal() {
   const qty = cart[pdCurrentId] ? cart[pdCurrentId].qty : 0;
   const w = pdSelectedWeight;
   const unit = p.unit || "kg";
- const _gb4 = unit && unit.includes("g") ? (parseInt(unit)||100) : 0;
+ const _gb4 = unit && isGramUnit(unit) ? (parseInt(unit)||100) : 0;
 const pr = _gb4 > 0 ? (p.price / _gb4) * w : p.price * w;
   const liveEl = document.getElementById("pd-live-total");
   if (liveEl) {
@@ -3123,6 +3123,13 @@ window.submitPdReview = async () => {
     showToast('Could not submit review. Try again!', 'error');
   }
 };
+  // GRAM CHECK — "kg" ko gram nahi maanna
+function isGramUnit(unit) {
+  return unit && /^\d+g$/.test(unit.trim());
+}
+  function isGramUnit(unit) {
+  return unit && /^\d+g$/.test(unit.trim());
+}
 function loadProducts() {
  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
@@ -3133,7 +3140,7 @@ function loadProducts() {
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
    const _unitStr = (data.unit || "");
-const _isGram = _unitStr.includes("g");
+const _isGram = _unitStr.isGramUnit();
 const _initG = _isGram ? (parseInt(_unitStr)||100) : 0.5;
 // HAMESHA fresh set karo agar qty 0 hai
 if (!cart[d.id] || cart[d.id].qty === 0) {
@@ -3230,7 +3237,7 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-   const _grd = d.unit && d.unit.includes("g") ? (parseInt(d.unit)||100) : 0;
+   const _grd = d.unit && d.isGramUnit(unit) ? (parseInt(d.unit)||100) : 0;
 const units = _grd > 0
   ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
   : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
@@ -3412,7 +3419,7 @@ window.changeQty = (id, val) => {
     return;
   }
   const unit = p.unit || "kg";
-  const _initW = unit.includes("g") ? (parseInt(unit)||100) : 0.5;
+  const _initW = isGramUnit(unit) ? (parseInt(unit)||100) : 0.5;
   if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: _initW };
   cart[id].qty += val;
   if (cart[id].qty < 0) cart[id].qty = 0;
@@ -3429,7 +3436,7 @@ const tEl = document.getElementById("total-" + id);
   if (tEl) {
     if (cart[id].qty > 0) {
      const w = parseFloat(cart[id].selectedWeight) || 0.5;
-const _gq = unit.includes("g") ? (parseInt(unit)||100) : 0;
+const _gq = isGramUnit(unit) ? (parseInt(unit)||100) : 0;
 const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
       tEl.textContent = "Total: ₹" + (pr * cart[id].qty).toFixed(2);
       tEl.classList.add("show");
@@ -3457,7 +3464,7 @@ function calcTotal() {
       const qty = cart[item].qty;
       const unit = p.unit || "kg";
     const w = parseFloat(cart[item].selectedWeight) || 0.5;
-      const _gct = unit.includes("g") ? (parseInt(unit)||100) : 0;
+      const _gct = isGramUnit(unit) ? (parseInt(unit)||100) : 0;
       const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
       total += price; ic++;
       const itemImg = p.image || '';
@@ -3468,7 +3475,7 @@ function calcTotal() {
             (itemImg ? '<img class="citem-img" src="' + itemImg + '" alt="' + item + '" loading="lazy">' : '') +
             '<div class="citem-info">' +
               '<h4>' + item + '</h4>' +
-              '<p>' + qty + ' × ' + w + (unit.includes("g") ? "g" : unit) + ' = ₹' + price.toFixed(2) + '</p>' +
+              '<p>' + qty + ' × ' + w + (isGramUnit(unit) ? "g" : unit) + ' = ₹' + price.toFixed(2) + '</p>' +
               '<div class="citem-delivery"><span>' + deliverySlotText + '</span></div>' +
             '</div>' +
           '</div>' +
@@ -3563,7 +3570,7 @@ window.updateWeight = (id, weight, el) => {
   const p = allP[id];
   if (!p) return;
   const unit = p.unit || "";
-  const isGram = unit.includes("g");
+  const isGram = isGramUnit(unit);
   const baseG = isGram ? (parseInt(unit)||100) : 0;
   if (!cart[id]) cart[id] = { qty: 0, price: p.price, selectedWeight: isGram ? baseG : 0.5 };
   cart[id].selectedWeight = parseFloat(weight);
