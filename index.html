@@ -3116,16 +3116,44 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
- const _grd = d.unit && d.unit.includes("g") ? (parseInt(d.unit)||100) : 0;
-const units = _grd > 0
-  ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
-  : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
-  const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
-grid.innerHTML += '<div class="pcard fade-up" onclick="openProductDetail(\'' + id + '\')" style="cursor:pointer;"><div class="pc-img">' +(d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '') +
-(d.originalPrice && d.originalPrice > d.price ? '<div class="badge-discount">-' + Math.round((1 - d.price/d.originalPrice)*100) + '%</div>' : '')+ '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' + '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' + '<img src="' + d.image + '" alt="' + id + '" loading="lazy" onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
-'<button class="pc-quickview" onclick="event.stopPropagation();openProductDetail(\'' + id + '\')">👁️ Quick View</button></div>'<div class="pc-body"><div class="pc-name">' + id + '</div>' + '<div class="stock-indicator ' + (d.stock === 0 ? "stock-out" : d.stock <= 5 ? "stock-low" : "stock-in") + '">' + (d.stock === 0 ? "🔴 Out of Stock" : d.stock <= 5 ? "🟡 Only " + d.stock + " Left!" : "🟢 In Stock") + '</div>' + '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div>'<div class="pc-price-row"><div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div>' +
-(d.originalPrice && d.originalPrice > d.price ? '<span class="pc-price-original">₹' + d.originalPrice + '</span><span class="pc-discount-pct">-' + Math.round((1-d.price/d.originalPrice)*100) + '%</span>' : '') +
-'</div>'<div class="pc-unit">per ' + (d.unit||"kg") + '</div><div class="wpills">' + wp + '</div><div class="pc-actions"><div class="qty-ctrl"><button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',-1)">−</button><span class="qnum" id="qty-' + id + '">' + (cart[id] ? cart[id].qty : 0) + '</span><button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">+</button></div>' + (d.stock === 0 ? '<button class="notify-btn" onclick="event.stopPropagation();notifyMe(\'' + id + '\')">🔔 Notify Me</button>' : '<button class="add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>') + '</div><div class="pc-live" id="total-' + id + '"></div></div></div>';
+    const _grd = d.unit && d.unit.includes("g") ? (parseInt(d.unit)||100) : 0;
+    const units = _grd > 0
+      ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
+      : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
+    const wp = units.map((u,i) => '<span class="wp' + (i===0?" sel":"") + '" onclick="updateWeight(\'' + id + '\',' + u.v + ',this)">' + u.l + '</span>').join("");
+    grid.innerHTML +=
+      '<div class="pcard fade-up" onclick="openProductDetail(\'' + id + '\')" style="cursor:pointer;">' +
+        '<div class="pc-img">' +
+          (d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '') +
+          (d.originalPrice && d.originalPrice > d.price ? '<div class="badge-discount">-' + Math.round((1 - d.price/d.originalPrice)*100) + '%</div>' : '') +
+          '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' +
+          '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' +
+          '<img src="' + d.image + '" alt="' + id + '" loading="lazy" onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
+          '<button class="pc-quickview" onclick="event.stopPropagation();openProductDetail(\'' + id + '\')">👁️ Quick View</button>' +
+        '</div>' +
+        '<div class="pc-body">' +
+          '<div class="pc-name">' + id + '</div>' +
+          '<div class="stock-indicator ' + (d.stock === 0 ? "stock-out" : d.stock <= 5 ? "stock-low" : "stock-in") + '">' +
+            (d.stock === 0 ? "🔴 Out of Stock" : d.stock <= 5 ? "🟡 Only " + d.stock + " Left!" : "🟢 In Stock") +
+          '</div>' +
+          '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div>' +
+          '<div class="pc-price-row">' +
+            '<div class="pc-price">₹<span id="price-' + id + '">' + d.price + '</span></div>' +
+            (d.originalPrice && d.originalPrice > d.price ? '<span class="pc-price-original">₹' + d.originalPrice + '</span><span class="pc-discount-pct">-' + Math.round((1-d.price/d.originalPrice)*100) + '%</span>' : '') +
+          '</div>' +
+          '<div class="pc-unit">per ' + (d.unit||"kg") + '</div>' +
+          '<div class="wpills">' + wp + '</div>' +
+          '<div class="pc-actions">' +
+            '<div class="qty-ctrl">' +
+              '<button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',-1)">−</button>' +
+              '<span class="qnum" id="qty-' + id + '">' + (cart[id] ? cart[id].qty : 0) + '</span>' +
+              '<button class="qbtn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">+</button>' +
+            '</div>' +
+            (d.stock === 0 ? '<button class="notify-btn" onclick="event.stopPropagation();notifyMe(\'' + id + '\')">🔔 Notify Me</button>' : '<button class="add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>') +
+          '</div>' +
+          '<div class="pc-live" id="total-' + id + '"></div>' +
+        '</div>' +
+      '</div>';
   }
   document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
 }
