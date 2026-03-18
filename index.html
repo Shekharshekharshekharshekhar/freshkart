@@ -1563,6 +1563,16 @@ body.dark .sum-total{color:#2ecc71;}
     <button class="info-close-btn" onclick="closeInfoModal()">Close</button>
   </div>
 </div>
+  <!-- NOTIFICATION PERMISSION BANNER -->
+<div id="notifBanner" style="display:none;position:fixed;bottom:75px;left:12px;right:12px;background:#fff;border:2px solid var(--green);border-radius:16px;padding:14px 16px;display:none;align-items:center;gap:12px;z-index:8888;box-shadow:0 8px 28px rgba(0,0,0,0.15);font-family:'Poppins',sans-serif;">
+  <span style="font-size:28px;">🔔</span>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:700;">Daily Deals Notifications</div>
+    <div style="font-size:11px;color:#888;">Har roz best offers paao directly phone pe!</div>
+  </div>
+  <button onclick="requestNotificationPermission();document.getElementById('notifBanner').style.display='none'" style="background:var(--green);color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;">Enable</button>
+  <button onclick="document.getElementById('notifBanner').style.display='none';localStorage.setItem('notifDismissed','1')" style="background:none;border:none;font-size:18px;color:#aaa;cursor:pointer;">✕</button>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -3127,7 +3137,135 @@ window.submitPdReview = async () => {
 function isGramUnit(unit) {
   return unit && /^\d+g$/.test(unit.trim());
 }
+/* ═══ PUSH NOTIFICATIONS ═══ */
+const VAPID_KEY = 'YAHAN_APNI_VAPID_KEY_PASTE_KARO'; // Step 1 se
 
+let messaging = null;
+
+async function initPushNotifications() {
+  try {
+    const { getMessaging, getToken, onMessage } = await import(
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js'
+    );
+    messaging = getMessaging(app);
+
+    // Foreground messages handle karo
+    onMessage(messaging, (payload) => {
+      showToast('🔔 ' + payload.notification.title + ': ' + payload.notification.body, 'info', 5000);
+    });
+
+  } catch(e) {
+    console.log('Messaging init error:', e);
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  
+  const permission = await Notification.requestPermission();
+  
+  if (permission === 'granted') {
+    await saveUserToken();
+    showToast('🔔 Notifications enabled! You\'ll get daily deals!', 'success', 4000);
+  }
+}
+
+async function saveUserToken() {
+  if (!messaging) return;
+  
+  try {
+    const { getToken } = await import(
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js'
+    );
+    
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+    
+    if (token && currentUser) {
+      // Token Firebase mein save karo
+      await addDoc(collection(db, 'pushTokens'), {
+        token,
+        userId: currentUser.uid,
+        createdAt: new Date(),
+        platform: navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
+      });
+    }
+  } catch(e) {
+    console.log('Token error:', e);
+  }
+}
+
+// Abandoned cart check — 30 min baad
+function startAbandonedCartTimer() {
+  let cartTimer = null;
+  
+  // Cart change pe timer reset karo
+  const originalCalcTotal = calcTotal;
+  window._lastCartActivity = Date.now();
+  
+  setInterval(async () => {
+    const timeSince = Date.now() - window._lastCartActivity;
+    const thirtyMin = 30 * 60 * 1000;
+    
+    if (timeSince > thirtyMin && Object.keys(cart).some(id => cart[id].qty > 0)) {
+      // Cart abandoned — notification bhejo
+      await sendAbandonedCartNotification();
+      window._lastCartActivity = Date.now(); // Reset timer
+    }
+  }, 5 * 60 * 1000); // Har 5 min check karo
+}
+
+async function sendAbandonedCartNotification() {
+  if (!currentUser) return;
+  
+  try {
+    // Current user ka token lo
+    const tokenSnap = await getDocs(
+      query(collection(db, 'pushTokens'), 
+        where('userId', '==', currentUser.uid))
+    );
+    
+    if (tokenSnap.empty) return;
+    
+    const tokens = tokenSnap.docs.map(d => d.data().token);
+    const itemCount = Object.values(cart).filter(c => c.qty > 0).length;
+    
+    await fetch('/.netlify/functions/send-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tokens,
+        title: '🛒 Cart mein items hain!',
+        body: itemCount + ' item(s) cart mein hain — order complete karo aur 30 min mein delivery pao!',
+        data: { type: 'abandoned_cart' }
+      })
+    });
+  } catch(e) {
+    console.log('Abandoned cart notification error:', e);
+  }
+}
+
+// New product notification (admin panel se call hoga)
+window.sendNewProductNotification = async (productName, price) => {
+  try {
+    const tokensSnap = await getDocs(collection(db, 'pushTokens'));
+    const tokens = tokensSnap.docs.map(d => d.data().token).filter(Boolean);
+    
+    if (!tokens.length) return;
+    
+    await fetch('/.netlify/functions/send-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tokens,
+        title: '🌿 Naya Product!',
+        body: productName + ' ab available hai — sirf ₹' + price + ' mein!',
+        data: { type: 'new_product' }
+      })
+    });
+  } catch(e) {
+    console.log('New product notification error:', e);
+  }
+};
 function loadProducts() {
  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
@@ -3153,6 +3291,17 @@ if (!cart[d.id] || cart[d.id].qty === 0) {
     renderRecommended(); 
   });
 }
+  // Push notifications initialize karo
+initPushNotifications();
+startAbandonedCartTimer();
+
+// 5 sec baad notification banner dikhao
+setTimeout(() => {
+  if (Notification.permission === 'default' && !localStorage.getItem('notifDismissed')) {
+    const banner = document.getElementById('notifBanner');
+    if (banner) banner.style.display = 'flex';
+  }
+}, 5000);
 /* ── SOCIAL PROOF ── */
 function animCount(id, target, suffix, duration) {
   const el = document.getElementById(id);
