@@ -3127,9 +3127,7 @@ window.submitPdReview = async () => {
 function isGramUnit(unit) {
   return unit && /^\d+g$/.test(unit.trim());
 }
-  function isGramUnit(unit) {
-  return unit && /^\d+g$/.test(unit.trim());
-}
+  
 function loadProducts() {
  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
