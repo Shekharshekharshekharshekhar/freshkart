@@ -3138,7 +3138,7 @@ function loadProducts() {
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
    const _unitStr = (data.unit || "");
-const _isGram = _unitStr.isGramUnit();
+
 const _initG = _isGram ? (parseInt(_unitStr)||100) : 0.5;
 // HAMESHA fresh set karo agar qty 0 hai
 if (!cart[d.id] || cart[d.id].qty === 0) {
