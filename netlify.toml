@@ -15,8 +15,6 @@
   for = "/manifest.json"
   [headers.values]
     Cache-Control = "no-cache"
-[build]
-  functions = "netlify/functions"
 
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
