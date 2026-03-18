@@ -1891,7 +1891,7 @@ window.openProductDetail = (id) => {
   const p = allP[id];
   if (!p) return;
   pdCurrentId = id;
-const _gb = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit)||100) : 0;
+const _gb = isGramUnit(p.unit) ? (parseInt(p.unit)||100) : 0;
 pdSelectedWeight = cart[id] ? cart[id].selectedWeight || (_gb||1) : (_gb||1);
 
  // Main image set karo
@@ -1903,7 +1903,7 @@ pdSelectedWeight = cart[id] ? cart[id].selectedWeight || (_gb||1) : (_gb||1);
   renderPdGallery(p, id);
   document.getElementById("pd-category").textContent = p.category || "Vegetables";
   document.getElementById("pd-name").textContent = id;
- const _initUnit = pdSelectedWeight >= 1000 ? (pdSelectedWeight/1000)+"kg" : pdSelectedWeight+(p.unit && p.isGramUnit(unit) ? "g" : "kg");
+const _initUnit = pdSelectedWeight >= 1000 ? (pdSelectedWeight/1000)+"kg" : pdSelectedWeight+(isGramUnit(p.unit) ? "g" : "kg");
 document.getElementById("pd-unit").textContent = _initUnit;
 
   const hot = document.getElementById("pd-hot");
@@ -1911,7 +1911,7 @@ document.getElementById("pd-unit").textContent = _initUnit;
 
   // Price
   const priceEl = document.getElementById("pd-price");
-const _gb2 = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit)||100) : 0;
+const _gb2 = isGramUnit(p.unit) ? (parseInt(p.unit)||100) : 0;
 const basePrice = _gb2 > 0 ? (p.price / _gb2) * pdSelectedWeight : p.price * pdSelectedWeight;
   priceEl.textContent = basePrice.toFixed(0);
 
@@ -1923,7 +1923,7 @@ const basePrice = _gb2 > 0 ? (p.price / _gb2) * pdSelectedWeight : p.price * pdS
   document.getElementById("pd-rating-text").textContent = p.ratingCount > 0 ? rv + " (" + p.ratingCount + " reviews)" : "No ratings yet";
 
   // Weight pills
- const gBase = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit) || 100) : 0;
+const gBase = isGramUnit(p.unit) ? (parseInt(p.unit) || 100) : 0;
 const units = gBase > 0
   ? [
       {v: gBase,     l: gBase + "g"},
@@ -2047,10 +2047,10 @@ window.pdSelectWeight = (weight, el) => {
     cart[pdCurrentId] = cart[pdCurrentId] || { qty: 0, price: allP[pdCurrentId].price, selectedWeight: 1 };
     cart[pdCurrentId].selectedWeight = weight;
     const p = allP[pdCurrentId];
-   const _gb3 = p.unit && p.isGramUnit(unit) ? (parseInt(p.unit)||100) : 0;
+  const _gb3 = isGramUnit(p.unit) ? (parseInt(p.unit)||100) : 0;
 const newPrice = _gb3 > 0 ? (p.price / _gb3) * weight : p.price * weight;
     document.getElementById("pd-price").textContent = newPrice.toFixed(0);
-    document.getElementById("pd-unit").textContent = weight >= 1000 ? (weight/1000) + "kg" : weight + (p.unit && p.isGramUnit(unit) ? "g" : "kg");
+   document.getElementById("pd-unit").textContent = weight >= 1000 ? (weight/1000) + "kg" : weight + (isGramUnit(p.unit) ? "g" : "kg");
     updatePdLiveTotal();
   }
 };
@@ -3123,11 +3123,11 @@ window.submitPdReview = async () => {
     showToast('Could not submit review. Try again!', 'error');
   }
 };
-  // GRAM CHECK — "kg" ko gram nahi maanna
+ // GRAM CHECK — "kg" ko gram nahi maanna
 function isGramUnit(unit) {
   return unit && /^\d+g$/.test(unit.trim());
 }
-  
+
 function loadProducts() {
  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
@@ -3137,8 +3137,8 @@ function loadProducts() {
       const cat = data.category || "Vegetables";
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
-   const _unitStr = (data.unit || "");
-
+const _unitStr = (data.unit || "");
+const _isGram = isGramUnit(_unitStr);
 const _initG = _isGram ? (parseInt(_unitStr)||100) : 0.5;
 // HAMESHA fresh set karo agar qty 0 hai
 if (!cart[d.id] || cart[d.id].qty === 0) {
@@ -3235,7 +3235,7 @@ function renderProducts(products) {
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
     const rt = d.ratingCount > 0 ? rv + " (" + d.ratingCount + ")" : "Rate it";
-   const _grd = d.unit && d.isGramUnit(unit) ? (parseInt(d.unit)||100) : 0;
+  const _grd = isGramUnit(d.unit) ? (parseInt(d.unit)||100) : 0;
 const units = _grd > 0
   ? [{v:_grd,l:_grd+"g"},{v:_grd*2,l:(_grd*2)+"g"},{v:_grd*4,l:(_grd*4)+"g"},{v:1000,l:"1kg"},{v:2000,l:"2kg"}]
   : [{v:0.5,l:"0.5kg"},{v:1,l:"1kg"},{v:2,l:"2kg"},{v:5,l:"5kg"}];
@@ -4118,5 +4118,4 @@ window.installPWA = async () => {
 </script>
 </body>
 </html>
-
 
