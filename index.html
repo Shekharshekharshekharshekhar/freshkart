@@ -3208,7 +3208,7 @@ async function saveUserToken() {
 
 // Abandoned cart check — 30 min baad
 // ✅ SAHI CODE
-unction startAbandonedCartTimer() {
+function startAbandonedCartTimer() {
   window._lastCartActivity = Date.now();
   setInterval(async () => {
     const timeSince = Date.now() - window._lastCartActivity;
