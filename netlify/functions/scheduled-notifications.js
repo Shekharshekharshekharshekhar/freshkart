@@ -5,45 +5,37 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    }),
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+    })
   });
 }
 
-// Yeh function daily 9am pe chalega
-exports.handler = async (event) => {
-  const db = admin.firestore();
-  
+exports.handler = async () => {
   try {
-    // Sabhi subscribed users ke tokens lo
-    const tokensSnap = await db.collection('pushTokens').get();
-    const tokens = [];
-    tokensSnap.forEach(doc => {
-      if (doc.data().token) tokens.push(doc.data().token);
+    // Saare tokens lo
+    const db = admin.firestore();
+    const snap = await db.collection('pushTokens').get();
+    const tokens = snap.docs.map(d => d.data().token).filter(Boolean);
+
+    if (!tokens.length) return { statusCode: 200, body: 'No tokens' };
+
+    const messages = [
+      { title: '🌿 Subah ki taazi sabziyan!', body: 'Aaj ke best deals — seedha farm se aapke ghar!' },
+      { title: '⚡ 30 Min Delivery!', body: 'Fresh vegetables abhi order karo — HariBasket!' },
+      { title: '🎟️ Aaj ka offer!', body: 'FRESH10 coupon use karo — 10% OFF milega!' },
+      { title: '🥬 Farm Fresh Available!', body: 'Aaj ki taazi sabziyan available hain. Order karo!' }
+    ];
+
+    // Random message pick karo
+    const msg = messages[Math.floor(Math.random() * messages.length)];
+
+    await admin.messaging().sendEachForMulticast({
+      notification: msg,
+      tokens: tokens
     });
 
-    if (tokens.length === 0) return { statusCode: 200, body: 'No subscribers' };
-
-    // Daily deal message
-    const deals = [
-      { title: '🥬 Aaj Ka Deal!', body: 'Spinach 40% OFF — Sirf aaj! Order karo abhi 🛒' },
-      { title: '🍅 Fresh Arrivals!', body: 'Farm fresh tomatoes aa gaye — ₹29/kg only!' },
-      { title: '🌿 Morning Fresh!', body: 'Sabzi order karo, 30 min mein delivery!' },
-      { title: '💚 HariBasket Deal!', body: 'Free delivery above ₹299 — Order karo!' },
-    ];
-    
-    const deal = deals[new Date().getDay() % deals.length];
-
-    const message = {
-      notification: deal,
-      data: { type: 'daily_deal', url: '/' },
-      tokens,
-    };
-
-    await admin.messaging().sendEachForMulticast(message);
-    
-    return { statusCode: 200, body: 'Daily deal sent!' };
+    return { statusCode: 200, body: JSON.stringify({ success: true, sent: tokens.length }) };
   } catch (err) {
-    return { statusCode: 500, body: err.message };
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
