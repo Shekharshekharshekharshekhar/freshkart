@@ -3272,7 +3272,7 @@ window.sendNewProductNotification = async (productName, price) => {
   }
 };
 function loadProducts() {
- showSkeletons();
+  showSkeletons();
   onSnapshot(collection(db,"products"), snap => {
     allP = {}; cats.clear();
     snap.forEach(d => {
@@ -3280,20 +3280,33 @@ function loadProducts() {
       const cat = data.category || "Vegetables";
       allP[d.id] = { ...data, category: cat };
       cats.add(cat);
-const _unitStr = (data.unit || "");
-const _isGram = isGramUnit(_unitStr);
-const _initG = _isGram ? (parseInt(_unitStr)||100) : 0.5;
-// HAMESHA fresh set karo agar qty 0 hai
-if (!cart[d.id] || cart[d.id].qty === 0) {
-  cart[d.id] = { price: data.price, qty: cart[d.id] ? cart[d.id].qty : 0, selectedWeight: _initG };
-} else {
-  cart[d.id].price = data.price;
-  cart[d.id].selectedWeight = parseFloat(cart[d.id].selectedWeight) || _initG;
-}
+      const _unitStr = (data.unit || "");
+      const _isGram = isGramUnit(_unitStr);
+      const _initG = _isGram ? (parseInt(_unitStr)||100) : 0.5;
+      if (!cart[d.id] || cart[d.id].qty === 0) {
+        cart[d.id] = { price: data.price, qty: cart[d.id] ? cart[d.id].qty : 0, selectedWeight: _initG };
+      } else {
+        cart[d.id].price = data.price;
+        cart[d.id].selectedWeight = parseFloat(cart[d.id].selectedWeight) || _initG;
+      }
     });
+
+    // ✅ NEW PRODUCT AUTO NOTIFICATION
+    snap.docChanges().forEach(async (change) => {
+      if (change.type === 'added' && Object.keys(allP).length > 0) {
+        const newProduct = change.doc.data();
+        const productName = change.doc.id;
+        const addedAt = newProduct.createdAt?.toDate?.();
+        const isNew = addedAt && (Date.now() - addedAt.getTime()) < 60000;
+        if (isNew) {
+          await sendNewProductNotification(productName, newProduct.price);
+        }
+      }
+    });
+
     renderPills();
     applyFilters();
-    renderRecommended(); 
+    renderRecommended();
   });
 }
   // Service Worker register karo
