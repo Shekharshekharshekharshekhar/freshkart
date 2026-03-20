@@ -3224,7 +3224,7 @@ function startAbandonedCartTimer() {
       // Cart abandoned — notification bhejo
       await sendAbandonedCartNotification();
       window._lastCartActivity = Date.now(); // Reset timer
-    }
+    },
    5 * 60 * 1000); // Har 5 min check karo
 }
 
