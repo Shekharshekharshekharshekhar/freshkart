@@ -3225,7 +3225,7 @@ function startAbandonedCartTimer() {
       await sendAbandonedCartNotification();
       window._lastCartActivity = Date.now(); // Reset timer
     }
-  }, 5 * 60 * 1000); // Har 5 min check karo
+   5 * 60 * 1000); // Har 5 min check karo
 }
 
 async function sendAbandonedCartNotification() {
