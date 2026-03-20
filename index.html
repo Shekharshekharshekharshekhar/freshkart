@@ -2046,7 +2046,7 @@ function renderPeopleAlsoBought(productId) {
   if (!others.length) { row.parentElement.style.display = 'none'; return; }
   row.parentElement.style.display = 'block';
   row.innerHTML = others.map(([id, prod]) => {
- const safeId = id.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+ const safeId = id.replace(/'/g, "");
  return '<div class="pab-card" onclick="closeProductDetail();setTimeout(function(){openProductDetail(\\'' + safeId + '\\')},300)">' +
       '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
 '<div class="pab-card-body">' +
