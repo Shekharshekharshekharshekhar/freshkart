@@ -1335,7 +1335,28 @@ await setDoc(doc(db, "products", name), { price, unit, image, images, category, 
   ["p-name","p-price","p-unit","p-image","p-image2","p-image3","p-category"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
   addUploadedImages = [];
   renderAddPreviews();
-  toast("✅ Product added: " + name);
+  // ✅ NOTIFICATION BHEJO
+try {
+  const tokensSnap = await getDocs(collection(db, 'pushTokens'));
+  const tokens = tokensSnap.docs.map(d => d.data().token).filter(Boolean);
+  if (tokens.length) {
+    await fetch('https://haribasket.netlify.app/.netlify/functions/send-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tokens,
+        title: '🌿 Naya Product!',
+        body: name + ' ab available hai — sirf ₹' + price + ' mein!',
+        data: { type: 'new_product' }
+      })
+    });
+    toast("🔔 " + tokens.length + " customers ko notify kiya!");
+  }
+} catch(e) {
+  console.log('Notification error:', e);
+}
+
+toast("✅ Product added: " + name);
 };
 
 window.updatePrice = async id => {
