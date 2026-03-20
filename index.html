@@ -770,6 +770,11 @@ body.dark .sum-total{color:#2ecc71;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
 .notify-btn{width:100%;padding:8px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:11px;font-size:12px;font-weight:700;margin-top:4px;}
 /* WHATSAPP FLOAT */
+  @media(max-width:768px) {
+  #notifBanner {
+    bottom: 70px !important;
+  }
+}
 .wa-float{position:fixed;bottom:80px;left:15px;background:#25D366;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;border:none;box-shadow:0 5px 20px rgba(37,211,102,0.5);z-index:800;text-decoration:none;animation:waPulse 2s infinite;}
 @keyframes waPulse{0%,100%{box-shadow:0 5px 20px rgba(37,211,102,0.5);}50%{box-shadow:0 5px 30px rgba(37,211,102,0.8);}}
 @media(max-width:768px){.wa-float{bottom:70px;width:48px;height:48px;font-size:22px;}}
@@ -1560,7 +1565,21 @@ body.dark .sum-total{color:#2ecc71;}
   </div>
 </div>
   <!-- NOTIFICATION PERMISSION BANNER -->
-<div id="notifBanner" style="display:none;position:fixed;bottom:75px;left:12px;right:12px;background:#fff;border:2px solid var(--green);border-radius:16px;padding:14px 16px;display:none;align-items:center;gap:12px;z-index:8888;box-shadow:0 8px 28px rgba(0,0,0,0.15);font-family:'Poppins',sans-serif;">
+<div id="notifBanner" style="
+  display:none;
+  position:fixed;
+  bottom:75px;
+  left:12px;
+  right:12px;
+  background:#fff;
+  border:2px solid var(--green);
+  border-radius:16px;
+  padding:14px 16px;
+  align-items:center;
+  gap:12px;
+  z-index:8889;
+  box-shadow:0 8px 28px rgba(0,0,0,0.15);
+  font-family:'Poppins',sans-serif;">
   <span style="font-size:28px;">🔔</span>
   <div style="flex:1;">
     <div style="font-size:13px;font-weight:700;">Daily Deals Notifications</div>
@@ -3289,8 +3308,11 @@ startAbandonedCartTimer();
 // 5 sec baad notification banner dikhao
 setTimeout(() => {
   if (Notification.permission === 'default' && !localStorage.getItem('notifDismissed')) {
-    const banner = document.getElementById('notifBanner');
-    if (banner) banner.style.display = 'flex';
+   const banner = document.getElementById('notifBanner');
+if (banner) {
+  banner.style.display = 'flex';
+  banner.style.alignItems = 'center';
+}
   }
 }, 5000);
 /* ── SOCIAL PROOF ── */
