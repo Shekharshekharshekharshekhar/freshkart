@@ -3257,7 +3257,7 @@ window.sendNewProductNotification = async (productName, price) => {
     
     if (!tokens.length) return;
     
-    await fetch('/.netlify/functions/send-notification', {
+   await fetch('https://haribasket.netlify.app/.netlify/functions/send-notification', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
