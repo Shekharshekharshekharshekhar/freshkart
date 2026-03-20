@@ -2,10 +2,6 @@
 <html lang="en">
 <head>
   <!-- head mein add karo -->
-<link rel="preload" as="image"
-  href="https://images.unsplash.com/
-photo-1542838132-92c53300491e
-?w=800&q=60">
   <link rel="manifest" href="/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1772,11 +1768,7 @@ async function loadOrders() {
     const orders = [];
   snap.forEach(d => {
   const data = d.data();
-  if (
-    data.userId === currentUser.uid ||
-    data.userId === "guest" ||
-    !data.userId
-  ) {
+ if (data.userId === currentUser.uid) {
     orders.push({ id: d.id, ...data });
   }
 });
@@ -2036,8 +2028,8 @@ function renderPeopleAlsoBought(productId) {
   row.parentElement.style.display = 'block';
   row.innerHTML = others.map(([id, prod]) =>
     '<div class="pab-card" onclick="closeProductDetail();setTimeout(()=>openProductDetail(\'' + id + '\'),300)">' +
-      '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
-      '<div class="pab-card-body">' +
+      '<img src="' + w.image + '" alt="' + w.productId + '" loading="lazy">' +
+'<div class="wl-card-info">' +
         '<div class="pab-card-name">' + id + '</div>' +
         '<div class="pab-card-price">₹' + prod.price + '</div>' +
       '</div>' +
@@ -2602,7 +2594,6 @@ window.goToSlide = window.pbGo;
 
 renderOffersBanner(defaultBanners);
 // Banners load karo
-renderOffersBanner(defaultBanners);
   /* ── RECENTLY VIEWED ── */
 let recentlyViewed = JSON.parse(localStorage.getItem('fkRecentViewed') || '[]');
 
@@ -4216,7 +4207,6 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 };
-localStorage.removeItem('fkCart_v2');
 cart = {};
 loadCart();
 loadCouponsFromFirebase();
