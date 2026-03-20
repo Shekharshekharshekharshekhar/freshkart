@@ -2045,8 +2045,9 @@ function renderPeopleAlsoBought(productId) {
     .slice(0, 6);
   if (!others.length) { row.parentElement.style.display = 'none'; return; }
   row.parentElement.style.display = 'block';
-  row.innerHTML = others.map(([id, prod]) =>
-   '<div class="pab-card" onclick="closeProductDetail();setTimeout(()=>openProductDetail(\'' + id + '\'),300)">' +
+  row.innerHTML = others.map(([id, prod]) => {
+ const safeId = id.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+ return '<div class="pab-card" onclick="closeProductDetail();setTimeout(function(){openProductDetail(\\'' + safeId + '\\')},300)">' +
       '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
 '<div class="pab-card-body">' +
         '<div class="pab-card-name">' + id + '</div>' +
@@ -2054,7 +2055,7 @@ function renderPeopleAlsoBought(productId) {
       '</div>' +
       '<button class="pab-add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>' +
     '</div>'
-  ).join('');
+ }).join('');
 }
 document.getElementById("productDetail").addEventListener("click", e => {
   if (e.target === document.getElementById("productDetail")) closeProductDetail();
@@ -3211,9 +3212,9 @@ function startAbandonedCartTimer() {
   let cartTimer = null;
   
   // Cart change pe timer reset karo
-  const originalCalcTotal = calcTotal;
   window._lastCartActivity = Date.now();
-  
+  function startAbandonedCartTimer() {
+ window._lastCartActivity = Date.now();
   setInterval(async () => {
     const timeSince = Date.now() - window._lastCartActivity;
     const thirtyMin = 30 * 60 * 1000;
@@ -4245,8 +4246,7 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 };
-loadCart();
-loadCouponsFromFirebase();
+
   // Back to Top
 window.addEventListener('scroll', () => {
   const btn = document.getElementById('backTop');
