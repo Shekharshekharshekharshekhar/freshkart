@@ -12,11 +12,27 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Background notification handle karo
 messaging.onBackgroundMessage((payload) => {
   const { title, body } = payload.notification;
   self.registration.showNotification(title, {
-    body: body,
+    body,
     icon: '/icon-192.png',
-    badge: '/icon-192.png'
+    badge: '/icon-192.png',
+    data: payload.data,
+    actions: [
+      { action: 'open', title: '🛒 Order Now' },
+      { action: 'close', title: 'Close' }
+    ]
   });
+});
+
+// Notification click handle karo
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  if (event.action === 'open' || !event.action) {
+    event.waitUntil(
+      clients.openWindow('https://haribasket.netlify.app')
+    );
+  }
 });
