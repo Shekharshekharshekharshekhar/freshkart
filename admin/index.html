@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>HariBasket Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
+:root{--bg:#0f2027;--bg2:#1a3a4a;--card:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.15);--green:#00e676;--red:#ff5252;--orange:#ff9800;--blue:#2196f3;--purple:#9c27b0;--sidebar-w:220px;}
+body{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff;min-height:100vh;}
+body.light{background:#f0f4f8;color:#1a1a1a;}
+body.light .card{background:#fff;color:#1a1a1a;box-shadow:0 4px 15px rgba(0,0,0,0.08);}
+body.light header{background:#27ae60;}
+body.light .sidebar{background:#1a3a4a;}
+body.light input,body.light select,body.light textarea{background:#f5f5f5;color:#1a1a1a;border-color:#ddd;}
+body.light .mob-bottom-nav{background:#1a3a4a;}
+body.light .mob-bnav-item{color:#fff;}
+body.light .mob-bnav-item.active{color:var(--green);}
+
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-card{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:24px;padding:40px;width:100%;max-width:380px;text-align:center;}
+.login-card h2{font-size:24px;margin-bottom:6px;color:var(--green);}
+.login-card p{font-size:13px;color:#aaa;margin-bottom:24px;}
+.login-logo{font-size:48px;margin-bottom:12px;}
+.inp{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;margin-bottom:12px;outline:none;transition:0.2s;}
+.inp:focus{border-color:var(--green);background:rgba(255,255,255,0.12);}
+.login-btn-main{width:100%;padding:13px;background:linear-gradient(135deg,#27ae60,#00e676);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;}
+.login-err{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+
+/* LAYOUT */
+#adminPanel{display:none;}
+header{background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;}
+.header-left{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.hbtn{padding:7px 12px;border:none;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;}
+.hamburger{display:none;background:rgba(255,255,255,0.1);border:none;color:#fff;width:36px;height:36px;border-radius:10px;font-size:18px;cursor:pointer;align-items:center;justify-content:center;}
+
+/* SIDEBAR OVERLAY */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:299;}
+.sidebar-overlay.show{display:block;}
+
+/* SIDEBAR */
+.main-wrap{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:var(--sidebar-w);background:rgba(0,0,0,0.3);padding:16px 0;flex-shrink:0;border-right:1px solid var(--border);transition:transform 0.3s ease;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;transition:0.2s;font-size:14px;border-left:3px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,0.08);}
+.nav-item.active{background:rgba(0,230,118,0.12);border-left-color:var(--green);color:var(--green);}
+.nav-icon{font-size:18px;}
+
+/* CONTENT */
+.content{flex:1;padding:16px;overflow-y:auto;min-width:0;}
+.page{display:none;}
+.page.active{display:block;}
+.page-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px;}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+.sum-box{border-radius:14px;padding:16px;text-align:center;}
+.sum-box h4{font-size:11px;opacity:0.85;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.sum-box h2{font-size:24px;font-weight:800;}
+.g1{background:linear-gradient(135deg,#2196f3,#21cbf3);}
+.g2{background:linear-gradient(135deg,#00c853,#69f0ae);}
+.g3{background:linear-gradient(135deg,#ff9800,#ffc107);}
+.g4{background:linear-gradient(135deg,#e74c3c,#ff6b6b);}
+.g5{background:linear-gradient(135deg,#9c27b0,#e040fb);}
+.g6{background:linear-gradient(135deg,#00bcd4,#00e5ff);}
+
+/* BUTTONS */
+.btn{padding:9px 14px;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;transition:0.2s;touch-action:manipulation;}
+.btn:active{transform:scale(0.96);}
+.btn-green{background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;}
+.btn-blue{background:linear-gradient(135deg,#2196f3,#42a5f5);color:#fff;}
+.btn-red{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;}
+.btn-orange{background:linear-gradient(135deg,#e67e22,#f39c12);color:#fff;}
+.btn-purple{background:linear-gradient(135deg,#9c27b0,#ba68c8);color:#fff;}
+
+/* TABLE — scrollable on mobile */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:500px;}
+.tbl th{padding:10px 12px;background:rgba(255,255,255,0.08);text-align:left;font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.tbl tr:hover td{background:rgba(255,255,255,0.04);}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-pending{background:#fff8e1;color:#e67e22;}
+.badge-packed{background:#e3f2fd;color:#2196f3;}
+.badge-delivered{background:#e8f5e9;color:#27ae60;}
+.badge-cancelled{background:#fce4ec;color:#e74c3c;}
+.badge-ofd{background:#e8eaf6;color:#5c6bc0;}
+/* STOCK BADGES */
+.stock-ok{color:#00e676;font-weight:700;}
+.stock-low{color:#ff9800;font-weight:700;}
+.stock-out{color:#ff5252;font-weight:700;}
+/* STOCK ALERT BANNER */
+.stock-alert-banner{background:linear-gradient(135deg,rgba(255,82,82,0.15),rgba(255,152,0,0.1));border:1px solid rgba(255,82,82,0.4);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:none;}
+.stock-alert-banner.show{display:block;}
+.stock-alert-title{font-size:12px;font-weight:700;color:#ff5252;margin-bottom:8px;}
+.stock-alert-item{font-size:12px;color:#ffcdd2;padding:3px 0;display:flex;justify-content:space-between;}
+/* BULK SELECT */
+.bulk-toolbar{
+  display:none;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  background:linear-gradient(135deg,rgba(33,150,243,0.15),rgba(0,230,118,0.1));
+  border:1px solid rgba(33,150,243,0.4);
+  border-radius:14px;
+  padding:10px 14px;
+  margin-bottom:12px;
+}
+.bulk-toolbar.show{display:flex;}
+.bulk-count{font-size:13px;font-weight:700;color:#00e676;margin-right:4px;}
+.order-card.selected{border-color:#2196f3;background:rgba(33,150,243,0.08);}
+.order-card .bulk-chk{
+  width:18px;height:18px;
+  accent-color:#2196f3;
+  cursor:pointer;
+  flex-shrink:0;
+  margin-right:4px;
+}
+.select-mode-btn{
+  padding:7px 12px;border:1px solid rgba(255,255,255,0.2);border-radius:9px;
+  background:rgba(255,255,255,0.08);color:#fff;font-size:12px;font-weight:700;
+  cursor:pointer;transition:0.2s;
+}
+.select-mode-btn.active{background:rgba(33,150,243,0.3);border-color:#2196f3;color:#2196f3;}
+/* PRINT INVOICE */
+@media print{
+  body *{visibility:hidden;}
+  #invoicePrint,#invoicePrint *{visibility:visible;}
+  #invoicePrint{position:fixed;left:0;top:0;width:100%;background:#fff;color:#000;padding:30px;font-family:'Segoe UI',Arial,sans-serif;}
+}
+
+/* ══ DATE FILTER PILLS ══ */
+.date-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.date-pill{padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);color:#ccc;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;}
+.date-pill:hover{background:rgba(0,230,118,0.12);border-color:rgba(0,230,118,0.4);color:#fff;}
+.date-pill.active{background:linear-gradient(135deg,rgba(0,230,118,0.25),rgba(33,150,243,0.2));border-color:var(--green);color:var(--green);box-shadow:0 2px 12px rgba(0,230,118,0.2);}
+body.light .date-pill{background:#f0f4f8;color:#555;border-color:#ddd;}
+body.light .date-pill.active{background:linear-gradient(135deg,#e8f5e9,#e3f2fd);border-color:#27ae60;color:#27ae60;}
+
+/* ══ FILTERED STATS ROW ══ */
+.filtered-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px;}
+.fstat-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 10px;text-align:center;transition:0.2s;}
+.fstat-box:hover{background:rgba(255,255,255,0.09);}
+.fstat-label{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.fstat-value{font-size:20px;font-weight:800;}
+.fstat-green{color:#00e676;}
+.fstat-blue{color:#2196f3;}
+.fstat-orange{color:#ff9800;}
+.fstat-red{color:#ff5252;}
+
+/* ══ IMAGE UPLOAD ZONE ══ */
+.img-upload-zone{
+  border:2px dashed rgba(0,230,118,0.35);
+  border-radius:14px;
+  padding:20px 16px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.25s;
+  background:rgba(0,230,118,0.04);
+  margin-bottom:10px;
+  position:relative;
+}
+.img-upload-zone:hover,.img-upload-zone.drag-over{border-color:var(--green);background:rgba(0,230,118,0.1);}
+.img-upload-zone input[type=file]{display:none;}
+.img-upload-icon{font-size:28px;margin-bottom:6px;}
+.img-upload-text{font-size:12px;color:#aaa;line-height:1.5;}
+.img-upload-text b{color:var(--green);}
+.img-upload-previews{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.img-upload-thumb{position:relative;width:64px;height:64px;}
+.img-upload-thumb img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:2px solid var(--green);}
+.img-upload-thumb .remove-img{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#e74c3c;border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.upload-toggle{display:flex;gap:6px;margin-bottom:10px;background:rgba(255,255,255,0.05);border-radius:10px;padding:4px;}
+.upload-tab{flex:1;padding:7px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;color:#aaa;transition:0.2s;border:none;background:none;}
+.upload-tab.active{background:rgba(0,230,118,0.2);color:var(--green);}
+
+/* ══ STOCK BADGE PILLS (enhanced) ══ */
+.stock-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.stock-pill-green{background:rgba(0,230,118,0.15);color:#00e676;border:1px solid rgba(0,230,118,0.3);}
+.stock-pill-orange{background:rgba(255,152,0,0.15);color:#ff9800;border:1px solid rgba(255,152,0,0.3);}
+.stock-pill-red{background:rgba(255,82,82,0.15);color:#ff5252;border:1px solid rgba(255,82,82,0.3);animation:pulse-red 2s infinite;}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(255,82,82,0.3);}50%{box-shadow:0 0 0 4px rgba(255,82,82,0);}}
+
+/* ══ ORDER NOTES ══ */
+.order-note-display{
+  background:rgba(255,193,7,0.08);
+  border:1px solid rgba(255,193,7,0.25);
+  border-radius:9px;
+  padding:8px 12px;
+  font-size:12px;
+  color:#ffc107;
+  margin-bottom:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+.order-note-display .note-text{flex:1;line-height:1.5;}
+.edit-note-btn{background:none;border:none;color:#ffc107;cursor:pointer;font-size:12px;flex-shrink:0;opacity:0.7;padding:0;}
+.edit-note-btn:hover{opacity:1;}
+.note-input-wrap{display:flex;gap:6px;margin-bottom:8px;align-items:flex-end;}
+.note-textarea{flex:1;padding:8px 12px;border-radius:9px;border:1px solid rgba(255,193,7,0.4);background:rgba(255,193,7,0.06);color:#fff;font-size:12px;outline:none;resize:none;font-family:inherit;min-height:36px;}
+.note-textarea:focus{border-color:#ffc107;}
+.note-textarea::placeholder{color:#888;}
+
+/* SEARCH */
+.search-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.search-inp{flex:1;min-width:160px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;outline:none;}
+.search-inp:focus{border-color:var(--green);}
+.filter-sel{padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;outline:none;cursor:pointer;}
+
+/* PRODUCT FORM */
+.prod-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px;}
+.form-inp{padding:10px 13px;border-radius:11px;border:1px solid var(--border);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;outline:none;width:100%;}
+.form-inp:focus{border-color:var(--green);}
+.form-inp::placeholder{color:#888;}
+
+/* ORDER CARD */
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
+.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.order-id{font-size:12px;color:#aaa;}
+.order-id span{color:var(--green);font-weight:700;}
+.order-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.order-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px;}
+.oi-item{background:rgba(255,255,255,0.05);border-radius:9px;padding:9px;}
+.oi-label{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;}
+.oi-value{font-size:13px;font-weight:600;}
+.order-items-list{font-size:12px;color:#ccc;margin-bottom:10px;}
+.oi-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:10px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:25px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;}
+
+/* MOBILE BOTTOM NAV */
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(15,32,39,0.98);border-top:1px solid var(--border);backdrop-filter:blur(10px);z-index:300;justify-content:space-around;align-items:center;padding:6px 0;height:60px;}
+.mob-bnav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;border:none;background:none;color:#aaa;cursor:pointer;flex:1;font-family:inherit;transition:0.2s;border-radius:8px;}
+.mob-bnav-item.active{color:var(--green);}
+.mob-bnav-icon{font-size:19px;line-height:1;}
+.mob-bnav-label{font-size:9px;font-weight:600;}
+
+/* PRODUCT CARD ON MOBILE */
+.prod-item-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.prod-item-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;}
+.prod-item-img{width:56px;height:56px;object-fit:cover;border-radius:10px;flex-shrink:0;}
+.prod-item-info{flex:1;}
+.prod-item-name{font-size:14px;font-weight:700;margin-bottom:6px;}
+.prod-item-inputs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.prod-item-actions{display:flex;gap:8px;margin-top:10px;}
+
+/* ═══════════════════════════════════════
+   EDIT PRODUCT MODAL  (NEW)
+═══════════════════════════════════════ */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.75);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:linear-gradient(135deg,#0f2027,#203a43);
+  border:1px solid rgba(0,230,118,0.3);
+  border-radius:20px;
+  padding:20px;
+  width:100%;
+  max-width:520px;
+  max-height:90vh;
+  overflow-y:auto;
+  position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+body.light .modal-box{
+  background:#fff;
+  border-color:#27ae60;
+}
+.modal-title{
+  font-size:16px;
+  font-weight:800;
+  color:var(--green);
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.modal-close{
+  position:absolute;
+  top:14px;right:14px;
+  background:rgba(255,255,255,0.1);
+  border:none;
+  color:#fff;
+  width:32px;height:32px;
+  border-radius:50%;
+  font-size:16px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:0.2s;
+}
+.modal-close:hover{background:rgba(231,76,60,0.7);}
+.modal-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.modal-form .full-width{grid-column:1/-1;}
+.modal-label{font-size:11px;color:#aaa;margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:0.4px;}
+.modal-img-preview{
+  display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;
+}
+.modal-img-preview img{
+  width:64px;height:64px;object-fit:cover;border-radius:10px;
+  border:2px solid rgba(255,255,255,0.15);
+}
+.modal-img-preview img.has-src{border-color:var(--green);}
+.modal-footer{display:flex;gap:8px;}
+.modal-footer .btn{flex:1;padding:12px;font-size:13px;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  .sidebar{
+    position:fixed;
+    top:0;left:0;
+    height:100vh;
+    z-index:300;
+    transform:translateX(-100%);
+    padding-top:60px;
+    background:#0f2027;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .mob-bottom-nav{display:flex;}
+  .content{padding:12px 10px 70px;}
+  .summary-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .sum-box h2{font-size:20px;}
+  .sum-box h4{font-size:10px;}
+  .sum-box{padding:14px 8px;}
+  .page-title{font-size:16px;margin-bottom:12px;}
+  .order-info{grid-template-columns:repeat(2,1fr);}
+  .charts-grid{grid-template-columns:1fr;}
+  .prod-form{grid-template-columns:1fr 1fr;}
+  .search-bar{flex-direction:column;}
+  .search-inp{min-width:100%;}
+  .filter-sel{width:100%;}
+  .order-actions .btn{flex:1;text-align:center;padding:10px 8px;font-size:11px;}
+  .card{padding:12px;}
+  #toast{bottom:70px;font-size:12px;padding:10px 18px;}
+  .modal-form{grid-template-columns:1fr;}
+  .modal-form .full-width{grid-column:1/-1;}
+}
+
+@media(max-width:400px){
+  .summary-grid{grid-template-columns:repeat(2,1fr);}
+  .prod-form{grid-template-columns:1fr;}
+  .order-info{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginBox">
+  <div class="login-card">
+    <div class="login-logo">🧺</div>
+    <h2>HariBasket Admin</h2>
+    <p>Login to manage your store</p>
+    <input class="inp" type="email" id="adminEmail" placeholder="Admin Email" autocomplete="email">
+    <input class="inp" type="password" id="adminPass" placeholder="Password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="login-btn-main" onclick="doAdminLogin()">🔐 Login</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <header>
+    <div class="header-left">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+      🧺 HariBasket Admin
+    </div>
+    <div class="header-right">
+      <button class="hbtn" style="background:rgba(255,255,255,0.1);" onclick="toggleTheme()">🌙</button>
+      <button class="hbtn btn-red" onclick="doLogout()">🚪 <span class="desk-only">Logout</span></button>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <div class="main-wrap">
+    <div class="sidebar" id="sidebar">
+      <div class="nav-item active" onclick="showPage('dashboard',this);closeSidebar()"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('orders',this);closeSidebar()"><span class="nav-icon">📦</span> Orders</div>
+      <div class="nav-item" onclick="showPage('products',this);closeSidebar()"><span class="nav-icon">🥬</span> Products</div>
+      <div class="nav-item" onclick="showPage('analytics',this);closeSidebar()"><span class="nav-icon">📈</span> Analytics</div>
+      <div class="nav-item" onclick="showPage('customers',this);closeSidebar()"><span class="nav-icon">👥</span> Customers</div>
+      <div class="nav-item" onclick="showPage('reviews',this);loadReviews();closeSidebar()"><span class="nav-icon">⭐</span> Reviews</div>
+      <div class="nav-item" onclick="showPage('coupons',this);loadCoupons();closeSidebar()"><span class="nav-icon">🎟️</span> Coupons</div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">📊 Dashboard</div>
+
+        <!-- STOCK ALERT BANNER -->
+        <div class="stock-alert-banner" id="stockAlertBanner">
+          <div class="stock-alert-title">⚠️ Low / Out of Stock Alert</div>
+          <div id="stockAlertList"></div>
+        </div>
+
+        <!-- DATE FILTER PILLS -->
+        <div class="date-filter-bar">
+          <button class="date-pill active" id="dpill-today" onclick="setDateFilter('today')">Today</button>
+          <button class="date-pill" id="dpill-week" onclick="setDateFilter('week')">This Week</button>
+          <button class="date-pill" id="dpill-month" onclick="setDateFilter('month')">This Month</button>
+          <button class="date-pill" id="dpill-all" onclick="setDateFilter('all')">All Time</button>
+        </div>
+
+        <!-- FILTERED SUMMARY STATS -->
+        <div class="filtered-stats">
+          <div class="fstat-box"><div class="fstat-label">Orders</div><div class="fstat-value fstat-blue" id="fs-orders">0</div></div>
+          <div class="fstat-box"><div class="fstat-label">Revenue</div><div class="fstat-value fstat-green" id="fs-revenue">₹0</div></div>
+          <div class="fstat-box"><div class="fstat-label">Delivered</div><div class="fstat-value fstat-green" id="fs-delivered">0</div></div>
+          <div class="fstat-box"><div class="fstat-label">Pending</div><div class="fstat-value fstat-orange" id="fs-pending">0</div></div>
+          <div class="fstat-box"><div class="fstat-label">Cancelled</div><div class="fstat-value fstat-red" id="fs-cancelled">0</div></div>
+          <div class="fstat-box"><div class="fstat-label">Avg Order</div><div class="fstat-value fstat-blue" id="fs-avg">₹0</div></div>
+        </div>
+
+        <!-- ALL-TIME SUMMARY GRID -->
+        <div class="summary-grid">
+          <div class="sum-box g1"><h4>Total Orders</h4><h2 id="s-totalOrders">0</h2></div>
+          <div class="sum-box g2"><h4>Revenue</h4><h2 id="s-revenue">₹0</h2></div>
+          <div class="sum-box g3"><h4>Pending</h4><h2 id="s-pending">0</h2></div>
+          <div class="sum-box g4"><h4>Cancelled</h4><h2 id="s-cancelled">0</h2></div>
+          <div class="sum-box g5"><h4>Delivered</h4><h2 id="s-delivered">0</h2></div>
+          <div class="sum-box g6"><h4>Today</h4><h2 id="s-today">0</h2></div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📅 Today Summary</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+            <div class="oi-item"><div class="oi-label">Today Orders</div><div class="oi-value" id="d-todayOrders">0</div></div>
+            <div class="oi-item"><div class="oi-label">Today Revenue</div><div class="oi-value" id="d-todayRev">₹0</div></div>
+            <div class="oi-item"><div class="oi-label">COD Orders</div><div class="oi-value" id="d-cod">0</div></div>
+            <div class="oi-item"><div class="oi-label">Online Orders</div><div class="oi-value" id="d-online">0</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📦 Recent Orders</div>
+          <div id="recentOrders"></div>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div class="page" id="page-orders">
+        <div class="page-title">📦 Manage Orders
+          <button class="select-mode-btn" id="selectModeBtn" onclick="toggleSelectMode()" style="margin-left:auto;">☑️ Select</button>
+          <button class="btn btn-green" onclick="exportOrdersCSV()" style="font-size:11px;">⬇️ CSV</button>
+        </div>
+
+        <!-- BULK ACTION TOOLBAR -->
+        <div class="bulk-toolbar" id="bulkToolbar">
+          <span class="bulk-count" id="bulkCount">0 selected</span>
+          <button class="btn btn-green" onclick="bulkUpdateStatus('Delivered')">✅ Mark Delivered</button>
+          <button class="btn btn-blue" onclick="bulkUpdateStatus('Packed')">📦 Mark Packed</button>
+          <button class="btn btn-purple" onclick="bulkUpdateStatus('Out for Delivery')">🛵 Mark OFD</button>
+          <button class="btn btn-red" onclick="bulkDeleteOrders()">🗑️ Delete Selected</button>
+          <button class="btn" style="background:rgba(255,255,255,0.1);" onclick="clearSelection()">✕ Clear</button>
+          <button class="btn" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);" onclick="selectAllVisible()">Select All</button>
+        </div>
+
+        <div class="search-bar">
+          <input class="search-inp" id="orderSearch" placeholder="🔍 Search by Order ID, Name..." oninput="filterOrders()">
+          <select class="filter-sel" id="orderFilter" onchange="filterOrders()">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Packed">Packed</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <select class="filter-sel" id="paymentFilter" onchange="filterOrders()">
+            <option value="">All Payments</option>
+            <option value="COD">COD</option>
+            <option value="Online">Online</option>
+          </select>
+        </div>
+        <div id="ordersList"></div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="page" id="page-products">
+        <div class="page-title">🥬 Manage Products</div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">➕ Add New Product</div>
+          <div class="prod-form">
+            <input class="form-inp" id="p-name" placeholder="Product Name">
+            <input class="form-inp" type="number" id="p-price" placeholder="Price (₹)" inputmode="numeric">
+            <input class="form-inp" id="p-unit" placeholder="Unit (kg/g)">
+            <input class="form-inp" id="p-category" placeholder="Category">
+            <select class="form-inp" id="p-popular">
+              <option value="false">Normal</option>
+              <option value="true">Hot/Popular</option>
+            </select>
+          </div>
+
+          <!-- IMAGE INPUT TOGGLE -->
+          <div style="font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">📸 Product Images</div>
+          <div class="upload-toggle">
+            <button class="upload-tab active" id="tab-url" onclick="switchImgTab('url')">🔗 URL</button>
+            <button class="upload-tab" id="tab-upload" onclick="switchImgTab('upload')">📁 Upload Photo</button>
+          </div>
+
+          <!-- URL MODE -->
+          <div id="img-url-mode">
+            <input class="form-inp" id="p-image" placeholder="Main Image URL" style="margin-bottom:6px;">
+            <input class="form-inp" id="p-image2" placeholder="Image 2 (optional)" style="margin-bottom:6px;">
+            <input class="form-inp" id="p-image3" placeholder="Image 3 (optional)">
+          </div>
+
+          <!-- UPLOAD MODE -->
+          <div id="img-upload-mode" style="display:none;">
+            <div class="img-upload-zone" id="addUploadZone" onclick="document.getElementById('p-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleAddDrop(event)">
+              <input type="file" id="p-file-input" accept="image/*" multiple onchange="handleAddFiles(this.files)">
+              <div class="img-upload-icon">📷</div>
+              <div class="img-upload-text">
+                <b>Click ya drag</b> karke photos add karo<br>
+                <span style="font-size:11px;color:#666;">Max 3 images • JPG/PNG • Phone gallery supported</span>
+              </div>
+              <div class="img-upload-previews" id="add-img-previews"></div>
+            </div>
+            <div style="font-size:11px;color:#888;text-align:center;">⚠️ Photos temporarily base64 mein store honge (URL use karna recommended hai)</div>
+          </div>
+
+          <button class="btn btn-green" onclick="addProduct()" style="width:100%;padding:12px;margin-top:12px;">➕ Add Product</button>
+        </div>
+        <div class="search-bar">
+          <input class="search-inp" id="productSearch" placeholder="🔍 Search products..." oninput="filterProducts()">
+        </div>
+        <div id="productList"></div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="page" id="page-analytics">
+        <div class="page-title">📈 Analytics</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn btn-blue" onclick="setChartMode('monthly')">Monthly</button>
+          <button class="btn btn-orange" onclick="setChartMode('daily')">Daily</button>
+          <button class="btn btn-purple" onclick="setChartMode('weekly')">Weekly</button>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-wrap"><div class="chart-title">Sales Trend</div><canvas id="salesChart"></canvas></div>
+          <div class="chart-wrap"><div class="chart-title">COD vs Online</div><canvas id="paymentChart"></canvas></div>
+          <div class="chart-wrap"><div class="chart-title">Order Status</div><canvas id="statusChart"></canvas></div>
+          <div class="chart-wrap"><div class="chart-title">Top Products</div><canvas id="productChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="page" id="page-customers">
+        <div class="page-title">👥 Customer Insights</div>
+        <div class="tbl-wrap" id="customersList"></div>
+      </div>
+
+      <!-- COUPONS -->
+      <div class="page" id="page-coupons">
+        <div class="page-title">🎟️ Coupon Management</div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">➕ Create Coupon</div>
+          <div class="prod-form">
+            <input class="form-inp" id="c-code" placeholder="Coupon Code (e.g. SAVE10)" style="text-transform:uppercase;">
+            <select class="form-inp" id="c-type">
+              <option value="percent">Percent (%) OFF</option>
+              <option value="flat">Flat (₹) OFF</option>
+            </select>
+            <input class="form-inp" type="number" id="c-value" placeholder="Value" inputmode="numeric">
+            <input class="form-inp" type="number" id="c-minorder" placeholder="Min Order (₹)" inputmode="numeric">
+            <input class="form-inp" id="c-desc" placeholder="Description (e.g. 10% OFF)">
+          </div>
+          <button class="btn btn-green" onclick="createCoupon()" style="width:100%;padding:12px;">🎟️ Create Coupon</button>
+        </div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📋 Active Coupons</div>
+        <div id="couponsList"><p style="color:#aaa;text-align:center;padding:20px;">Loading...</p></div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="page" id="page-reviews">
+        <div class="page-title">⭐ Customer Reviews</div>
+        <div id="reviewsBody"><p style="color:#aaa;text-align:center;padding:40px;">Click Reviews tab to load...</p></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ORDER NOTE MODAL  ← NEW FEATURE
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal-box" style="max-width:400px;">
+    <button class="modal-close" onclick="closeNoteModal()">✕</button>
+    <div class="modal-title">📝 Order Note</div>
+    <div style="font-size:12px;color:#aaa;margin-bottom:10px;" id="note-order-label"></div>
+    <textarea class="note-textarea" id="noteTextarea" rows="4" placeholder="e.g. Customer ne call kiya, extra mirch nahi daalni..." style="width:100%;border-radius:10px;padding:10px 13px;border:1px solid rgba(255,193,7,0.4);background:rgba(255,193,7,0.06);color:#fff;font-size:13px;outline:none;resize:vertical;font-family:inherit;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-orange" onclick="saveNote()" style="flex:1;padding:12px;">💾 Save Note</button>
+      <button class="btn btn-red" onclick="deleteNote()" style="padding:12px 14px;">🗑️</button>
+      <button class="btn" style="background:rgba(255,255,255,0.1);padding:12px 14px;" onclick="closeNoteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     INVOICE PRINT MODAL  ← NEW FEATURE
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="invoiceModal">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="closeInvoiceModal()">✕</button>
+    <div class="modal-title">🧾 Order Invoice</div>
+    <div id="invoicePrint" style="background:#fff;color:#000;border-radius:12px;padding:20px;font-family:'Segoe UI',Arial,sans-serif;">
+      <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #27ae60;padding-bottom:12px;">
+        <div style="font-size:28px;">🧺</div>
+        <div style="font-size:18px;font-weight:800;color:#27ae60;">HariBasket</div>
+        <div style="font-size:11px;color:#666;">Fresh Vegetables | 30 Min Delivery</div>
+      </div>
+      <div id="inv-content"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-blue" onclick="window.print()" style="flex:1;padding:12px;">🖨️ Print</button>
+      <button class="btn" style="background:rgba(255,255,255,0.1);flex:1;padding:12px;" onclick="closeInvoiceModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     EDIT PRODUCT MODAL  ← NEW FEATURE
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEditModal()">✕</button>
+    <div class="modal-title">✏️ Edit Product: <span id="edit-modal-name" style="color:#fff;font-size:14px;"></span></div>
+
+    <!-- Live image preview -->
+    <div class="modal-img-preview" id="edit-img-preview"></div>
+
+    <div class="modal-form">
+      <!-- Product name (read-only label, shown for reference) -->
+      <div class="full-width">
+        <label class="modal-label">Product Name (ID — cannot change)</label>
+        <input class="form-inp" id="edit-name-display" disabled style="opacity:0.5;cursor:not-allowed;">
+      </div>
+
+      <div>
+        <label class="modal-label">Price (₹)</label>
+        <input class="form-inp" type="number" id="edit-price" placeholder="Price" inputmode="numeric">
+      </div>
+
+      <div>
+        <label class="modal-label">Unit (kg / g / piece…)</label>
+        <input class="form-inp" id="edit-unit" placeholder="e.g. kg">
+      </div>
+
+      <div>
+        <label class="modal-label">Stock Quantity</label>
+        <input class="form-inp" type="number" id="edit-stock" placeholder="Stock" inputmode="numeric">
+      </div>
+
+      <div>
+        <label class="modal-label">Category</label>
+        <input class="form-inp" id="edit-category" placeholder="e.g. Vegetables">
+      </div>
+
+      <div class="full-width">
+        <label class="modal-label">📸 Images</label>
+        <div class="upload-toggle" style="margin-bottom:8px;">
+          <button class="upload-tab active" id="edit-tab-url" onclick="switchEditImgTab('url')">🔗 URL</button>
+          <button class="upload-tab" id="edit-tab-upload" onclick="switchEditImgTab('upload')">📁 Upload</button>
+        </div>
+        <div id="edit-img-url-mode">
+          <input class="form-inp" id="edit-image" placeholder="Main Image URL" oninput="refreshEditPreview()" style="margin-bottom:6px;">
+          <input class="form-inp" id="edit-image2" placeholder="Image 2 URL" oninput="refreshEditPreview()" style="margin-bottom:6px;">
+          <input class="form-inp" id="edit-image3" placeholder="Image 3 URL" oninput="refreshEditPreview()">
+        </div>
+        <div id="edit-img-upload-mode" style="display:none;">
+          <div class="img-upload-zone" id="editUploadZone" onclick="document.getElementById('edit-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleEditDrop(event)">
+            <input type="file" id="edit-file-input" accept="image/*" multiple onchange="handleEditFiles(this.files)">
+            <div class="img-upload-icon">📷</div>
+            <div class="img-upload-text"><b>Click ya drag</b> karke photos add karo<br><span style="font-size:11px;color:#666;">Max 3 images</span></div>
+            <div class="img-upload-previews" id="edit-upload-previews"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="full-width">
+        <label class="modal-label">Hot / Popular</label>
+        <select class="form-inp" id="edit-popular">
+          <option value="false">Normal</option>
+          <option value="true">🔥 Hot / Popular</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="saveEditProduct()">💾 Save Changes</button>
+      <button class="btn" style="background:rgba(255,255,255,0.1);" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mob-bottom-nav" id="mobBottomNav">
+  <button class="mob-bnav-item active" id="mbn-dashboard" onclick="showPage('dashboard',null);setMobNav('dashboard')">
+    <span class="mob-bnav-icon">📊</span>
+    <span class="mob-bnav-label">Dashboard</span>
+  </button>
+  <button class="mob-bnav-item" id="mbn-orders" onclick="showPage('orders',null);setMobNav('orders')">
+    <span class="mob-bnav-icon">📦</span>
+    <span class="mob-bnav-label">Orders</span>
+  </button>
+  <button class="mob-bnav-item" id="mbn-products" onclick="showPage('products',null);setMobNav('products')">
+    <span class="mob-bnav-icon">🥬</span>
+    <span class="mob-bnav-label">Products</span>
+  </button>
+  <button class="mob-bnav-item" id="mbn-analytics" onclick="showPage('analytics',null);setMobNav('analytics')">
+    <span class="mob-bnav-icon">📈</span>
+    <span class="mob-bnav-label">Analytics</span>
+  </button>
+  <button class="mob-bnav-item" id="mbn-more" onclick="toggleSidebar()">
+    <span class="mob-bnav-icon">☰</span>
+    <span class="mob-bnav-label">More</span>
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, updateDoc, doc, deleteDoc, addDoc, setDoc, getDocs, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDDYqExFGbNWytFlYY3ttbr0zug427x_QM",
+  authDomain: "freshkart-web.firebaseapp.com",
+  projectId: "freshkart-web",
+  storageBucket: "freshkart-web.firebasestorage.app",
+  messagingSenderId: "960532053767",
+  appId: "1:960532053767:web:a13d2eb1fddea1ee28cfa2"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let allOrders = [], allProducts = {}, chartMode = "monthly";
+let salesChart = null, paymentChart = null, statusChart = null, productChart = null;
+let currentEditId = null; // ← tracks which product is being edited
+
+/* AUTH */
+onAuthStateChanged(auth, u => {
+  if (u) {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    document.getElementById("mobBottomNav").style.display = "flex";
+    loadOrders();
+    loadProducts();
+  } else {
+    document.getElementById("loginBox").style.display = "flex";
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("mobBottomNav").style.display = "none";
+  }
+});
+
+window.doAdminLogin = async () => {
+  const email = document.getElementById("adminEmail").value.trim();
+  const pass = document.getElementById("adminPass").value;
+  const err = document.getElementById("loginErr");
+  if (!email || !pass) { err.style.display = "block"; err.textContent = "Please enter credentials"; return; }
+  try { await signInWithEmailAndPassword(auth, email, pass); err.style.display = "none"; }
+  catch(e) { err.style.display = "block"; err.textContent = "Invalid credentials!"; }
+};
+window.doLogout = () => signOut(auth);
+
+/* SIDEBAR TOGGLE */
+window.toggleSidebar = () => {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+};
+window.closeSidebar = () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+};
+
+/* MOBILE BOTTOM NAV */
+window.setMobNav = (page) => {
+  document.querySelectorAll('.mob-bnav-item').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('mbn-' + page);
+  if (el) el.classList.add('active');
+};
+
+/* NAVIGATION */
+window.showPage = (page, el) => {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("page-" + page).classList.add("active");
+  if (el) el.classList.add("active");
+  if (page === "analytics") setTimeout(generateCharts, 100);
+  if (page === "customers") renderCustomers();
+  if (page === "reviews") loadReviews();
+  if (page === "coupons") loadCoupons();
+  setMobNav(page);
+  window.scrollTo(0, 0);
+};
+
+window.toggleTheme = () => document.body.classList.toggle("light");
+
+/* TOAST */
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.opacity = "1";
+  setTimeout(() => t.style.opacity = "0", 2500);
+}
+
+/* ORDERS */
+function loadOrders() {
+  onSnapshot(collection(db, "orders"), snap => {
+    allOrders = [];
+    snap.forEach(d => allOrders.push({ id: d.id, ...d.data() }));
+    allOrders.sort((a, b) => {
+      const at = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bt = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+      return bt - at;
+    });
+    updateDashboard();
+    renderOrders(allOrders);
+    generateCharts();
+  });
+}
+
+function statusBadge(status) {
+  if (status === "Delivered") return "badge-delivered";
+  if (status === "Cancelled") return "badge-cancelled";
+  if (status === "Packed") return "badge-packed";
+  if (status === "Out for Delivery") return "badge-ofd";
+  return "badge-pending";
+}
+
+function updateDashboard() {
+  const today = new Date().toDateString();
+  let rev = 0, pending = 0, delivered = 0, cancelled = 0, todayCount = 0, todayRev = 0, cod = 0, online = 0;
+  allOrders.forEach(o => {
+    rev += o.total || 0;
+    if (o.status === "Pending" || !o.status) pending++;
+    else if (o.status === "Delivered") delivered++;
+    else if (o.status === "Cancelled") cancelled++;
+    const oDate = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toDateString() : "";
+    if (oDate === today) { todayCount++; todayRev += o.total || 0; }
+    if (o.paymentType === "Online") online++; else cod++;
+  });
+  animNum("s-totalOrders", allOrders.length);
+  animMoney("s-revenue", rev);
+  animNum("s-pending", pending);
+  animNum("s-cancelled", cancelled);
+  animNum("s-delivered", delivered);
+  animNum("s-today", todayCount);
+  document.getElementById("d-todayOrders").textContent = todayCount;
+  document.getElementById("d-todayRev").textContent = "₹" + todayRev.toFixed(0);
+  document.getElementById("d-cod").textContent = cod;
+  document.getElementById("d-online").textContent = online;
+
+  const recent = allOrders.slice(0, 5);
+  document.getElementById("recentOrders").innerHTML = recent.map(o => {
+    const sc = statusBadge(o.status);
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (o.name || "Customer") + '</div>' +
+        '<div style="font-size:11px;color:#aaa;">' + (o.orderId || o.id) + '</div>' +
+        '<div style="font-size:11px;color:#00e676;margin-top:2px;">🕒 ' + (o.deliverySlot || "ASAP") + '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px;">' +
+        '<span style="font-size:13px;font-weight:700;color:#00e676;">₹' + (o.total || 0).toFixed(0) + '</span>' +
+        '<span class="badge ' + sc + '">' + (o.status || "Pending") + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+  updateFilteredStats();
+}
+
+function renderOrders(orders) {
+  const list = document.getElementById("ordersList");
+  if (!orders.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;">No orders found</div>'; return; }
+  list.innerHTML = orders.map(o => {
+    const sc = statusBadge(o.status);
+    const date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "—";
+    let itemsHtml = "";
+    if (o.items) {
+      for (let i in o.items) {
+        if (o.items[i].qty > 0) {
+          const w = o.items[i].selectedWeight || 1;
+          const unit = o.items[i].unit || "kg";
+          itemsHtml += '<div class="oi-row"><span>🥬 ' + i + '</span><span>' + o.items[i].qty + ' x ' + w + unit + '</span></div>';
+        }
+      }
+    }
+    const isPending = !o.status || o.status === "Pending";
+    const isPacked = o.status === "Packed";
+    const isOFD = o.status === "Out for Delivery";
+    const isSelected = selectedOrderIds.has(o.id);
+    const chkHtml = bulkSelectMode
+      ? '<input type="checkbox" class="bulk-chk" data-id="' + o.id + '" ' + (isSelected ? "checked" : "") + ' onclick="toggleOrderSelect(\'' + o.id + '\',this)">'
+      : "";
+
+    return '<div class="order-card' + (isSelected ? " selected" : "") + '">' +
+      '<div class="order-top">' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          chkHtml +
+          '<div>' +
+            '<div class="order-id">Order: <span>' + (o.orderId || o.id) + '</span></div>' +
+            '<div style="font-size:11px;color:#aaa;margin-top:2px;">🕒 ' + date + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<span class="badge ' + sc + '">' + (o.status || "Pending") + '</span>' +
+      '</div>' +
+      '<div class="order-info">' +
+        '<div class="oi-item"><div class="oi-label">Customer</div><div class="oi-value">' + (o.name || "—") + '</div></div>' +
+        '<div class="oi-item"><div class="oi-label">Phone</div><div class="oi-value">' + (o.phone || "—") + '</div></div>' +
+        '<div class="oi-item"><div class="oi-label">Total</div><div class="oi-value" style="color:#00e676;">₹' + (o.total || 0).toFixed(2) + '</div></div>' +
+        '<div class="oi-item"><div class="oi-label">Payment</div><div class="oi-value">' + (o.paymentType || "COD") + '</div></div>' +
+        '<div class="oi-item"><div class="oi-label">Delivery Slot</div><div class="oi-value" style="color:#00e676;font-size:11px;">' + (o.deliverySlot || "ASAP") + '</div></div>' +
+        (o.coupon ? '<div class="oi-item"><div class="oi-label">Coupon</div><div class="oi-value" style="color:#f39c12;">' + o.coupon + ' (-₹' + (o.discount || 0) + ')</div></div>' : '') +
+      '</div>' +
+      (o.address ? '<div style="font-size:12px;color:#aaa;margin-bottom:8px;">📍 ' + o.address + '</div>' : '') +
+      (itemsHtml ? '<div class="order-items-list">' + itemsHtml + '</div>' : '') +
+      (o.note ? '<div class="order-note-display"><span style="font-size:13px;">📝</span><span class="note-text">' + o.note + '</span><button class="edit-note-btn" onclick="openNoteModal(\'' + o.id + '\')" title="Edit note">✏️</button></div>' : '') +
+      '<div class="order-actions">' +
+        (isPending ? '<button class="btn btn-blue" onclick="updateStatus(\'' + o.id + '\',\'Packed\')">📦 Pack</button>' +
+          '<button class="btn btn-purple" onclick="updateStatus(\'' + o.id + '\',\'Out for Delivery\')">🛵 OFD</button>' +
+          '<button class="btn btn-green" onclick="updateStatus(\'' + o.id + '\',\'Delivered\')">✅ Done</button>' +
+          '<button class="btn btn-red" onclick="updateStatus(\'' + o.id + '\',\'Cancelled\')">❌ Cancel</button>' : '') +
+        (isPacked ? '<button class="btn btn-purple" onclick="updateStatus(\'' + o.id + '\',\'Out for Delivery\')">🛵 OFD</button>' +
+          '<button class="btn btn-green" onclick="updateStatus(\'' + o.id + '\',\'Delivered\')">✅ Delivered</button>' : '') +
+        (isOFD ? '<button class="btn btn-green" onclick="updateStatus(\'' + o.id + '\',\'Delivered\')">✅ Delivered</button>' : '') +
+        '<button class="btn btn-orange" onclick="printInvoice(\'' + o.id + '\')">🧾</button>' +
+        '<button class="btn" style="background:rgba(255,193,7,0.15);color:#ffc107;border:1px solid rgba(255,193,7,0.3);" onclick="openNoteModal(\'' + o.id + '\')" title="Add/Edit Note">📝</button>' +
+        '<button class="btn" style="background:rgba(255,255,255,0.1);" onclick="deleteOrder(\'' + o.id + '\')">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+window.filterOrders = () => {
+  const s = document.getElementById("orderSearch").value.toLowerCase();
+  const f = document.getElementById("orderFilter").value;
+  const p = document.getElementById("paymentFilter").value;
+  const filtered = allOrders.filter(o => {
+    const matchS = !s || (o.orderId||"").toLowerCase().includes(s) || (o.name||"").toLowerCase().includes(s) || (o.phone||"").includes(s);
+    const matchF = !f || o.status === f || (!o.status && f === "Pending");
+    const matchP = !p || (o.paymentType || "COD") === p;
+    return matchS && matchF && matchP;
+  });
+  renderOrders(filtered);
+};
+
+window.updateStatus = async (id, status) => {
+  await updateDoc(doc(db, "orders", id), { status });
+  toast("✅ Status updated: " + status);
+  const order = allOrders.find(o => o.id === id);
+  if (!order || !order.phone) return;
+  const statusMessages = {
+    "Packed": "*[HariBasket Order Update]*\n--------------------------------\n\nHello *" + (order.name || "Customer") + "*\n\nYour order *" + (order.orderId || id) + "* has been *PACKED*\n\nWill be out for delivery soon!\n\n--------------------------------\n*Estimated Delivery:* 30 Minutes\n--------------------------------\n\nThank you for ordering from HariBasket!\nFresh Vegetables | 30 Min Delivery",
+    "Out for Delivery": "*[HariBasket Order Update]*\n--------------------------------\n\nHello *" + (order.name || "Customer") + "*\n\nYour order *" + (order.orderId || id) + "* is *OUT FOR DELIVERY*\n\nOur delivery partner is on the way!\n\n--------------------------------\n*Estimated Arrival:* 10-15 Minutes\n--------------------------------\n\nThank you for ordering from HariBasket!\nFresh Vegetables | 30 Min Delivery",
+    "Delivered": "*[HariBasket Order Update]*\n--------------------------------\n\nHello *" + (order.name || "Customer") + "*\n\nYour order *" + (order.orderId || id) + "* has been *DELIVERED*\n\nEnjoy your fresh vegetables!\n\nPlease rate your experience on our website.\n\n--------------------------------\n*Order Total:* Rs." + (order.total || 0).toFixed(0) + "\n*Payment:* " + (order.paymentType || "COD") + "\n--------------------------------\n\nThank you for ordering from HariBasket!\nFresh Vegetables | 30 Min Delivery",
+    "Cancelled": "*[HariBasket Order Update]*\n--------------------------------\n\nHello *" + (order.name || "Customer") + "*\n\nYour order *" + (order.orderId || id) + "* has been *CANCELLED*\n\nSorry for the inconvenience.\nPlease feel free to place a new order!\n\n--------------------------------\nFor help contact us on WhatsApp.\n--------------------------------\n\nHariBasket | Fresh Vegetables | 30 Min Delivery"
+  };
+  const msg = statusMessages[status];
+  if (msg) {
+    const phone = "91" + order.phone.replace(/\D/g, '').slice(-10);
+    window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(msg), "_blank");
+  }
+};
+
+window.deleteOrder = async id => {
+  if (!confirm("Delete this order?")) return;
+  await deleteDoc(doc(db, "orders", id));
+  toast("🗑️ Order deleted");
+};
+
+/* ══════════════════════════════════════
+   BULK SELECT  ← NEW
+══════════════════════════════════════ */
+let bulkSelectMode = false;
+let selectedOrderIds = new Set();
+
+window.toggleSelectMode = () => {
+  bulkSelectMode = !bulkSelectMode;
+  const btn = document.getElementById("selectModeBtn");
+  btn.classList.toggle("active", bulkSelectMode);
+  btn.textContent = bulkSelectMode ? "✕ Cancel" : "☑️ Select";
+  if (!bulkSelectMode) { selectedOrderIds.clear(); }
+  const s = document.getElementById("orderSearch").value.toLowerCase();
+  const f = document.getElementById("orderFilter").value;
+  const p = document.getElementById("paymentFilter").value;
+  const filtered = allOrders.filter(o => {
+    const matchS = !s || (o.orderId||"").toLowerCase().includes(s) || (o.name||"").toLowerCase().includes(s) || (o.phone||"").includes(s);
+    const matchF = !f || o.status === f || (!o.status && f === "Pending");
+    const matchP = !p || (o.paymentType || "COD") === p;
+    return matchS && matchF && matchP;
+  });
+  renderOrders(filtered);
+  updateBulkToolbar();
+};
+
+window.toggleOrderSelect = (id, el) => {
+  if (selectedOrderIds.has(id)) {
+    selectedOrderIds.delete(id);
+    el.closest(".order-card").classList.remove("selected");
+  } else {
+    selectedOrderIds.add(id);
+    el.closest(".order-card").classList.add("selected");
+  }
+  updateBulkToolbar();
+};
+
+window.selectAllVisible = () => {
+  document.querySelectorAll(".order-card .bulk-chk").forEach(chk => {
+    const id = chk.dataset.id;
+    if (id) {
+      selectedOrderIds.add(id);
+      chk.checked = true;
+      chk.closest(".order-card").classList.add("selected");
+    }
+  });
+  updateBulkToolbar();
+};
+
+window.clearSelection = () => {
+  selectedOrderIds.clear();
+  document.querySelectorAll(".order-card").forEach(c => c.classList.remove("selected"));
+  document.querySelectorAll(".bulk-chk").forEach(c => c.checked = false);
+  updateBulkToolbar();
+};
+
+function updateBulkToolbar() {
+  const toolbar = document.getElementById("bulkToolbar");
+  const countEl = document.getElementById("bulkCount");
+  const n = selectedOrderIds.size;
+  if (bulkSelectMode && n > 0) {
+    toolbar.classList.add("show");
+    countEl.textContent = n + " selected";
+  } else {
+    toolbar.classList.remove("show");
+  }
+}
+
+window.bulkUpdateStatus = async (status) => {
+  if (!selectedOrderIds.size) { toast("⚠️ Koi order select nahi!"); return; }
+  if (!confirm(selectedOrderIds.size + " orders ko " + status + " mark karna chahte ho?")) return;
+  let done = 0;
+  const promises = [...selectedOrderIds].map(id =>
+    updateDoc(doc(db, "orders", id), { status }).then(() => done++)
+  );
+  await Promise.all(promises);
+  toast("✅ " + done + " orders → " + status);
+  selectedOrderIds.clear();
+  bulkSelectMode = false;
+  const btn = document.getElementById("selectModeBtn");
+  btn.classList.remove("active");
+  btn.textContent = "☑️ Select";
+  updateBulkToolbar();
+};
+
+window.bulkDeleteOrders = async () => {
+  if (!selectedOrderIds.size) { toast("⚠️ Koi order select nahi!"); return; }
+  if (!confirm("⚠️ " + selectedOrderIds.size + " orders permanently delete honge. Sure ho?")) return;
+  let done = 0;
+  const promises = [...selectedOrderIds].map(id =>
+    deleteDoc(doc(db, "orders", id)).then(() => done++)
+  );
+  await Promise.all(promises);
+  toast("🗑️ " + done + " orders deleted");
+  selectedOrderIds.clear();
+  bulkSelectMode = false;
+  const btn = document.getElementById("selectModeBtn");
+  btn.classList.remove("active");
+  btn.textContent = "☑️ Select";
+  updateBulkToolbar();
+};
+
+/* ══════════════════════════════════════
+   DATE FILTER  ← NEW
+══════════════════════════════════════ */
+let currentDateFilter = 'today';
+
+window.setDateFilter = (mode) => {
+  currentDateFilter = mode;
+  document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+  const pill = document.getElementById('dpill-' + mode);
+  if (pill) pill.classList.add('active');
+  updateFilteredStats();
+};
+
+function getFilteredOrders(mode) {
+  const now = new Date();
+  return allOrders.filter(o => {
+    if (!o.createdAt || !o.createdAt.toDate) return mode === 'all';
+    const d = o.createdAt.toDate();
+    if (mode === 'today') return d.toDateString() === now.toDateString();
+    if (mode === 'week') {
+      const start = new Date(now); start.setDate(now.getDate() - now.getDay()); start.setHours(0,0,0,0);
+      return d >= start;
+    }
+    if (mode === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return true;
+  });
+}
+
+function updateFilteredStats() {
+  const orders = getFilteredOrders(currentDateFilter);
+  let revenue = 0, delivered = 0, pending = 0, cancelled = 0;
+  orders.forEach(o => {
+    revenue += o.total || 0;
+    if (o.status === 'Delivered') delivered++;
+    else if (o.status === 'Cancelled') cancelled++;
+    else pending++;
+  });
+  const avg = orders.length ? revenue / orders.length : 0;
+  document.getElementById('fs-orders').textContent = orders.length;
+  document.getElementById('fs-revenue').textContent = '₹' + revenue.toFixed(0);
+  document.getElementById('fs-delivered').textContent = delivered;
+  document.getElementById('fs-pending').textContent = pending;
+  document.getElementById('fs-cancelled').textContent = cancelled;
+  document.getElementById('fs-avg').textContent = '₹' + avg.toFixed(0);
+}
+
+/* ══════════════════════════════════════
+   IMAGE UPLOAD  ← NEW
+══════════════════════════════════════ */
+let addUploadedImages = [];
+let editUploadedImages = [];
+
+window.switchImgTab = (tab) => {
+  document.getElementById('tab-url').classList.toggle('active', tab === 'url');
+  document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+  document.getElementById('img-url-mode').style.display = tab === 'url' ? '' : 'none';
+  document.getElementById('img-upload-mode').style.display = tab === 'upload' ? '' : 'none';
+};
+
+window.switchEditImgTab = (tab) => {
+  document.getElementById('edit-tab-url').classList.toggle('active', tab === 'url');
+  document.getElementById('edit-tab-upload').classList.toggle('active', tab === 'upload');
+  document.getElementById('edit-img-url-mode').style.display = tab === 'url' ? '' : 'none';
+  document.getElementById('edit-img-upload-mode').style.display = tab === 'upload' ? '' : 'none';
+};
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function renderAddPreviews() {
+  const container = document.getElementById('add-img-previews');
+  if (!container) return;
+  container.innerHTML = addUploadedImages.map((src, i) =>
+    '<div class="img-upload-thumb"><img src="' + src + '"><button class="remove-img" onclick="removeAddImg(' + i + ')">✕</button></div>'
+  ).join('');
+}
+
+window.handleAddFiles = async (files) => {
+  for (let i = 0; i < Math.min(files.length, 3 - addUploadedImages.length); i++) {
+    addUploadedImages.push(await fileToBase64(files[i]));
+  }
+  renderAddPreviews();
+};
+
+window.handleAddDrop = async (e) => {
+  e.preventDefault();
+  document.getElementById('addUploadZone').classList.remove('drag-over');
+  if (e.dataTransfer.files.length) await handleAddFiles(e.dataTransfer.files);
+};
+
+window.removeAddImg = (i) => { addUploadedImages.splice(i, 1); renderAddPreviews(); };
+
+function renderEditPreviews() {
+  const container = document.getElementById('edit-upload-previews');
+  if (!container) return;
+  container.innerHTML = editUploadedImages.map((src, i) =>
+    '<div class="img-upload-thumb"><img src="' + src + '"><button class="remove-img" onclick="removeEditImg(' + i + ')">✕</button></div>'
+  ).join('');
+}
+
+window.handleEditFiles = async (files) => {
+  for (let i = 0; i < Math.min(files.length, 3 - editUploadedImages.length); i++) {
+    editUploadedImages.push(await fileToBase64(files[i]));
+  }
+  renderEditPreviews();
+};
+
+window.handleEditDrop = async (e) => {
+  e.preventDefault();
+  document.getElementById('editUploadZone').classList.remove('drag-over');
+  if (e.dataTransfer.files.length) await handleEditFiles(e.dataTransfer.files);
+};
+
+window.removeEditImg = (i) => { editUploadedImages.splice(i, 1); renderEditPreviews(); };
+
+/* ══════════════════════════════════════
+   ORDER NOTES  ← NEW
+══════════════════════════════════════ */
+let currentNoteOrderId = null;
+
+window.openNoteModal = (orderId) => {
+  currentNoteOrderId = orderId;
+  const o = allOrders.find(x => x.id === orderId);
+  document.getElementById('note-order-label').textContent = 'Order: ' + (o ? (o.orderId || orderId) : orderId) + (o && o.name ? ' • ' + o.name : '');
+  document.getElementById('noteTextarea').value = (o && o.note) ? o.note : '';
+  document.getElementById('noteModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('noteTextarea').focus(), 100);
+};
+
+window.closeNoteModal = () => {
+  document.getElementById('noteModal').classList.remove('open');
+  document.body.style.overflow = '';
+  currentNoteOrderId = null;
+};
+
+window.saveNote = async () => {
+  if (!currentNoteOrderId) return;
+  const note = document.getElementById('noteTextarea').value.trim();
+  if (!note) { toast('⚠️ Note khali hai!'); return; }
+  await updateDoc(doc(db, 'orders', currentNoteOrderId), { note });
+  toast('📝 Note saved!');
+  closeNoteModal();
+};
+
+window.deleteNote = async () => {
+  if (!currentNoteOrderId) return;
+  if (!confirm('Note delete karna chahte ho?')) return;
+  await updateDoc(doc(db, 'orders', currentNoteOrderId), { note: '' });
+  toast('🗑️ Note deleted!');
+  closeNoteModal();
+};
+
+document.getElementById('noteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeNoteModal();
+});
+
+/* PRODUCTS */
+function loadProducts() {
+  onSnapshot(collection(db, "products"), snap => {
+    allProducts = {};
+    snap.forEach(d => allProducts[d.id] = { ...d.data(), docId: d.id });
+    renderProducts(allProducts);
+    checkStockAlerts();
+  });
+}
+
+function renderProducts(products) {
+  const list = document.getElementById("productList");
+  if (!Object.keys(products).length) { list.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;">No products found</div>'; return; }
+  list.innerHTML = Object.entries(products).map(([id, d]) => {
+    const stock = d.stock || 0;
+    let stockPill;
+    if (stock === 0) {
+      stockPill = '<span class="stock-pill stock-pill-red">🔴 Out of Stock</span>';
+    } else if (stock <= 5) {
+      stockPill = '<span class="stock-pill stock-pill-orange">🟠 Low: ' + stock + '</span>';
+    } else {
+      stockPill = '<span class="stock-pill stock-pill-green">🟢 ' + stock + '</span>';
+    }
+    return '<div class="prod-item-card">' +
+      '<div class="prod-item-top">' +
+        '<img src="' + (d.image || "") + '" class="prod-item-img" loading="lazy" onerror="this.src=\'https://via.placeholder.com/56?text=No+Img\'">' +
+        '<div class="prod-item-info">' +
+          '<div class="prod-item-name">' + id + '</div>' +
+          '<div class="prod-item-inputs">' +
+            '<input type="number" id="price-' + id + '" value="' + (d.price || 0) + '" style="width:85px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;" inputmode="numeric">' +
+            '<span style="font-size:11px;color:#aaa;">₹/' + (d.unit || "kg") + '</span>' +
+            '<input type="number" id="stock-' + id + '" value="' + stock + '" style="width:70px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;" placeholder="Stock" inputmode="numeric">' +
+            stockPill +
+            '<span class="badge ' + (d.popular ? "badge-delivered" : "badge-pending") + '">' + (d.popular ? "🔥 Hot" : "Normal") + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="prod-item-actions">' +
+        '<button class="btn btn-blue" onclick="updatePrice(\'' + id + '\')" style="flex:1;">💾 Price</button>' +
+        '<button class="btn btn-orange" onclick="updateStock(\'' + id + '\')" style="flex:1;">📦 Stock</button>' +
+        '<button class="btn btn-purple" onclick="openEditModal(\'' + id + '\')" style="flex:1;">✏️ Edit</button>' +
+        '<button class="btn btn-red" onclick="deleteProduct(\'' + id + '\')">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+window.filterProducts = () => {
+  const s = document.getElementById("productSearch").value.toLowerCase();
+  const filtered = Object.fromEntries(Object.entries(allProducts).filter(([id]) => id.toLowerCase().includes(s)));
+  renderProducts(filtered);
+};
+
+window.addProduct = async () => {
+  const name = document.getElementById("p-name").value.trim();
+  const price = parseInt(document.getElementById("p-price").value);
+  const unit = document.getElementById("p-unit").value.trim() || "kg";
+  const category = document.getElementById("p-category").value.trim() || "Vegetables";
+  const popular = document.getElementById("p-popular").value === "true";
+
+  // Determine image source — URL tab or upload tab
+  const isUploadMode = document.getElementById('tab-upload').classList.contains('active');
+  let image = "", images = [];
+  if (isUploadMode) {
+    if (!addUploadedImages.length) { toast("⚠️ Photo upload karo ya URL mode use karo!"); return; }
+    images = [...addUploadedImages];
+    image = images[0];
+  } else {
+    image = document.getElementById("p-image").value.trim();
+    const image2 = document.getElementById("p-image2").value.trim();
+    const image3 = document.getElementById("p-image3").value.trim();
+    images = [image, image2, image3].filter(img => img !== '');
+  }
+
+  if (!name || !price || !image) { toast("⚠️ Fill Name, Price and Image!"); return; }
+await setDoc(doc(db, "products", name), { price, unit, image, images, category, popular, rating: 0, ratingCount: 0, stock: 50, createdAt: new Date() });
+  ["p-name","p-price","p-unit","p-image","p-image2","p-image3","p-category"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  addUploadedImages = [];
+  renderAddPreviews();
+  toast("✅ Product added: " + name);
+};
+
+window.updatePrice = async id => {
+  const newPrice = parseInt(document.getElementById("price-" + id).value);
+  await updateDoc(doc(db, "products", id), { price: newPrice });
+  toast("✅ Price updated: " + id);
+};
+
+window.updateStock = async id => {
+  const newStock = parseInt(document.getElementById("stock-" + id).value);
+  await updateDoc(doc(db, "products", id), { stock: newStock });
+  toast("✅ Stock updated: " + id);
+};
+
+window.deleteProduct = async id => {
+  if (!confirm("Delete product: " + id + "?")) return;
+  await deleteDoc(doc(db, "products", id));
+  toast("🗑️ Deleted: " + id);
+};
+
+/* ══════════════════════════════════════
+   STOCK ALERT  ← NEW
+══════════════════════════════════════ */
+function checkStockAlerts() {
+  const banner = document.getElementById("stockAlertBanner");
+  const alertList = document.getElementById("stockAlertList");
+  if (!banner || !alertList) return;
+  const lowItems = Object.entries(allProducts)
+    .filter(([, d]) => (d.stock || 0) <= 5)
+    .sort((a, b) => (a[1].stock || 0) - (b[1].stock || 0));
+  if (!lowItems.length) { banner.classList.remove("show"); return; }
+  banner.classList.add("show");
+  alertList.innerHTML = lowItems.map(([id, d]) => {
+    const s = d.stock || 0;
+    const color = s === 0 ? "#ff5252" : "#ff9800";
+    return '<div class="stock-alert-item"><span>' + id + '</span><span style="color:' + color + ';font-weight:700;">' + (s === 0 ? "OUT OF STOCK" : "Stock: " + s) + '</span></div>';
+  }).join("");
+}
+
+/* ══════════════════════════════════════
+   PRINT INVOICE  ← NEW
+══════════════════════════════════════ */
+window.printInvoice = (orderId) => {
+  const o = allOrders.find(x => x.id === orderId);
+  if (!o) { toast("❌ Order not found"); return; }
+  const date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : new Date().toLocaleDateString("en-IN");
+  let itemsRows = "";
+  let itemTotal = 0;
+  if (o.items) {
+    for (let i in o.items) {
+      if (o.items[i].qty > 0) {
+        const qty = o.items[i].qty;
+        const w = o.items[i].selectedWeight || 1;
+        const unit = o.items[i].unit || "kg";
+        const price = allProducts[i] ? allProducts[i].price || 0 : 0;
+        const subtotal = price * qty;
+        itemTotal += subtotal;
+        itemsRows += '<tr><td style="padding:6px 4px;border-bottom:1px solid #eee;">' + i + '</td>' +
+          '<td style="padding:6px 4px;border-bottom:1px solid #eee;text-align:center;">' + qty + ' x ' + w + unit + '</td>' +
+          '<td style="padding:6px 4px;border-bottom:1px solid #eee;text-align:right;">₹' + subtotal.toFixed(0) + '</td></tr>';
+      }
+    }
+  }
+  const discount = o.discount || 0;
+  const invHtml =
+    '<div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:12px;color:#555;">' +
+      '<div><b>Order ID:</b> ' + (o.orderId || o.id) + '<br><b>Date:</b> ' + date + '</div>' +
+      '<div style="text-align:right;"><b>Payment:</b> ' + (o.paymentType || "COD") + '<br><b>Slot:</b> ' + (o.deliverySlot || "ASAP") + '</div>' +
+    '</div>' +
+    '<div style="background:#f9f9f9;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;">' +
+      '<b>👤 Customer</b><br>' + (o.name || "—") + '<br>' + (o.phone || "") +
+      (o.address ? '<br>📍 ' + o.address : '') +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px;">' +
+      '<thead><tr style="background:#27ae60;color:#fff;">' +
+        '<th style="padding:8px 4px;text-align:left;">Item</th>' +
+        '<th style="padding:8px 4px;text-align:center;">Qty</th>' +
+        '<th style="padding:8px 4px;text-align:right;">Amount</th>' +
+      '</tr></thead><tbody>' + itemsRows + '</tbody>' +
+    '</table>' +
+    '<div style="text-align:right;font-size:13px;">' +
+      (discount > 0 ? '<div style="color:#e67e22;">Discount (' + (o.coupon || "") + '): -₹' + discount + '</div>' : '') +
+      '<div style="font-size:16px;font-weight:800;color:#27ae60;margin-top:6px;">Total: ₹' + (o.total || 0).toFixed(2) + '</div>' +
+    '</div>' +
+    '<div style="text-align:center;margin-top:14px;font-size:11px;color:#999;border-top:1px dashed #ddd;padding-top:10px;">Thank you for ordering from HariBasket! 🧺<br>Fresh Vegetables | 30 Min Delivery</div>';
+  document.getElementById("inv-content").innerHTML = invHtml;
+  document.getElementById("invoiceModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+};
+
+window.closeInvoiceModal = () => {
+  document.getElementById("invoiceModal").classList.remove("open");
+  document.body.style.overflow = "";
+};
+
+document.getElementById("invoiceModal").addEventListener("click", function(e) {
+  if (e.target === this) closeInvoiceModal();
+});
+
+/* ══════════════════════════════════════
+   EXPORT CSV  ← NEW
+══════════════════════════════════════ */
+window.exportOrdersCSV = () => {
+  if (!allOrders.length) { toast("⚠️ No orders to export!"); return; }
+  const headers = ["Order ID","Date","Customer","Phone","Address","Status","Payment","Delivery Slot","Items","Total","Coupon","Discount"];
+  const rows = allOrders.map(o => {
+    const date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString("en-IN") : "";
+    let items = "";
+    if (o.items) { for (let i in o.items) { if (o.items[i].qty > 0) items += i + " x" + o.items[i].qty + " | "; } }
+    return [
+      o.orderId || o.id,
+      date,
+      (o.name || "").replace(/,/g, " "),
+      o.phone || "",
+      (o.address || "").replace(/,/g, " "),
+      o.status || "Pending",
+      o.paymentType || "COD",
+      o.deliverySlot || "ASAP",
+      items.replace(/,/g, " "),
+      (o.total || 0).toFixed(2),
+      o.coupon || "",
+      o.discount || 0
+    ];
+  });
+  const csv = [headers, ...rows].map(r => r.map(v => '"' + v + '"').join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "HariBasket_Orders_" + new Date().toISOString().split("T")[0] + ".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("✅ CSV exported!");
+};
+
+/* ══════════════════════════════════════
+   EDIT MODAL FUNCTIONS  ← NEW
+══════════════════════════════════════ */
+
+window.openEditModal = (id) => {
+  const d = allProducts[id];
+  if (!d) { toast("❌ Product not found"); return; }
+  currentEditId = id;
+
+  // Populate all fields
+  document.getElementById("edit-modal-name").textContent = id;
+  document.getElementById("edit-name-display").value = id;
+  document.getElementById("edit-price").value = d.price || "";
+  document.getElementById("edit-unit").value = d.unit || "kg";
+  document.getElementById("edit-stock").value = d.stock || 0;
+  document.getElementById("edit-category").value = d.category || "Vegetables";
+  document.getElementById("edit-popular").value = d.popular ? "true" : "false";
+
+  // Images
+  const imgs = d.images && d.images.length ? d.images : [d.image || "", "", ""];
+  document.getElementById("edit-image").value = imgs[0] || "";
+  document.getElementById("edit-image2").value = imgs[1] || "";
+  document.getElementById("edit-image3").value = imgs[2] || "";
+
+  refreshEditPreview();
+
+  // Open modal
+  document.getElementById("editModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+};
+
+window.closeEditModal = () => {
+  document.getElementById("editModal").classList.remove("open");
+  document.body.style.overflow = "";
+  currentEditId = null;
+  editUploadedImages = [];
+  // reset edit img tab back to URL
+  switchEditImgTab('url');
+};
+
+// Live image preview inside modal
+window.refreshEditPreview = () => {
+  const urls = [
+    document.getElementById("edit-image").value.trim(),
+    document.getElementById("edit-image2").value.trim(),
+    document.getElementById("edit-image3").value.trim()
+  ].filter(u => u);
+
+  const preview = document.getElementById("edit-img-preview");
+  if (!urls.length) { preview.innerHTML = '<span style="font-size:11px;color:#888;">No images entered</span>'; return; }
+  preview.innerHTML = urls.map((u, i) =>
+    '<img src="' + u + '" alt="Image ' + (i+1) + '" class="has-src" ' +
+    'onerror="this.style.opacity=\'0.3\';this.title=\'Invalid URL\'" ' +
+    'onload="this.style.opacity=\'1\'">'
+  ).join("");
+};
+
+window.saveEditProduct = async () => {
+  if (!currentEditId) { toast("❌ No product selected"); return; }
+
+  const price = parseInt(document.getElementById("edit-price").value);
+  const unit = document.getElementById("edit-unit").value.trim() || "kg";
+  const stock = parseInt(document.getElementById("edit-stock").value) || 0;
+  const category = document.getElementById("edit-category").value.trim() || "Vegetables";
+  const popular = document.getElementById("edit-popular").value === "true";
+
+  const isUploadMode = document.getElementById('edit-tab-upload').classList.contains('active');
+  let image = "", images = [];
+  if (isUploadMode) {
+    if (!editUploadedImages.length) { toast("⚠️ Photo upload karo ya URL tab use karo!"); return; }
+    images = [...editUploadedImages];
+    image = images[0];
+  } else {
+    image = document.getElementById("edit-image").value.trim();
+    const image2 = document.getElementById("edit-image2").value.trim();
+    const image3 = document.getElementById("edit-image3").value.trim();
+    images = [image, image2, image3].filter(u => u !== "");
+  }
+
+  if (!price || !image) { toast("⚠️ Price and Main Image are required!"); return; }
+
+  try {
+    await updateDoc(doc(db, "products", currentEditId), { price, unit, stock, category, popular, image, images });
+    toast("✅ Product updated: " + currentEditId);
+    editUploadedImages = [];
+    closeEditModal();
+  } catch(e) {
+    console.error(e);
+    toast("❌ Update failed: " + e.message);
+  }
+};
+
+// Close modal on overlay click
+document.getElementById("editModal").addEventListener("click", function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// Close modal on Escape key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeEditModal();
+});
+
+/* CHARTS */
+window.setChartMode = mode => { chartMode = mode; generateCharts(); };
+
+function generateCharts() {
+  [salesChart, paymentChart, statusChart, productChart].forEach(c => { if (c) c.destroy(); });
+  if (!document.getElementById("page-analytics").classList.contains("active")) return;
+  let labels = [], values = [];
+  if (chartMode === "monthly") {
+    labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    values = Array(12).fill(0);
+    allOrders.forEach(o => { if (o.createdAt && o.createdAt.toDate) { const m = o.createdAt.toDate().getMonth(); values[m] += o.total || 0; } });
+  } else if (chartMode === "daily") {
+    const map = {};
+    allOrders.forEach(o => { if (o.createdAt && o.createdAt.toDate) { const d = o.createdAt.toDate().toISOString().split("T")[0]; map[d] = (map[d] || 0) + (o.total || 0); } });
+    labels = Object.keys(map).sort().slice(-14);
+    values = labels.map(l => map[l]);
+  } else {
+    const map = {};
+    allOrders.forEach(o => { if (o.createdAt && o.createdAt.toDate) { const d = o.createdAt.toDate(); const week = "Week " + Math.ceil(d.getDate() / 7) + " " + d.toLocaleString("en-IN", { month: "short" }); map[week] = (map[week] || 0) + (o.total || 0); } });
+    labels = Object.keys(map);
+    values = labels.map(l => map[l]);
+  }
+  const chartOpts = { plugins: { legend: { labels: { color: "#fff", font: { size: 11 } } } }, scales: { x: { ticks: { color: "#aaa", font: { size: 10 } } }, y: { ticks: { color: "#aaa", font: { size: 10 } } } } };
+  salesChart = new Chart(document.getElementById("salesChart"), { type: "line", data: { labels, datasets: [{ label: "Sales ₹", data: values, tension: 0.4, fill: true, borderColor: "#00e676", backgroundColor: "rgba(0,230,118,0.1)" }] }, options: chartOpts });
+  let cod = 0, online = 0;
+  allOrders.forEach(o => { if (o.paymentType === "Online") online += o.total || 0; else cod += o.total || 0; });
+  paymentChart = new Chart(document.getElementById("paymentChart"), { type: "doughnut", data: { labels: ["COD", "Online"], datasets: [{ data: [cod, online], backgroundColor: ["#ff9800", "#2196f3"] }] }, options: { plugins: { legend: { labels: { color: "#fff", font: { size: 11 } } } } } });
+  let pending = 0, packed = 0, delivered = 0, cancelled = 0;
+  allOrders.forEach(o => { if (!o.status || o.status === "Pending") pending++; else if (o.status === "Packed") packed++; else if (o.status === "Delivered") delivered++; else if (o.status === "Cancelled") cancelled++; });
+  statusChart = new Chart(document.getElementById("statusChart"), { type: "bar", data: { labels: ["Pending", "Packed", "Delivered", "Cancelled"], datasets: [{ label: "Orders", data: [pending, packed, delivered, cancelled], backgroundColor: ["#ff9800", "#2196f3", "#00e676", "#ff5252"] }] }, options: chartOpts });
+  const prodCount = {};
+  allOrders.forEach(o => { if (o.items) { for (let i in o.items) { if (o.items[i].qty > 0) prodCount[i] = (prodCount[i] || 0) + o.items[i].qty; } } });
+  const sorted = Object.entries(prodCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  productChart = new Chart(document.getElementById("productChart"), { type: "bar", data: { labels: sorted.map(s => s[0]), datasets: [{ label: "Qty Sold", data: sorted.map(s => s[1]), backgroundColor: "#9c27b0" }] }, options: chartOpts });
+}
+
+/* CUSTOMERS */
+window.renderCustomers = () => {
+  const custMap = {};
+  allOrders.forEach(o => {
+    const key = o.phone || o.name || "Unknown";
+    if (!custMap[key]) custMap[key] = { name: o.name || "—", phone: o.phone || "—", orders: 0, spent: 0 };
+    custMap[key].orders++;
+    custMap[key].spent += o.total || 0;
+  });
+  const customers = Object.values(custMap).sort((a, b) => b.spent - a.spent);
+  document.getElementById("customersList").innerHTML = customers.length
+    ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th>Phone</th><th>Orders</th><th>Spent</th></tr></thead><tbody>' +
+      customers.map(c => '<tr><td>' + c.name + '</td><td>' + c.phone + '</td><td>' + c.orders + '</td><td style="color:#00e676;font-weight:700;">₹' + c.spent.toFixed(0) + '</td></tr>').join("") +
+      '</tbody></table></div>'
+    : '<div style="text-align:center;padding:40px;color:#aaa;">No customer data</div>';
+};
+
+/* ANIMATE */
+function animNum(id, val) { const el = document.getElementById(id); if (!el) return; let s = 0, step = val / 25; const t = setInterval(() => { s = Math.min(s + step, val); el.textContent = Math.floor(s); if (s >= val) clearInterval(t); }, 20); }
+function animMoney(id, val) { const el = document.getElementById(id); if (!el) return; let s = 0, step = val / 25; const t = setInterval(() => { s = Math.min(s + step, val); el.textContent = "₹" + Math.floor(s); if (s >= val) clearInterval(t); }, 20); }
+
+/* REVIEWS */
+window.loadReviews = async function() {
+  const body = document.getElementById('reviewsBody');
+  if (!body) return;
+  body.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Loading reviews...</p>';
+  try {
+    const snap = await getDocs(collection(db, 'reviews'));
+    const reviews = [];
+    snap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
+    reviews.sort((a, b) => {
+      const at = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+      const bt = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+      return bt - at;
+    });
+    if (!reviews.length) {
+      body.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;"><div style="font-size:40px;margin-bottom:12px;">⭐</div><p>No reviews yet!</p></div>';
+      return;
+    }
+    body.innerHTML = reviews.map(r => {
+      const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+      const date = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
+      return '<div style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.1);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;">' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:700;color:#fff;">👤 ' + (r.userName || 'Customer') + '</div>' +
+            '<div style="font-size:11px;color:#888;">' + (r.userEmail || '—') + ' • ' + date + '</div>' +
+          '</div>' +
+          '<button onclick="deleteReview(\'' + r.id + '\',\'' + r.productId + '\',' + (r.rating || 0) + ')" style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;padding:7px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">🗑️ Delete</button>' +
+        '</div>' +
+        '<div style="font-size:15px;color:#f39c12;margin-bottom:6px;">' + stars + ' <span style="font-size:11px;color:#aaa;">(' + (r.rating || 0) + '/5)</span></div>' +
+        '<div style="font-size:12px;color:#aaa;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;">📦 ' + (r.productId || '—') + '</div>' +
+        (r.reviewText ? '<div style="font-size:12px;color:#ddd;margin-top:8px;line-height:1.6;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;">💬 ' + r.reviewText + '</div>' : '') +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    body.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px;">Could not load reviews.</p>';
+  }
+};
+
+window.deleteReview = async (reviewId, productId, rating) => {
+  if (!confirm('Delete this review?')) return;
+  try {
+    await deleteDoc(doc(db, 'reviews', reviewId));
+    const snap = await getDocs(query(collection(db, 'reviews'), where('productId', '==', productId)));
+    const remaining = [];
+    snap.forEach(d => remaining.push(d.data()));
+    try {
+      if (remaining.length === 0) {
+        await updateDoc(doc(db, 'products', productId), { rating: 0, ratingCount: 0 });
+      } else {
+        const avg = remaining.reduce((s, r) => s + (r.rating || 0), 0) / remaining.length;
+        await updateDoc(doc(db, 'products', productId), { rating: avg, ratingCount: remaining.length });
+      }
+    } catch(e) {}
+    toast('✅ Review deleted!');
+    loadReviews();
+  } catch(e) { toast('❌ Could not delete review.'); }
+};
+
+/* COUPONS */
+window.loadCoupons = async function() {
+  const body = document.getElementById('couponsList');
+  if (!body) return;
+  body.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Loading coupons...</p>';
+  try {
+    const snap = await getDocs(collection(db, 'coupons'));
+    const coupons = [];
+    snap.forEach(d => coupons.push({ id: d.id, ...d.data() }));
+    if (!coupons.length) {
+      body.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;"><div style="font-size:36px;margin-bottom:10px;">🎟️</div><p>No coupons yet!</p></div>';
+      return;
+    }
+    body.innerHTML = coupons.map(c =>
+      '<div style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">' +
+        '<div>' +
+          '<div style="font-size:15px;font-weight:800;color:#00e676;letter-spacing:1px;">' + c.code + '</div>' +
+          '<div style="font-size:12px;color:#aaa;margin-top:3px;">' +
+            (c.type === 'percent' ? c.value + '% OFF' : '₹' + c.value + ' OFF') +
+            ' • Min: ₹' + (c.minOrder || 0) +
+            (c.desc ? ' • ' + c.desc : '') +
+          '</div>' +
+        '</div>' +
+        '<button onclick="deleteCoupon(\'' + c.id + '\')" style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">🗑️ Delete</button>' +
+      '</div>'
+    ).join('');
+  } catch(e) {
+    body.innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px;">Could not load coupons.</p>';
+  }
+};
+
+window.createCoupon = async () => {
+  const code = document.getElementById('c-code').value.trim().toUpperCase();
+  const type = document.getElementById('c-type').value;
+  const value = parseInt(document.getElementById('c-value').value);
+  const minOrder = parseInt(document.getElementById('c-minorder').value) || 99;
+  const desc = document.getElementById('c-desc').value.trim();
+  if (!code || !value) { toast('⚠️ Fill Code and Value!'); return; }
+  if (code.length < 3) { toast('⚠️ Code min 3 characters!'); return; }
+  try {
+    await setDoc(doc(db, 'coupons', code), {
+      code, type, value, minOrder,
+      desc: desc || (type === 'percent' ? value + '% OFF' : '₹' + value + ' OFF'),
+      createdAt: new Date()
+    });
+    toast('✅ Coupon created: ' + code);
+    ['c-code','c-value','c-minorder','c-desc'].forEach(id => document.getElementById(id).value = '');
+    loadCoupons();
+  } catch(e) { toast('❌ Could not create coupon.'); }
+};
+
+window.deleteCoupon = async (couponId) => {
+  if (!confirm('Delete coupon: ' + couponId + '?')) return;
+  try {
+    await deleteDoc(doc(db, 'coupons', couponId));
+    toast('✅ Coupon deleted!');
+    loadCoupons();
+  } catch(e) { toast('❌ Could not delete coupon.'); }
+};
+</script>
+</body>
+</html>
