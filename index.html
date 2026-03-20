@@ -3218,7 +3218,7 @@ function startAbandonedCartTimer() {
       window._lastCartActivity = Date.now();
     }
   }, 5 * 60 * 1000);
-}
+
     
     if (timeSince > thirtyMin && Object.keys(cart).some(id => cart[id].qty > 0)) {
       // Cart abandoned — notification bhejo
