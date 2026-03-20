@@ -2046,8 +2046,8 @@ function renderPeopleAlsoBought(productId) {
   if (!others.length) { row.parentElement.style.display = 'none'; return; }
   row.parentElement.style.display = 'block';
   row.innerHTML = others.map(([id, prod]) =>
-    '<div class="pab-card" onclick="closeProductDetail();setTimeout(()=>openProductDetail(\'' + id + '\'),300)">' +
-      ''<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
+   '<div class="pab-card" onclick="closeProductDetail();setTimeout(()=>openProductDetail(\'' + id + '\'),300)">' +
+      '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
 '<div class="pab-card-body">' +
         '<div class="pab-card-name">' + id + '</div>' +
         '<div class="pab-card-price">₹' + prod.price + '</div>' +
@@ -3303,6 +3303,15 @@ if (!cart[d.id] || cart[d.id].qty === 0) {
     renderRecommended(); 
   });
 }
+  // Service Worker register karo
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(reg => console.log('✅ SW registered'))
+    .catch(err => console.log('SW error:', err));
+}
+
+loadCart();
+loadCouponsFromFirebase();
   // Push notifications initialize karo
 initPushNotifications();
 startAbandonedCartTimer();
@@ -3619,6 +3628,7 @@ const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
     document.getElementById("addSound").play().catch(() => {});
   }
   calcTotal();
+  window._lastCartActivity = Date.now();
 };
 function calcTotal() {
   total = 0; let html = ""; let ic = 0;
