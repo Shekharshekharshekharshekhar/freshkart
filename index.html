@@ -3207,16 +3207,18 @@ async function saveUserToken() {
 }
 
 // Abandoned cart check — 30 min baad
+// ✅ SAHI CODE
 function startAbandonedCartTimer() {
-  let cartTimer = null;
-  
-  // Cart change pe timer reset karo
   window._lastCartActivity = Date.now();
-  function startAbandonedCartTimer() {
- window._lastCartActivity = Date.now();
   setInterval(async () => {
     const timeSince = Date.now() - window._lastCartActivity;
     const thirtyMin = 30 * 60 * 1000;
+    if (timeSince > thirtyMin && Object.keys(cart).some(id => cart[id].qty > 0)) {
+      await sendAbandonedCartNotification();
+      window._lastCartActivity = Date.now();
+    }
+  }, 5 * 60 * 1000);
+}
     
     if (timeSince > thirtyMin && Object.keys(cart).some(id => cart[id].qty > 0)) {
       // Cart abandoned — notification bhejo
