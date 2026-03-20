@@ -348,7 +348,7 @@ body.dark .wl-body{background:#1e1e1e;}
 body.dark .info-card{background:#1e1e1e;}
 body.dark .info-card p{color:#aaa;}
 body.dark .info-card h3{color:#ccc;}
-body.dark .cinput,.ctextarea{background:#252525;color:#eee;border-color:#333;}
+body.dark .cinput, body.dark .ctextarea{background:#252525;color:#eee;border-color:#333;}
 body.dark .csummary{background:#1a1a1a;}
 body.dark .free-del-bar{background:linear-gradient(135deg,#252525,#2a2a2a);border-color:#333;}
 body.dark .coupon-inp{background:#252525;color:#eee;border-color:#333;}
@@ -2047,8 +2047,8 @@ function renderPeopleAlsoBought(productId) {
   row.parentElement.style.display = 'block';
   row.innerHTML = others.map(([id, prod]) =>
     '<div class="pab-card" onclick="closeProductDetail();setTimeout(()=>openProductDetail(\'' + id + '\'),300)">' +
-      '<img src="' + w.image + '" alt="' + w.productId + '" loading="lazy">' +
-'<div class="wl-card-info">' +
+      ''<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
+'<div class="pab-card-body">' +
         '<div class="pab-card-name">' + id + '</div>' +
         '<div class="pab-card-price">₹' + prod.price + '</div>' +
       '</div>' +
@@ -2377,7 +2377,7 @@ function renderWishlist() {
   let html = "";
   userWishlist.forEach(w => {
     html += '<div class="wl-card">' +
-     '<img src="' + w.image + '" alt="' + w.productId + '" loading="lazy">'
+     '<img src="' + w.image + '" alt="' + w.productId + '" loading="lazy">'+
       '<div class="wl-card-info">' +
         '<div class="wl-card-name">' + w.productId + '</div>' +
         '<div class="wl-card-price">₹' + w.price + '/' + (w.unit||"kg") + '</div>' +
@@ -3148,7 +3148,7 @@ function isGramUnit(unit) {
   return unit && /^\d+g$/.test(unit.trim());
 }
 /* ═══ PUSH NOTIFICATIONS ═══ */
-const VAPID_KEY = 'YAHAN_APNI_VAPID_KEY_PASTE_KARO'; // Step 1 se
+const VAPID_KEY = 'BGEjE3MbyQK7spfxl6IuSF-PsdvmE_HqdvFVUxw47h26KvAiMZ_UiyOzekI2cN8DazOG7fwZ0JAsk3boESWS1JU'; // Step 1 se
 
 let messaging = null;
 
@@ -3331,12 +3331,16 @@ function animCount(id, target, suffix, duration) {
 }
 
 // Numbers animate karo page load pe
-setTimeout(() => {
-  animCount('spN1', 500, '+', 1500);
-  animCount('spN2', 2500, '+', 1800);
-  animCount('spN3', 4.8, '★', 1000);
-  animCount('spN4', 30, ' min', 800);
-}, 500);
+const spObs = new IntersectionObserver(([e]) => {
+  if (e.isIntersecting) {
+    animCount('spN1', 500, '+', 1500);
+    animCount('spN2', 2500, '+', 1800);
+    animCount('spN3', 4.8, '★', 1000);
+    animCount('spN4', 30, ' min', 800);
+    spObs.disconnect();
+  }
+}, { threshold: 0.3 });
+spObs.observe(document.querySelector('.sp-section'));
 
 // Live orders rotate karo
 const liveOrders = [
@@ -4231,7 +4235,6 @@ window.showToast = (msg, type = 'success', duration = 3000) => {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 };
-cart = {};
 loadCart();
 loadCouponsFromFirebase();
   // Back to Top
