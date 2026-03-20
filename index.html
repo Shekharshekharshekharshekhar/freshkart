@@ -2046,16 +2046,15 @@ function renderPeopleAlsoBought(productId) {
   if (!others.length) { row.parentElement.style.display = 'none'; return; }
   row.parentElement.style.display = 'block';
   row.innerHTML = others.map(([id, prod]) => {
- const safeId = id.replace(/'/g, "");
- return; '<div class="pab-card" onclick="closeProductDetail();setTimeout(function(){openProductDetail(\\'' + safeId + '\\')},300)">' +
-      '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
-'<div class="pab-card-body">' +
-        '<div class="pab-card-name">' + id + '</div>' +
-        '<div class="pab-card-price">₹' + prod.price + '</div>' +
-      '</div>' +
-      '<button class="pab-add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>' +
-    '</div>'
- }).join('');
+  return '<div class="pab-card" onclick="closeProductDetail();setTimeout(function(){openProductDetail(\'' + id + '\')},300)">' +
+    '<img src="' + prod.image + '" alt="' + id + '" loading="lazy">' +
+    '<div class="pab-card-body">' +
+    '<div class="pab-card-name">' + id + '</div>' +
+    '<div class="pab-card-price">₹' + prod.price + '</div>' +
+    '</div>' +
+    '<button class="pab-add-btn" onclick="event.stopPropagation();changeQty(\'' + id + '\',1)">＋ Add</button>' +
+    '</div>';
+}).join('');
 }
 document.getElementById("productDetail").addEventListener("click", e => {
   if (e.target === document.getElementById("productDetail")) closeProductDetail();
