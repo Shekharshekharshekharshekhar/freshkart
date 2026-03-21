@@ -1002,6 +1002,32 @@ body.dark .sum-total{color:#2ecc71;}
   from { opacity:0; transform:translateY(30px); }
   to   { opacity:1; transform:translateY(0); }
 }
+  /* ═══ MOBILE NOTIFICATION BANNER FIX ═══ */
+@media(max-width:768px) {
+  #notifBanner {
+    bottom: 70px !important;
+    left: 8px !important;
+    right: 8px !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+    flex-wrap: nowrap !important;
+  }
+  #notifBanner > div:first-child {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+  #notifBanner > div:nth-child(2) > div:first-child {
+    font-size: 12px !important;
+  }
+  #notifBanner > div:nth-child(2) > div:last-child {
+    font-size: 10px !important;
+  }
+  #notifBanner button {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -1672,6 +1698,10 @@ onAuthStateChanged(auth, u => {
     loadWishlist();
     loadSavedAddress();
     loadUserPoints();
+    // ✅ Login ke baad token update karo userId ke saath
+    if (Notification.permission === 'granted') {
+      setTimeout(() => saveUserToken(), 2000);
+    }
   } else {
     lb.style.display = "flex";
     ud.style.display = "none";
@@ -3258,22 +3288,34 @@ async function saveUserToken() {
     const { getToken } = await import(
       'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js'
     );
-    // SW ready hone ka wait karo
     const swReg = await navigator.serviceWorker.ready;
     const token = await getToken(messaging, { 
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: swReg  
     });
     
-    if (token && currentUser) {
-      // Token Firebase mein save karo
-      await addDoc(collection(db, 'pushTokens'), {
-        token,
-        userId: currentUser.uid,
-        createdAt: new Date(),
-        platform: navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
-      });
+    if (!token) return;
+
+    // ✅ Pehle check karo token already exist karta hai ya nahi
+    const existing = await getDocs(
+      query(collection(db, 'pushTokens'), where('token', '==', token))
+    );
+    
+    if (!existing.empty) {
+      console.log('✅ Token already saved!');
+      return;
     }
+
+    // ✅ Naya token save karo — login nahi hai toh bhi save karo
+    await addDoc(collection(db, 'pushTokens'), {
+      token,
+      userId: currentUser ? currentUser.uid : 'guest_' + Date.now(),
+      createdAt: new Date(),
+      platform: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    });
+    
+    console.log('✅ Token saved successfully!');
+    
   } catch(e) {
     console.log('Token error:', e);
   }
