@@ -3184,13 +3184,16 @@ window.requestNotificationPermission = async () => {
 };
 async function saveUserToken() {
   if (!messaging) return;
-  
   try {
     const { getToken } = await import(
       'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js'
     );
-    
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+    // SW ready hone ka wait karo
+    const swReg = await navigator.serviceWorker.ready;
+    const token = await getToken(messaging, { 
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: swReg  
+    });
     
     if (token && currentUser) {
       // Token Firebase mein save karo
@@ -3312,7 +3315,11 @@ function loadProducts() {
   // Service Worker register karo
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then(reg => console.log('✅ SW registered'))
+    .then(async reg => {
+      console.log('✅ SW registered', reg);
+      await navigator.serviceWorker.ready;
+      console.log('✅ SW ready!');
+    })
     .catch(err => console.log('SW error:', err));
 }
 
