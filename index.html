@@ -998,6 +998,10 @@ body.dark .sum-total{color:#2ecc71;}
   .sp-stats{grid-template-columns:repeat(2,1fr);}
   .sp-stat-num{font-size:18px;}
 }
+  @keyframes slideUpBanner {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -1571,22 +1575,45 @@ body.dark .sum-total{color:#2ecc71;}
   bottom:75px;
   left:12px;
   right:12px;
-  background:#fff;
-  border:2px solid var(--green);
-  border-radius:16px;
-  padding:14px 16px;
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border:1.5px solid var(--green);
+  border-radius:20px;
+  padding:16px 18px;
   align-items:center;
   gap:12px;
   z-index:8889;
-  box-shadow:0 8px 28px rgba(0,0,0,0.15);
-  font-family:'Poppins',sans-serif;">
-  <span style="font-size:28px;">🔔</span>
+  box-shadow:0 8px 32px rgba(39,174,96,0.25);
+  font-family:'Poppins',sans-serif;
+  animation:slideUpBanner 0.5s cubic-bezier(0.34,1.56,0.64,1);">
+
+  <div style="width:46px;height:46px;background:linear-gradient(135deg,#27ae60,#2ecc71);
+    border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;flex-shrink:0;box-shadow:0 4px 14px rgba(39,174,96,0.4);">🔔</div>
+
   <div style="flex:1;">
-    <div style="font-size:13px;font-weight:700;">Daily Deals Notifications</div>
-    <div style="font-size:11px;color:#888;">Har roz best offers paao directly phone pe!</div>
+    <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">
+      Daily Deals Notification
+    </div>
+    <div style="font-size:11px;color:#aaa;">
+      Har roz best offers paao directly phone pe!
+    </div>
   </div>
-  <button onclick="requestNotificationPermission();document.getElementById('notifBanner').style.display='none'" style="background:var(--green);color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;">Enable</button>
-  <button onclick="document.getElementById('notifBanner').style.display='none';localStorage.setItem('notifDismissed','1')" style="background:none;border:none;font-size:18px;color:#aaa;cursor:pointer;">✕</button>
+
+  <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+    <button onclick="requestNotificationPermission();document.getElementById('notifBanner').style.display='none'"
+      style="background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;
+      padding:9px 16px;border-radius:12px;font-size:12px;font-weight:700;
+      font-family:'Poppins',sans-serif;cursor:pointer;
+      box-shadow:0 4px 12px rgba(39,174,96,0.4);white-space:nowrap;">
+      🔔 Enable
+    </button>
+    <button onclick="document.getElementById('notifBanner').style.display='none';localStorage.setItem('notifDismissed','1')"
+      style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+      color:#aaa;padding:6px 16px;border-radius:10px;font-size:11px;
+      font-family:'Poppins',sans-serif;cursor:pointer;">
+      Baad mein
+    </button>
+  </div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -3170,18 +3197,61 @@ async function initPushNotifications() {
 }
 
 window.requestNotificationPermission = async () => {
-  if (!('Notification' in window)) {
-    showToast('Notifications not supported on this browser.', 'warning');
-    return;
-  }
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted') {
-    await saveUserToken();
-    showToast('🔔 Notifications enabled! Daily deals milenge!', 'success', 4000);
-  } else if (permission === 'denied') {
-    showToast('Notifications blocked. Browser settings se enable karo.', 'warning', 4000);
+  try {
+    if (!('Notification' in window)) {
+      showToast('Notifications not supported on this browser.', 'warning');
+      return;
+    }
+
+    // Already granted hai
+    if (Notification.permission === 'granted') {
+      await saveUserToken();
+      showToast('🔔 Notifications already enabled!', 'success', 3000);
+      document.getElementById('notifBanner').style.display = 'none';
+      return;
+    }
+
+    // Permission maango
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      await saveUserToken();
+      showToast('🔔 Notifications enabled! Daily deals milenge!', 'success', 4000);
+      document.getElementById('notifBanner').style.display = 'none';
+      // ✅ Premium animation dikhao
+      showNotifSuccessAnimation();
+    } else if (permission === 'denied') {
+      showToast('❌ Notifications blocked!', 'warning', 4000);
+    }
+  } catch(e) {
+    console.log('Notification permission error:', e);
   }
 };
+
+// ✅ Premium success animation
+function showNotifSuccessAnimation() {
+  const div = document.createElement('div');
+  div.style.cssText = `
+    position:fixed; top:50%; left:50%;
+    transform:translate(-50%,-50%) scale(0);
+    background:linear-gradient(135deg,#27ae60,#2ecc71);
+    color:#fff; border-radius:24px;
+    padding:30px 40px; text-align:center;
+    z-index:99999; font-family:'Poppins',sans-serif;
+    box-shadow:0 20px 60px rgba(39,174,96,0.4);
+    transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  `;
+  div.innerHTML = `
+    <div style="font-size:52px;margin-bottom:10px;">🔔</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Notifications ON!</div>
+    <div style="font-size:13px;opacity:0.9;">Ab aapko har deal ki update milegi!</div>
+  `;
+  document.body.appendChild(div);
+  setTimeout(() => div.style.transform = 'translate(-50%,-50%) scale(1)', 50);
+  setTimeout(() => {
+    div.style.transform = 'translate(-50%,-50%) scale(0)';
+    setTimeout(() => div.remove(), 400);
+  }, 2500);
+}
 async function saveUserToken() {
   if (!messaging) return;
   try {
@@ -3331,14 +3401,14 @@ startAbandonedCartTimer();
 
 // 5 sec baad notification banner dikhao
 setTimeout(() => {
-  if (Notification.permission === 'default' && !localStorage.getItem('notifDismissed')) {
-   const banner = document.getElementById('notifBanner');
-if (banner) {
-  banner.style.display = 'flex';
-  banner.style.alignItems = 'center';
-}
+  if (Notification.permission !== 'granted' && !localStorage.getItem('notifDismissed')) {
+    const banner = document.getElementById('notifBanner');
+    if (banner) {
+      banner.style.display = 'flex';
+      banner.style.alignItems = 'center';
+    }
   }
-}, 5000);
+}, 4000);
 /* ── SOCIAL PROOF ── */
 function animCount(id, target, suffix, duration) {
   const el = document.getElementById(id);
