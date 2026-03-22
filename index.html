@@ -2948,6 +2948,15 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
   display: none;
 }
 .field-error.show { display: block; }
+  .cart-x {
+  position: relative !important;
+  z-index: 10 !important;
+  pointer-events: all !important;
+  cursor: pointer !important;
+}
+.cart-hdr::before {
+  pointer-events: none !important;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -2972,7 +2981,7 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
     <li onclick="goContact(this)">Contact</li>
   </ul>
   <div class="nav-actions">
-    <button class="login-btn" id="navLoginBtn" onclick="openLoginModal()">Login</button>
+    <button class="login-btn" id="navLoginBtn" onclick="window.openLoginModal && window.openLoginModal()">Login</button>
     <div id="userDropdown" class="user-dropdown" style="display:none;">
       <div class="user-avatar" id="userAvatarLetter">U</div>
       <span class="user-name-nav" id="userDisplayName"></span>
@@ -2984,7 +2993,7 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
         <a href="#" class="logout-link" onclick="doLogout();return false;">🚪 Logout</a>
       </div>
     </div>
-    <button class="cart-nav-btn" onclick="toggleCart()">🛒<span class="cart-nav-badge" id="cartNavBadge">0</span></button>
+   <button class="cart-nav-btn" onclick="window.toggleCart()">🛒<span class="cart-nav-badge" id="cartNavBadge">0</span></button>
     <button onclick="toggleDark()" class="dark-toggle">🌙</button>
   </div>
 </nav>
@@ -2992,7 +3001,7 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
 <nav class="bottom-nav" id="bottomNav">
   <button class="bnav-item active" id="bn-home" onclick="goHomeM()"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
   <button class="bnav-item" id="bn-shop" onclick="goShopM()"><span class="bnav-icon">🥬</span><span class="bnav-label">Shop</span></button>
-  <button class="bnav-item bnav-cart" id="bn-cart" onclick="toggleCart()"><span class="bnav-icon">🛒</span><span class="bnav-label">Cart</span><span class="bnav-cart-badge" id="bnavBadge">0</span></button>
+ <button class="bnav-item bnav-cart" id="bn-cart" onclick="window.toggleCart()"><span class="bnav-icon">🛒</span><span class="bnav-label">Cart</span><span class="bnav-cart-badge" id="bnavBadge">0</span></button>
   <button class="bnav-item" id="bn-orders" onclick="openOrdersPanel()"><span class="bnav-icon">📦</span><span class="bnav-label">Orders</span></button>
   <button class="bnav-item" id="bn-profile" onclick="openProfilePanelM()"><span class="bnav-icon">👤</span><span class="bnav-label">Profile</span></button>
 </nav>
@@ -3001,8 +3010,8 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
     <h1>Freshness You Can Trust</h1>
     <p>Farm Direct • Organic • Delivered in 30 Minutes</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="scrollToProducts()">🛒 Shop Now</button>
-      <button class="btn-secondary" onclick="scrollToProducts()">🔥 Explore Offers</button>
+      <button class="btn-primary" onclick="window.scrollToProducts && window.scrollToProducts()">🛒 Shop Now</button>
+      <button class="btn-secondary" onclick="window.scrollToProducts && window.scrollToProducts()">🔥 Explore Offers</button>
     </div>
     <div class="countdown-box">⏰ Offer Ends In: <span id="timer" class="timer-num"></span></div>
     <div class="trust-badges">
@@ -3053,11 +3062,14 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
 <h2 class="sec-title" id="productsSection">Fresh Vegetables</h2>
 <div class="products-grid" id="productsGrid"></div>
 
-<button class="float-cart" id="cartIcon" onclick="toggleCart()">🛒<span id="cartCount">0</span></button>
-<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<button class="float-cart" id="cartIcon" onclick="window.toggleCart()">🛒<span id="cartCount">0</span></button>
+<div class="cart-overlay" id="cartOverlay" onclick="window.toggleCart()"></div>
 
 <div class="cart-drawer" id="cartDrawer">
-  <div class="cart-hdr"><h3>🛒 Your Cart</h3><button class="cart-x" onclick="toggleCart()">✕</button></div>
+<div class="cart-hdr">
+  <h3>🛒 Your Cart</h3>
+  <button class="cart-x" onclick="window.toggleCart()" style="position:relative;z-index:10;cursor:pointer;pointer-events:all;">✕</button>
+</div>
   <div class="cart-list" id="cartItems"></div>
   <div class="csummary">
     <!-- LOYALTY POINTS -->
@@ -3280,7 +3292,7 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
 
 <div id="loginModal">
   <div class="mcard">
-    <button class="m-close" onclick="closeLoginModal()">✕</button>
+    <button class="m-close"onclick="window.closeLoginModal && window.closeLoginModal()">✕</button>
     <div class="m-banner"><div class="m-logo">🌿 HariBasket<span>Farm Fresh • 30 Min Delivery</span></div></div>
     <div class="m-tabs-wrap"><div class="m-tabs">
       <button class="m-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
@@ -3358,7 +3370,7 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
 <div id="productDetail">
   <div class="pd-card">
     <div class="pd-img-wrap">
-      <button class="pd-close" onclick="closeProductDetail()">✕</button>
+     <button class="pd-close" onclick="window.closeProductDetail && window.closeProductDetail()" style="z-index:10;position:relative;">✕</button>
       <div class="pd-hot" id="pd-hot" style="display:none;">🔥 Hot</div>
      <img id="pd-image" src="" alt="" loading="lazy">
     </div>
