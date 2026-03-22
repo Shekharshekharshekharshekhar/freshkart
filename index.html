@@ -3516,6 +3516,7 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
     <div class="m-tabs-wrap"><div class="m-tabs">
       <button class="m-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
       <button class="m-tab" data-tab="signup" onclick="switchTab('signup')">Sign Up</button>
+      <button class="m-tab" data-tab="phone" onclick="switchTab('phone')">📱 OTP</button>
     </div></div>
     <div class="m-body">
       <div class="fpanel active" id="panel-login">
@@ -3530,6 +3531,38 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
         <button class="m-cta" id="login-btn" onclick="doLogin()">Login to HariBasket</button>
         <p class="terms">By continuing you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></p>
       </div>
+      <div class="fpanel" id="panel-phone">
+  <div class="m-welcome"><h3>Phone Login 📱</h3><p>OTP se secure login</p></div>
+  <div class="merr" id="error-phone-otp"></div>
+  <div class="msuc" id="success-phone-otp"></div>
+
+  <div id="phone-step-1">
+    <div class="igrp">
+      <span class="ico">🇮🇳</span>
+      <input type="tel" id="otp-phone" placeholder="+91 Mobile Number"
+        maxlength="13" inputmode="numeric"
+        oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+    </div>
+    <div id="recaptcha-container" style="margin:12px 0;display:flex;justify-content:center;"></div>
+    <button class="m-cta" id="send-otp-btn" onclick="sendOTP()">📲 Send OTP</button>
+  </div>
+
+  <div id="phone-step-2" style="display:none;">
+    <p style="font-size:12px;color:#888;text-align:center;margin-bottom:14px;">
+      OTP sent to <strong id="otp-sent-to"></strong>
+    </p>
+    <div class="igrp">
+      <span class="ico">🔢</span>
+      <input type="number" id="otp-code" placeholder="6-digit OTP"
+        maxlength="6" inputmode="numeric">
+    </div>
+    <button class="m-cta" id="verify-otp-btn" onclick="verifyOTP()">✅ Verify OTP</button>
+    <p style="text-align:center;margin-top:10px;">
+      <a href="#" onclick="resendOTP();return false;"
+        style="font-size:12px;color:var(--green);font-weight:600;">Resend OTP</a>
+    </p>
+  </div>
+</div>
       <div class="fpanel" id="panel-signup">
         <div class="m-welcome"><h3>Create Account 🌱</h3><p>Join 10,000+ happy customers</p></div>
         <div class="merr" id="error-signup"></div>
@@ -3976,7 +4009,131 @@ window.doForgotPassword = async () => {
 };
 
 window.doLogout = async () => { await signOut(auth); closeProfilePanel(); closeOrdersPanel(); showToast("Logged out! See you soon 👋", "info"); };
+/* ═══ PHONE OTP LOGIN ═══ */
+let phoneConfirmResult = null;
+let recaptchaVerifier = null;
 
+window.sendOTP = async () => {
+  const phoneRaw = document.getElementById('otp-phone').value.trim();
+  const errEl = document.getElementById('error-phone-otp');
+  errEl.style.display = 'none';
+
+  // Format karo
+  let phone = phoneRaw.replace(/\s/g, '');
+  if (!phone.startsWith('+')) phone = '+91' + phone.replace(/^0/, '');
+  if (!/^\+91[6-9]\d{9}$/.test(phone)) {
+    errEl.textContent = '⚠️ Valid Indian number enter karo (10 digits, 6-9 se shuru)';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('send-otp-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending...';
+
+  try {
+    const { RecaptchaVerifier, signInWithPhoneNumber } = await import(
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js'
+    );
+
+    // reCAPTCHA setup
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'normal',
+        callback: () => {},
+        'expired-callback': () => {
+          recaptchaVerifier = null;
+          showToast('reCAPTCHA expired, please try again', 'warning');
+        }
+      });
+    }
+
+    phoneConfirmResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+
+    // Step 2 dikhao
+    document.getElementById('phone-step-1').style.display = 'none';
+    document.getElementById('phone-step-2').style.display = 'block';
+    document.getElementById('otp-sent-to').textContent = phone;
+    document.getElementById('success-phone-otp').textContent = '✅ OTP sent! Check your messages.';
+    document.getElementById('success-phone-otp').style.display = 'block';
+
+  } catch(e) {
+    console.error('OTP error:', e);
+    const msgs = {
+      'auth/too-many-requests': '⚠️ Too many requests. Wait karo.',
+      'auth/invalid-phone-number': '⚠️ Invalid phone number.',
+      'auth/quota-exceeded': '⚠️ SMS limit exceeded. Baad mein try karo.'
+    };
+    errEl.textContent = msgs[e.code] || '⚠️ OTP send failed. Try again.';
+    errEl.style.display = 'block';
+    recaptchaVerifier = null;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📲 Send OTP';
+};
+
+window.verifyOTP = async () => {
+  const code = document.getElementById('otp-code').value.trim();
+  const errEl = document.getElementById('error-phone-otp');
+  errEl.style.display = 'none';
+
+  if (!code || code.length !== 6) {
+    errEl.textContent = '⚠️ 6-digit OTP enter karo';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('verify-otp-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Verifying...';
+
+  try {
+    const result = await phoneConfirmResult.confirm(code);
+    const user = result.user;
+
+    // Firestore mein user save karo (agar naya hai)
+    const existing = await getDocs(query(collection(db,'users'), where('uid','==', user.uid)));
+    if (existing.empty) {
+      await addDoc(collection(db,'users'), {
+        uid: user.uid,
+        phone: user.phoneNumber,
+        name: 'User ' + user.phoneNumber.slice(-4),
+        createdAt: new Date()
+      });
+    }
+
+    showToast('✅ Phone login successful!', 'success', 3000);
+    closeLoginModal();
+
+    // Reset
+    document.getElementById('phone-step-1').style.display = 'block';
+    document.getElementById('phone-step-2').style.display = 'none';
+    document.getElementById('otp-phone').value = '';
+    document.getElementById('otp-code').value = '';
+    phoneConfirmResult = null;
+    recaptchaVerifier = null;
+
+  } catch(e) {
+    const msgs = {
+      'auth/invalid-verification-code': '⚠️ Wrong OTP! Check your messages.',
+      'auth/code-expired': '⚠️ OTP expired. Resend karo.'
+    };
+    errEl.textContent = msgs[e.code] || '⚠️ Verification failed.';
+    errEl.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✅ Verify OTP';
+};
+
+window.resendOTP = () => {
+  document.getElementById('phone-step-1').style.display = 'block';
+  document.getElementById('phone-step-2').style.display = 'none';
+  document.getElementById('success-phone-otp').style.display = 'none';
+  recaptchaVerifier = null;
+  phoneConfirmResult = null;
+};
 window.openProfilePanel = window.openProfilePanelM = async () => {
   if (!currentUser) { openLoginModal(); return; }
   document.getElementById("profilePanel").classList.add("show");
