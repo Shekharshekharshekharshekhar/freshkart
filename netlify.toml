@@ -64,6 +64,12 @@
   for = "/netlify/functions/*"
   [headers.values]
     Cache-Control = "no-cache, no-store"
+    # Admin panel protect karo
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-cache, no-store"
     Access-Control-Allow-Origin = "https://haribasket.netlify.app"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
