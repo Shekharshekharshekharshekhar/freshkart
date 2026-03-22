@@ -4,8 +4,8 @@
   "description": "Farm fresh vegetables delivered in 30 minutes",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a4a2e",
-  "theme_color": "#1a4a2e",
+  "background_color": "#f0faf4",
+  "theme_color": "#27ae60",
   "orientation": "portrait",
   "icons": [
     {
@@ -20,5 +20,14 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=60",
+      "sizes": "400x400",
+      "type": "image/jpeg"
+    }
+  ],
+  "categories": ["food", "shopping"],
+  "lang": "hi-IN"
 }
