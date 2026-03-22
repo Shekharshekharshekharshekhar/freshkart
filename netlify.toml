@@ -1,20 +1,69 @@
 [build]
   functions = "netlify/functions"
 
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
+# ALL FILES — Security headers
 [[headers]]
   for = "/*"
   [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
     Cache-Control = "public, max-age=31536000"
 
+# HTML — Always fresh
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "no-cache"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Manifest — Always fresh
 [[headers]]
   for = "/manifest.json"
   [headers.values]
-    Cache-Control = "no-cache"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
+# Service Worker — Always fresh
+[[headers]]
+  for = "/firebase-messaging-sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# Images — Long cache
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Netlify Functions — No cache
+[[headers]]
+  for = "/netlify/functions/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store"
+    Access-Control-Allow-Origin = "https://haribasket.netlify.app"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
