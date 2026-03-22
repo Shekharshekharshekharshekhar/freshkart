@@ -45,7 +45,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="/icon-192.png">
+<!-- ✅ FAVICON COMPLETE SET -->
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="shortcut icon" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/icon-192.png">
+<meta name="msapplication-TileImage" content="/icon-192.png">
+<meta name="msapplication-TileColor" content="#27ae60">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -3567,15 +3576,28 @@ function loadCart() {
     const saved = localStorage.getItem('fkCart_v2');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Purane carts mein selectedWeight fix karo
+      const cleaned = {};
       for (let id in parsed) {
-        if (parsed[id] && parsed[id].selectedWeight === 1 && parsed[id].qty === 0) {
-          delete parsed[id]; // Empty items delete karo
+        const item = parsed[id];
+        if (!item) continue;
+        // ✅ Empty items skip karo
+        if (item.qty === 0 && !item.selectedWeight) continue;
+        // ✅ selectedWeight ensure karo — string nahi, number ho
+        if (item.selectedWeight) {
+          item.selectedWeight = parseFloat(item.selectedWeight) || 1;
         }
+        // ✅ Price ensure karo
+        if (!item.price || isNaN(item.price)) {
+          item.price = 0;
+        }
+        cleaned[id] = item;
       }
-      cart = parsed;
+      cart = cleaned;
     }
-  } catch(e) { cart = {}; }
+  } catch(e) {
+    console.log('Cart load error:', e);
+    cart = {};
+  }
 }
 onAuthStateChanged(auth, u => {
   currentUser = u;
@@ -3591,6 +3613,21 @@ onAuthStateChanged(auth, u => {
     loadWishlist();
     loadSavedAddress();
     loadUserPoints();
+    // ✅ CART MERGE — guest cart save karo
+    if (Notification.permission === 'granted') {
+      setTimeout(() => saveUserToken(), 2000);
+    }
+    // ✅ Guest cart items preserve karo (already in localStorage)
+    const guestCart = localStorage.getItem('fkCart_v2');
+    if (guestCart) {
+      try {
+        const parsed = JSON.parse(guestCart);
+        let hasItems = Object.values(parsed).some(c => c && c.qty > 0);
+        if (hasItems) {
+          showToast('🛒 Cart items preserved after login!', 'success', 2000);
+        }
+      } catch(e) {}
+    }
     // ✅ Login ke baad token update karo userId ke saath
     if (Notification.permission === 'granted') {
       setTimeout(() => saveUserToken(), 2000);
@@ -5182,33 +5219,38 @@ async function saveUserToken() {
       'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js'
     );
     const swReg = await navigator.serviceWorker.ready;
-    const token = await getToken(messaging, { 
+    const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
-      serviceWorkerRegistration: swReg  
+      serviceWorkerRegistration: swReg
     });
-    
+
     if (!token) return;
 
-    // ✅ Pehle check karo token already exist karta hai ya nahi
+    // ✅ CHECK — token already exists?
     const existing = await getDocs(
       query(collection(db, 'pushTokens'), where('token', '==', token))
     );
-    
     if (!existing.empty) {
       console.log('✅ Token already saved!');
+      // ✅ UserId update karo agar user login hua
+      if (currentUser && existing.docs[0].data().userId !== currentUser.uid) {
+        await updateDoc(doc(db, 'pushTokens', existing.docs[0].id), {
+          userId: currentUser.uid,
+          updatedAt: new Date()
+        });
+      }
       return;
     }
 
-    // ✅ Naya token save karo — login nahi hai toh bhi save karo
+    // ✅ Naya token save karo
     await addDoc(collection(db, 'pushTokens'), {
       token,
       userId: currentUser ? currentUser.uid : 'guest_' + Date.now(),
       createdAt: new Date(),
       platform: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
     });
-    
-    console.log('✅ Token saved successfully!');
-    
+    console.log('✅ Token saved!');
+
   } catch(e) {
     console.log('Token error:', e);
   }
