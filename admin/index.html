@@ -536,7 +536,7 @@ body.light .modal-box{
               </div>
               <div class="img-upload-previews" id="add-img-previews"></div>
             </div>
-            <div style="font-size:11px;color:#888;text-align:center;">⚠️ Photos temporarily base64 mein store honge (URL use karna recommended hai)</div>
+           <div style="font-size:11px;color:#00e676;text-align:center;">✅ Photos Firebase Storage mein upload hongi</div>
           </div>
 
           <button class="btn btn-green" onclick="addProduct()" style="width:100%;padding:12px;margin-top:12px;">➕ Add Product</button>
@@ -1189,10 +1189,13 @@ function renderAddPreviews() {
 }
 
 window.handleAddFiles = async (files) => {
+  toast('⏳ Uploading images...');
   for (let i = 0; i < Math.min(files.length, 3 - addUploadedImages.length); i++) {
-    addUploadedImages.push(await fileToBase64(files[i]));
+    const url = await fileToBase64(files[i]);
+    addUploadedImages.push(url);
   }
   renderAddPreviews();
+  toast('✅ Images ready!');
 };
 
 window.handleAddDrop = async (e) => {
@@ -1212,12 +1215,14 @@ function renderEditPreviews() {
 }
 
 window.handleEditFiles = async (files) => {
+  toast('⏳ Uploading images...');
   for (let i = 0; i < Math.min(files.length, 3 - editUploadedImages.length); i++) {
-    editUploadedImages.push(await fileToBase64(files[i]));
+    const url = await fileToBase64(files[i]);
+    editUploadedImages.push(url);
   }
   renderEditPreviews();
+  toast('✅ Images ready!');
 };
-
 window.handleEditDrop = async (e) => {
   e.preventDefault();
   document.getElementById('editUploadZone').classList.remove('drag-over');
