@@ -744,6 +744,7 @@ body.light .modal-box{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot, updateDoc, doc, deleteDoc, addDoc, setDoc, getDocs, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDDYqExFGbNWytFlYY3ttbr0zug427x_QM",
@@ -756,7 +757,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-
+const storage = getStorage(app);
 let allOrders = [], allProducts = {}, chartMode = "monthly";
 let salesChart = null, paymentChart = null, statusChart = null, productChart = null;
 let currentEditId = null; // ← tracks which product is being edited
@@ -1159,13 +1160,24 @@ window.switchEditImgTab = (tab) => {
   document.getElementById('edit-img-upload-mode').style.display = tab === 'upload' ? '' : 'none';
 };
 
-function fileToBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
+async function fileToBase64(file) {
+  // ✅ Firebase Storage mein upload karo — base64 nahi!
+  try {
+    const fileName = file.name.replace(/\s+/g,'_') + '_' + Date.now();
+    const storageRef = ref(storage, 'products/' + fileName);
+    const snapshot = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(snapshot.ref);
+    return url; // ✅ URL return hoga, base64 nahi
+  } catch(e) {
+    console.error('Upload error:', e);
+    // fallback: base64
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
 }
 
 function renderAddPreviews() {
