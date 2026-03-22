@@ -2930,6 +2930,24 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
   outline-offset: 3px !important;
   border-radius: 10px !important;
 }
+  .cinput.error, .ctextarea.error {
+  border-color: #e74c3c !important;
+  background: #fff5f5 !important;
+  animation: shake 0.3s ease;
+}
+.cinput.success, .ctextarea.success {
+  border-color: #27ae60 !important;
+  background: #f0fff4 !important;
+}
+.field-error {
+  font-size: 11px;
+  color: #e74c3c;
+  font-weight: 600;
+  margin-top: -5px;
+  margin-bottom: 6px;
+  display: none;
+}
+.field-error.show { display: block; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
@@ -3103,19 +3121,25 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
     </select>
   </div>
 </div>
-    <input class="cinput" id="cust-name" placeholder="Your Full Name">
-   <input class="cinput" id="cust-phone"
+   <input class="cinput" id="cust-name" placeholder="Your Full Name"
+  oninput="validateField('cust-name')"
+  onblur="validateField('cust-name')">
+<div class="field-error" id="err-name">⚠️ Kam se kam 3 characters chahiye</div>
+
+<input class="cinput" id="cust-phone"
   placeholder="10-digit Mobile Number"
-  type="tel"
-  maxlength="10"
+  type="tel" maxlength="10"
   pattern="[6-9][0-9]{9}"
-  inputmode="numeric">
-  <div class="saved-addr-wrap">
-  <button class="saved-addr-btn" id="savedAddrBtn" onclick="useSavedAddress()">
-    📍 Use Saved Address: <span id="savedAddrText"></span>
-  </button>
-</div>
-<textarea class="ctextarea" id="cust-address" placeholder="Delivery Address"></textarea>
+  inputmode="numeric"
+  oninput="this.value=this.value.replace(/[^0-9]/g,'');validateField('cust-phone')"
+  onblur="validateField('cust-phone')">
+<div class="field-error" id="err-phone">⚠️ Valid 10-digit Indian number chahiye (6-9 se shuru)</div>
+
+<textarea class="ctextarea" id="cust-address"
+  placeholder="Delivery Address (ghar number, gali, landmark)"
+  oninput="validateField('cust-address')"
+  onblur="validateField('cust-address')"></textarea>
+<div class="field-error" id="err-address">⚠️ Complete address chahiye (min 10 characters)</div>
     <button class="pay-btn" onclick="placeOrder()">💳 Pay Online</button>
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
   </div>
@@ -5690,6 +5714,40 @@ const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
   calcTotal();
   window._lastCartActivity = Date.now();
 };
+  // ✅ REAL-TIME FORM VALIDATION
+window.validateField = (fieldId) => {
+  const el = document.getElementById(fieldId);
+  if (!el) return true;
+  const val = el.value.trim();
+  let isValid = true;
+  let errId = '';
+
+  if (fieldId === 'cust-name') {
+    isValid = val.length >= 3;
+    errId = 'err-name';
+  } else if (fieldId === 'cust-phone') {
+    isValid = /^[6-9]\d{9}$/.test(val);
+    errId = 'err-phone';
+  } else if (fieldId === 'cust-address') {
+    isValid = val.length >= 10;
+    errId = 'err-address';
+  }
+
+  el.classList.toggle('error', !isValid && val.length > 0);
+  el.classList.toggle('success', isValid);
+
+  const errEl = document.getElementById(errId);
+  if (errEl) errEl.classList.toggle('show', !isValid && val.length > 0);
+
+  return isValid;
+};
+
+function validateAllFields() {
+  const n = validateField('cust-name');
+  const p = validateField('cust-phone');
+  const a = validateField('cust-address');
+  return n && p && a;
+}
 function calcTotal() {
   total = 0; let html = ""; let ic = 0;
 
@@ -5865,8 +5923,12 @@ if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); retu
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
-  if (!nm || !ph || !ad) {
-    showToast("Please fill Name, Phone and Address!", "warning");
+ // ✅ VALIDATE ALL FIELDS
+  if (!validateAllFields()) {
+    showToast("⚠️ Please fill all details correctly!", "warning");
+    // Scroll to first error
+    const firstErr = document.querySelector('.cinput.error, .ctextarea.error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   if (!/^[6-9]\d{9}$/.test(ph)) {
@@ -6026,8 +6088,15 @@ window.sendOrder = async (pm) => {
   const nm = document.getElementById("cust-name").value.trim();
   const ph = document.getElementById("cust-phone").value.trim();
   const ad = document.getElementById("cust-address").value.trim();
-  if (!nm || !ph || !ad) { showToast("Please fill all customer details.", "warning"); return; }
- if (!/^[6-9]\d{9}$/.test(ph)) {
+  // ✅ VALIDATE ALL FIELDS
+  if (!validateAllFields()) {
+    showToast("⚠️ Please fill all details correctly!", "warning");
+    // Scroll to first error
+    const firstErr = document.querySelector('.cinput.error, .ctextarea.error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!/^[6-9]\d{9}$/.test(ph)) {
     showToast("Please enter a valid 10-digit Indian mobile number.", "error");
     document.getElementById('cust-phone').focus();
     document.getElementById('cust-phone').style.borderColor = '#ef4444';
