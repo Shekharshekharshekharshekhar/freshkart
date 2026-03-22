@@ -52,6 +52,34 @@
 
 <!-- ── LAZY LOADERS (non-blocking) ── -->
 <script>
+  // ✅ ADMIN AUTH GUARD
+onAuthStateChanged(auth, (user) => {
+  if (!user || user.email !== 'sk3209267@gmail.com') {
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;
+        justify-content:center;background:#060e08;font-family:'Poppins',sans-serif;">
+        <div style="background:#111c12;border-radius:24px;padding:40px;
+          text-align:center;border:1.5px solid rgba(46,204,113,0.2);max-width:380px;">
+          <div style="font-size:52px;margin-bottom:16px;">🔒</div>
+          <div style="color:#2ecc71;font-size:20px;font-weight:800;margin-bottom:8px;">
+            Admin Access Only
+          </div>
+          <div style="color:#7a9a7a;font-size:13px;margin-bottom:24px;">
+            Unauthorized access denied
+          </div>
+          <button onclick="window.location.href='/'"
+            style="background:linear-gradient(135deg,#27ae60,#2ecc71);
+            color:#fff;border:none;padding:14px 28px;border-radius:14px;
+            font-size:14px;font-weight:700;cursor:pointer;">
+            Go to HariBasket
+          </button>
+        </div>
+      </div>`;
+    return;
+  }
+  // ✅ Admin verified — panel show karo
+  doAdminInit(); // tumhara existing init function
+});
 // Razorpay lazy loader
 window._rzpLoaded = false;
 function loadRazorpay(cb) {
