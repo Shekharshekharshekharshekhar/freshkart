@@ -3691,6 +3691,55 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
   60% { width: 75%; }
   100% { width: 100%; }
 }
+       /* ── CART ADD ANIMATION ── */
+@keyframes cartBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.3) rotate(-5deg); }
+  60% { transform: scale(0.9) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+}
+.cart-add-ripple {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: rgba(39,174,96,0.3);
+  border-radius: 50%;
+  animation: ripple 0.6s ease forwards;
+  pointer-events: none;
+}
+
+/* ── NUMBER COUNTER ANIMATION ── */
+@keyframes countUp {
+  0% { transform: translateY(8px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.qnum { animation: countUp 0.2s ease; }
+
+/* ── PRODUCT CARD HOVER 3D ── */
+@media (hover: hover) {
+  .pcard {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+  .pcard:hover {
+    transform: translateY(-8px) rotateX(2deg) scale(1.015) !important;
+  }
+}
+
+/* ── SUCCESS CHECKMARK ── */
+@keyframes checkDraw {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+.success-check {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkDraw 0.5s ease forwards;
+}
 </style>
 </head>
 <body>
@@ -7381,8 +7430,39 @@ window.goBestSellers = el => {
 window.goContact = el => { setDNav(el); document.querySelector(".footer").scrollIntoView({ behavior: "smooth" }); };
 function setDNav(el) { document.querySelectorAll(".nav-desktop li").forEach(l => l.classList.remove("active")); if (el) el.classList.add("active"); }
 function setBNav(id) { document.querySelectorAll(".bnav-item").forEach(b => b.classList.remove("active")); const el = document.getElementById(id); if (el) el.classList.add("active"); }
-window.toggleDark = () => document.body.classList.toggle("dark");
+// Auto detect system dark mode
+function initDarkMode() {
+  const saved = localStorage.getItem('fkDarkMode');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+  if (saved === 'true' || (saved === null && prefersDark)) {
+    document.body.classList.add('dark');
+    updateDarkToggle(true);
+  }
+
+  // System change hone pe auto update
+  window.matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', e => {
+      if (localStorage.getItem('fkDarkMode') === null) {
+        document.body.classList.toggle('dark', e.matches);
+        updateDarkToggle(e.matches);
+      }
+    });
+}
+
+function updateDarkToggle(isDark) {
+  const btn = document.querySelector('.dark-toggle');
+  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+}
+
+window.toggleDark = () => {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('fkDarkMode', isDark);
+  updateDarkToggle(isDark);
+  showToast(isDark ? '🌙 Dark mode on!' : '☀️ Light mode on!', 'info', 1500);
+};
+
+initDarkMode();
 const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); }), { threshold: 0.06 });
 
 const et = Date.now() + 86400000;
