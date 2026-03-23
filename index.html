@@ -47,7 +47,7 @@
 <!-- ── FONTS: Non-blocking ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap&display=swap"
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet" media="print" onload="this.media='all'">
 <noscript>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1497,10 +1497,8 @@ body.dark .skeleton {
   font-family:'Poppins',sans-serif;
   backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
   animation:slideUpBanner 0.5s var(--spring);
-  bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
   left: 12px; right: 12px;
-  /* ... baaki existing properties same rahenge ... */
-  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px)) 
+  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
 }
     
 
@@ -1640,86 +1638,7 @@ body.dark .skeleton {
   .wa-float { bottom:78px; width:50px; height:50px; font-size:22px; }
   .back-top { bottom:144px; right:13px; width:40px; height:40px; font-size:16px; }
   /* ── MOBILE TOUCH TARGETS ── */
-@media (max-width: 768px) {
-  .qbtn {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 18px !important;
-  }
-  .add-btn {
-    padding: 12px 10px !important;
-    font-size: 13px !important;
-    min-height: 44px !important;
-  }
-  .qty-ctrl {
-    padding: 4px !important;
-  }
-  .qnum {
-    min-width: 32px !important;
-    font-size: 15px !important;
-  }
-}
- @media(max-width:768px) {
-  body { padding-bottom:var(--bnh); }
-  .nav-desktop { display:none; }
-  .user-name-nav { display:none; }
-  .bottom-nav { display:flex; }
-  .float-cart { display:none; }
-  .hero { min-height:64vh; }
-  .hero h1 { font-size:28px; letter-spacing:-1px; }
-  .hero p { font-size:14px; }
-  .products-grid { grid-template-columns:repeat(2,1fr); gap:10px; padding:4px 12px 90px; }
-  .pcard { border-radius:18px; }
-  .pc-img { height:148px; }
-  .pc-name { font-size:13px; }
-  .pc-price { font-size:18px; }
-  .pc-unit { font-size:11px; }
-  .qbtn { width:34px; height:34px; font-size:18px; }
-  .add-btn { padding:10px; font-size:13px; border-radius:12px; }
-  .btn-primary,.btn-secondary { padding:14px 28px; font-size:15px; }
-  .bottom-nav { height:70px; padding:0 8px; }
-  .bnav-icon { font-size:22px; }
-  .bnav-label { font-size:10px; }
-  .bnav-item { padding:7px 5px; }
-  .search-box input { padding:15px 96px 15px 50px; font-size:14px; }
-  .cart-drawer { width:100vw; }
-  .cart-hdr h3 { font-size:17px; }
-  .citem { padding:12px; border-radius:14px; }
-  .citem h4 { font-size:14px; }
-  .citem p { font-size:12px; }
-  .pay-btn,.cod-btn { padding:15px; font-size:15px; border-radius:16px; }
-  .cinput { padding:13px 15px; font-size:14px; }
-  .ctextarea { font-size:14px; padding:13px 15px; }
-  .track-inp { padding:13px 15px; font-size:14px; }
-  .track-btn { padding:13px 18px; font-size:14px; }
-  .sec-title { font-size:22px; }
-  .cpill { padding:9px 18px; font-size:12px; }
-  .sort-bar { flex-wrap:nowrap; overflow-x:auto; }
-  .sort-bar::-webkit-scrollbar { display:none; }
-  .sort-pill { padding:7px 14px; font-size:11px; }
-  .pd-img-wrap { height:260px; }
-  .pd-name { font-size:22px; }
-  .pd-price { font-size:32px; }
-  .pd-qbtn { width:42px; height:42px; font-size:22px; }
-  .pd-add-btn { padding:16px; font-size:16px; border-radius:16px; }
-  .mcard { border-radius:24px; }
-  .m-cta { padding:15px; font-size:15px; }
-  .igrp input { padding:13px 14px 13px 40px; font-size:14px; }
-  .coupon-inp { font-size:13px; }
-  .coupon-btn { padding:11px 16px; }
-  .slot-opt { padding:11px; font-size:12px; }
-  .ocard { padding:14px; border-radius:18px; }
-  .o-total { font-size:16px; }
-  .cancel-btn { padding:11px; font-size:13px; }
-  .sp-stats { grid-template-columns:repeat(2,1fr); }
-  .sp-stat-num { font-size:20px; }
-  .pb-track { height:152px; }
-  .pb-title { font-size:18px; }
-  .wa-float { bottom:78px; width:50px; height:50px; font-size:22px; }
-  .back-top { bottom:144px; right:13px; width:40px; height:40px; font-size:16px; }
-  #notifBanner { bottom:76px !important; left:10px !important; right:10px !important; padding:13px 14px !important; border-radius:18px !important; }
-  button { min-height:40px; }
-}
+
 /* ═══ DARK MODE ═══ */
 body.dark { background:#090f0a; color:#ddeedd; }
 body.dark .navbar { background:rgba(8,16,10,0.97); border-bottom-color:rgba(46,204,113,0.1); }
@@ -6714,10 +6633,11 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
       '<div class="pc-live" id="total-' + id + '"></div>' +
     '</div>' +
   '</div>';
-  document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
+  
+}
+document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
   updateWishlistButtons();
 }
-
 window.rateProduct = async (id, stars) => {
   const cur = allP[id];
   const nc = (cur.ratingCount || 0) + 1;
