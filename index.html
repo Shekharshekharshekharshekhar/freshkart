@@ -40,11 +40,9 @@
 
 <!-- ── CRITICAL: Hero image preload ── -->
 <link rel="preload"
-  href="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop"
+  href="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80&auto=format&fit=crop"
   as="image"
-  type="image/jpeg"
-  fetchpriority="high"
-  crossorigin="anonymous">
+  fetchpriority="high">
 
 <!-- ── FONTS: Non-blocking ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1499,12 +1497,12 @@ body.dark .skeleton {
   font-family:'Poppins',sans-serif;
   backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
   animation:slideUpBanner 0.5s var(--spring);
-}
-       #notifBanner {
-  /* existing properties same rehne do, sirf ye add karo: */
   bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
-  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  left: 12px; right: 12px;
+  /* ... baaki existing properties same rahenge ... */
+  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px)) 
 }
+    
 
 @media (max-width: 768px) {
   #notifBanner {
@@ -1518,6 +1516,7 @@ body.dark .skeleton {
     height: 40px !important;
     font-size: 18px !important;
   }
+  
 }
 @keyframes slideUpBanner { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
 
@@ -6445,6 +6444,7 @@ function loadProducts() {
     renderPills();
     applyFilters();
     renderRecommended();
+    cacheProducts();
   });
 }
   /* ── OFFLINE SUPPORT ── */
@@ -6761,7 +6761,6 @@ function renderRecommended() {
       </div>
     </div>
   `).join('');
-  cacheProducts(); // Products cache karo
 }
 window.handleSearch = () => {
   const inp = document.getElementById("searchInput").value.toLowerCase();
@@ -7160,8 +7159,7 @@ if (ad.length < 10) {
   saveAddress(nm, ph, ad);
 
   try {
-     await new Promise(resolve => loadRazorpay(resolve));
-   await new Promise(resolve => loadRazorpay(resolve));
+    await new Promise(resolve => loadRazorpay(resolve));
 const res = await fetch("/.netlify/functions/getkey");
     const data = await res.json();
 
