@@ -6623,6 +6623,16 @@ function renderProducts(products) {
   grid.innerHTML = "";
   for (let id in products) {
     const d = products[id];
+    // Urgency html
+const urgencyHtml = d.stock > 0 && d.stock <= 10
+  ? '<div style="background:linear-gradient(135deg,#fff3cd,#fff8e1);' +
+    'border:1px solid #f39c12;border-radius:8px;padding:5px 10px;' +
+    'font-size:10px;font-weight:800;color:#e67e22;margin-bottom:6px;' +
+    'display:flex;align-items:center;gap:5px;">' +
+    '<span style="animation:pulse 1s infinite;">🔥</span>' +
+    'Sirf ' + d.stock + ' bacha! Jaldi order karo' +
+    '</div>'
+  : '';
     const rv = d.ratingCount > 0 ? d.rating.toFixed(1) : 0;
     let sh = "";
     for (let i = 1; i <= 5; i++) sh += '<span class="' + (i <= Math.round(rv) ? "on" : "") + '" onclick="rateProduct(\'' + id + '\',' + i + ')">★</span>';
@@ -6650,15 +6660,14 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
           discBadge +
           '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' +
           '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' +
-         '<img src="' + d.image + '" alt="' + id + '" ' +
-'loading="lazy" ' +
-'decoding="async" ' +
-'width="162" height="152" ' +
-'onerror="this.src=\'https://via.placeholder.com/162x152/e8f5e9/27ae60?text=' + encodeURIComponent(id) + '\'">' onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
+      '<img src="' + d.image + '" alt="' + id + '" loading="lazy" decoding="async" width="162" height="152" ' +
+'onerror="this.src=\'https://via.placeholder.com/162x152/e8f5e9/27ae60?text=' + encodeURIComponent(id) + '\'" ' +
+'onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
           '<button class="pc-quickview" onclick="event.stopPropagation();openProductDetail(\'' + id + '\')">👁️ Quick View</button>' +
         '</div>' +
-        '<div class="pc-body">' +
-          '<div class="pc-name">'urgencyHtml + + id + '</div>' +
+       '<div class="pc-body">' +
+  '<div class="pc-name">' + id + '</div>' +
+  urgencyHtml +
       // Stock low hone pe urgency dikhao
 const urgencyHtml = d.stock > 0 && d.stock <= 10
   ? '<div style="background:linear-gradient(135deg,#fff3cd,#fff8e1);' +
