@@ -1365,7 +1365,62 @@ input, textarea, select { font-family:'Poppins',sans-serif; -webkit-appearance:n
 .pstep-label.active { color:#e67e22; }
 
 /* ═══ MISC ═══ */
-.skeleton { background:linear-gradient(90deg,#edf5ef 25%,#e0ede5 50%,#edf5ef 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:12px; }
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f5f1 25%,
+    #e0ede5 37%,
+    #f0f5f1 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmerSkeleton 1.4s ease infinite;
+}
+@keyframes shimmerSkeleton {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Better skeleton card */
+.skel-card {
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(27,100,55,0.06);
+}
+.skel-img {
+  height: 152px;
+  width: 100%;
+}
+.skel-body { padding: 12px; }
+.skel-line {
+  height: 12px;
+  margin-bottom: 9px;
+  border-radius: 8px;
+}
+.skel-line.short { width: 55%; }
+.skel-line.medium { width: 78%; }
+.skel-price {
+  height: 22px;
+  width: 45%;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.skel-btn {
+  height: 36px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+body.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    #0f1c11 25%,
+    #1a2a1a 37%,
+    #0f1c11 63%
+  );
+  background-size: 400% 100%;
+}
+       
 @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
 .skel-card { background:#fff; border-radius:22px; overflow:hidden; box-shadow:var(--shadow); }
 .skel-img { height:152px; width:100%; }
@@ -3934,7 +3989,10 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
   oninput="validateField('cust-address')"
   onblur="validateField('cust-address')"></textarea>
 <div class="field-error" id="err-address">⚠️ Complete address chahiye (min 10 characters)</div>
-    <button class="pay-btn" onclick="placeOrder()">💳 Pay Online</button>
+    <button class="pay-btn" onclick="placeOrder()// Order place hone pe strong haptic
+if (navigator.vibrate) {
+  navigator.vibrate([100, 50, 100, 50, 200]);
+}">💳 Pay Online</button>
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
   </div>
 </div>
@@ -5392,14 +5450,16 @@ function showSkeletons() {
   const grid = document.getElementById("productsGrid");
   let html = "";
   for (let i = 0; i < 6; i++) {
-    html += '<div class="skel-card">' +
-      '<div class="skel-img skeleton"></div>' +
-      '<div class="skel-body">' +
-        '<div class="skel-line medium skeleton"></div>' +
-        '<div class="skel-line short skeleton"></div>' +
-        '<div class="skel-line medium skeleton"></div>' +
-      '</div>' +
-    '</div>';
+    html +=
+      '<div class="skel-card">' +
+        '<div class="skel-img skeleton"></div>' +
+        '<div class="skel-body">' +
+          '<div class="skel-line medium skeleton"></div>' +
+          '<div class="skel-line short skeleton"></div>' +
+          '<div class="skel-price skeleton"></div>' +
+          '<div class="skel-btn skeleton"></div>' +
+        '</div>' +
+      '</div>';
   }
   grid.innerHTML = html;
 }
@@ -6386,6 +6446,40 @@ function loadProducts() {
     renderRecommended();
   });
 }
+  /* ── OFFLINE SUPPORT ── */
+function initOfflineSupport() {
+  // Products cache karo
+  window.addEventListener('online', () => {
+    showToast('✅ Internet wapas aa gaya!', 'success', 3000);
+    loadProducts();
+  });
+
+  window.addEventListener('offline', () => {
+    showToast('📶 Offline ho gaye — cached products dikh rahe hain', 'warning', 5000);
+
+    // Cache se products load karo
+    try {
+      const cached = localStorage.getItem('fkProductsCache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        allP = parsed;
+        renderPills();
+        applyFilters();
+      }
+    } catch(e) {}
+  });
+}
+
+// Products load hone ke baad cache karo
+function cacheProducts() {
+  try {
+    localStorage.setItem('fkProductsCache', JSON.stringify(allP));
+  } catch(e) {
+    console.log('Cache full:', e);
+  }
+}
+
+initOfflineSupport();
   // Splash screen hide karo
 setTimeout(() => {
   const splash = document.getElementById('splashScreen');
@@ -6657,6 +6751,7 @@ function renderRecommended() {
       </div>
     </div>
   `).join('');
+  cacheProducts(); // Products cache karo
 }
 window.handleSearch = () => {
   const inp = document.getElementById("searchInput").value.toLowerCase();
@@ -6759,7 +6854,10 @@ const pr = _gq > 0 ? (p.price / _gq) * w : p.price * w;
     if (card) { const img = card.querySelector("img"); if (img) flyToCart(img); }
     const ci = document.getElementById("cartIcon");
     if (ci) { ci.classList.add("shaking"); setTimeout(() => ci.classList.remove("shaking"), 380); }
-    document.getElementById("addSound").play().catch(() => {});
+    document.getElementById("addSound").play()// Haptic feedback — phone vibrate kare
+if (navigator.vibrate) {
+  navigator.vibrate(val > 0 ? [15] : [8]);
+}.catch(() => {});
   }
   calcTotal();
   window._lastCartActivity = Date.now();
@@ -7547,6 +7645,39 @@ window.installPWA = async () => {
   const b = document.getElementById('pwaBanner');
   if (b) b.remove();
 };
+  /* ── PERFORMANCE MONITORING ── */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (!window.performance) return;
+
+    const timing = performance.getEntriesByType('navigation')[0];
+    if (!timing) return;
+
+    const loadTime = Math.round(timing.loadEventEnd - timing.startTime);
+    const fcp = performance.getEntriesByName('first-contentful-paint')[0];
+    const fcpTime = fcp ? Math.round(fcp.startTime) : 0;
+
+    console.log('%c🌿 HariBasket Performance', 'color:#27ae60;font-size:16px;font-weight:bold;');
+    console.log('%cPage Load: ' + loadTime + 'ms', loadTime < 2000 ? 'color:green' : 'color:red');
+    console.log('%cFirst Content: ' + fcpTime + 'ms', fcpTime < 1000 ? 'color:green' : 'color:orange');
+
+    // Slow hone pe console warning
+    if (loadTime > 3000) {
+      console.warn('⚠️ Page load slow hai! Images optimize karo.');
+    }
+
+    // Firebase mein log karo (optional)
+    if (currentUser && loadTime > 0) {
+      addDoc(collection(db, 'performance'), {
+        userId: currentUser.uid,
+        loadTime,
+        fcpTime,
+        date: new Date(),
+        device: /Mobile/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+      }).catch(() => {});
+    }
+  }, 0);
+});
 </script>
 </body>
 </html>
