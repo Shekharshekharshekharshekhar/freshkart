@@ -39,7 +39,10 @@
 <meta name="msapplication-TileColor" content="#27ae60">
 
 <!-- ── CRITICAL: Hero image preload ── -->
-
+<link rel="preload"
+  href="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=60&auto=format&fit=crop"
+  as="image"
+  fetchpriority="high">
 
 <!-- ── FONTS: Non-blocking ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,9 +82,9 @@ function loadEmailJS() {
 }
 </script>
      <style>
+       @import url('https://fonts.googleapis.com/css2?family=Nunito...');
+@import url('https://fonts.googleapis.com/css2?family=Nunito...'); /* DUPLICATE */
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap');
-
 /* ═══ CSS VARIABLES ═══ */
 :root {
   --green:#27ae60; --green2:#2ecc71; --green3:#1a9e50;
@@ -733,6 +736,45 @@ input, textarea, select { font-family:'Poppins',sans-serif; -webkit-appearance:n
   transition:all var(--t) var(--ease); color:var(--text);
 }
 .ctextarea:focus { border-color:var(--green2); background:#fff; box-shadow:0 0 0 4px rgba(46,204,113,0.1); }
+       .upsell-section {
+  background: linear-gradient(135deg, #fff8e1, #fff3cd);
+  border: 1.5px solid rgba(243,156,18,0.3);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.upsell-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #e67e22;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.upsell-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.upsell-row::-webkit-scrollbar { display: none; }
+.upsell-item {
+  flex-shrink: 0;
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+  width: 80px;
+  border: 1.5px solid rgba(243,156,18,0.2);
+  cursor: pointer;
+  transition: 0.2s;
+}
+.upsell-item:hover { border-color: #f39c12; transform: translateY(-2px); }
+.upsell-item img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; }
+.upsell-item-name { font-size: 9px; font-weight: 700; color: #333; margin-bottom: 2px; line-height: 1.2; }
+.upsell-item-price { font-size: 10px; font-weight: 900; color: #27ae60; }
+.upsell-add { width: 100%; padding: 4px; background: #27ae60; color: white; border: none; border-radius: 6px; font-size: 9px; font-weight: 700; margin-top: 4px; cursor: pointer; }
 .pay-btn {
   width:100%; padding:14px;
   background:linear-gradient(135deg,var(--green3),var(--green2));
@@ -3268,15 +3310,19 @@ body.dark .stat-box { background: linear-gradient(135deg, #0a1510, #0f1c11) !imp
   pointer-events: none !important;
 }
   /* ── GPU ACCELERATION ── */
-.pcard, .cart-drawer, .bottom-nav, .float-cart,
-.toast, #productDetail, #loginModal, #profilePanel,
-#ordersPanel, #wishlistPanel, #cancelModal,
-#orderConfirm, #wishlistPanel {
+.cart-drawer,
+.bottom-nav,
+#productDetail .pd-card {
   will-change: transform;
   transform: translateZ(0);
-  -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
+
+/* Baaki elements animate hone se pehle GPU pe jaayenge */
+.pcard:hover,
+.float-cart:hover {
+  will-change: transform;
 }
 
 /* ── OFF-SCREEN CONTENT SKIP ── */
@@ -3522,10 +3568,139 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
     transform: none !important;
   }
 }  
+       #exitPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.3s;
+}
+#exitPopup.show { opacity: 1; visibility: visible; }
+.exit-card {
+  background: white;
+  border-radius: 28px;
+  padding: 32px 26px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.3);
+  animation: mPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+.exit-emoji { font-size: 56px; display: block; margin-bottom: 12px; }
+.exit-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #0d1a10;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.exit-desc { font-size: 13px; color: #888; margin-bottom: 20px; line-height: 1.6; }
+.exit-coupon {
+  background: linear-gradient(135deg, #eef8f2, #e0f2ea);
+  border: 2px dashed #27ae60;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+.exit-coupon-code {
+  font-family: 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #0d6b33;
+  letter-spacing: 3px;
+}
+.exit-coupon-desc { font-size: 11px; color: #27ae60; font-weight: 700; margin-top: 4px; }
+.exit-stay-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #0d6b33, #27ae60, #2ecc71);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 26px rgba(39,174,96,0.45);
+  margin-bottom: 10px;
+}
+.exit-leave-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  padding: 8px;
+}
+       #splashScreen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0a5c2a 0%, #1a9e50 50%, #2ecc71 100%);
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#splashScreen.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.splash-logo {
+  font-family: 'Nunito', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+  animation: scaleIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+.splash-tagline {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+  margin-bottom: 40px;
+}
+.splash-loader {
+  width: 200px;
+  height: 4px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.splash-loader-fill {
+  height: 100%;
+  background: white;
+  border-radius: 10px;
+  animation: loadFill 1.8s ease forwards;
+}
+@keyframes loadFill {
+  0% { width: 0%; }
+  60% { width: 75%; }
+  100% { width: 100%; }
+}
 </style>
 </head>
 <body>
-
+<div id="splashScreen">
+  <div class="splash-logo">🌿 HariBasket</div>
+  <div class="splash-tagline">Farm Fresh • 30 Min Delivery</div>
+  <div class="splash-loader">
+    <div class="splash-loader-fill"></div>
+  </div>
+</div>
 <div class="top-bar">
   <span class="top-bar-inner">🚚 Free Delivery Above ₹299 &nbsp;|&nbsp; ⚡ 30 Min Delivery &nbsp;|&nbsp; 💳 Secure Payments &nbsp;|&nbsp; ✔ Contactless &nbsp;|&nbsp; ✔ WhatsApp Support &nbsp;|&nbsp; 🌱 100% Fresh Guarantee</span>
 </div>
@@ -4170,6 +4345,26 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
     </button>
   </div>
 </div>
+  <div id="exitPopup">
+  <div class="exit-card">
+    <span class="exit-emoji">😢</span>
+    <div class="exit-title">Ruko! Ek special offer!</div>
+    <div class="exit-desc">
+      Sirf aapke liye — <strong>pehle order pe 15% extra discount!</strong>
+      Yeh offer sirf 10 minutes ke liye hai.
+    </div>
+    <div class="exit-coupon">
+      <div class="exit-coupon-code">STAY15</div>
+      <div class="exit-coupon-desc">✨ 15% OFF — Abhi apply karo checkout pe</div>
+    </div>
+    <button class="exit-stay-btn" onclick="closeExitPopup();document.getElementById('couponInput').value='STAY15';applyCoupon();toggleCart();">
+      🛒 Haan! Discount chahiye
+    </button>
+    <button class="exit-leave-btn" onclick="closeExitPopup()">
+      Nahi, baad mein aaunga
+    </button>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -4520,12 +4715,17 @@ async function loadOrders() {
   }
 
   try {
-    const snap = await getDocs(collection(db, "orders"));
-
-    const orders = [];
-  snap.forEach(d => {
-  const data = d.data();
- if (data.userId === currentUser.uid) {
+   const snap = await getDocs(
+  query(
+    collection(db, "orders"),
+    where("userId", "==", currentUser.uid),
+    orderBy("createdAt", "desc"),
+    limit(20)  // Sirf last 20 orders
+  )
+);
+const orders = [];
+snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+// JavaScript sort HATAO — Firebase already sorted dega
     orders.push({ id: d.id, ...data });
   }
 });
@@ -6137,6 +6337,39 @@ function loadProducts() {
     renderRecommended();
   });
 }
+  // Splash screen hide karo
+setTimeout(() => {
+  const splash = document.getElementById('splashScreen');
+  if (splash) splash.classList.add('hide');
+}, 1800);
+  // Exit Intent
+let exitShown = false;
+document.addEventListener('mouseleave', e => {
+  if (e.clientY <= 0 && !exitShown && Object.keys(cart).some(id => cart[id].qty > 0)) {
+    exitShown = true;
+    document.getElementById('exitPopup').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+});
+
+// Mobile pe back button
+window.addEventListener('popstate', () => {
+  if (!exitShown && Object.keys(cart).some(id => cart[id].qty > 0)) {
+    exitShown = true;
+    document.getElementById('exitPopup').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    history.pushState(null, '', window.location.href);
+  }
+});
+history.pushState(null, '', window.location.href);
+
+window.closeExitPopup = () => {
+  document.getElementById('exitPopup').classList.remove('show');
+  document.body.style.overflow = '';
+};
+
+// Firebase mein STAY15 coupon add karo bhi:
+// code: "STAY15", type: "percent", value: 15, desc: "Exit Offer 15%", minOrder: 99
   // Service Worker register karo
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -6273,11 +6506,25 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
           discBadge +
           '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' +
           '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' +
-          '<img src="' + d.image + '" alt="' + id + '" loading="lazy" onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
+         '<img src="' + d.image + '" alt="' + id + '" ' +
+'loading="lazy" ' +
+'decoding="async" ' +
+'width="162" height="152" ' +
+'onerror="this.src=\'https://via.placeholder.com/162x152/e8f5e9/27ae60?text=' + encodeURIComponent(id) + '\'">' onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
           '<button class="pc-quickview" onclick="event.stopPropagation();openProductDetail(\'' + id + '\')">👁️ Quick View</button>' +
         '</div>' +
         '<div class="pc-body">' +
-          '<div class="pc-name">' + id + '</div>' +
+          '<div class="pc-name">'urgencyHtml + + id + '</div>' +
+      // Stock low hone pe urgency dikhao
+const urgencyHtml = d.stock > 0 && d.stock <= 10
+  ? '<div style="background:linear-gradient(135deg,#fff3cd,#fff8e1);' +
+    'border:1px solid #f39c12;border-radius:8px;padding:5px 10px;' +
+    'font-size:10px;font-weight:800;color:#e67e22;margin-bottom:6px;' +
+    'display:flex;align-items:center;gap:5px;">' +
+    '<span style="animation:pulse 1s infinite;">🔥</span>' +
+    'Sirf ' + d.stock + ' bacha! Jaldi order karo' +
+    '</div>'
+  : '';
           '<div class="stock-indicator ' + stockBadge + '">' + stockText + '</div>' +
           '<div class="pc-stars"><div class="stars">' + sh + '</div><span class="rating-t">' + rt + '</span></div>' +
           '<div class="pc-price-row">' +
@@ -6605,6 +6852,49 @@ function calcTotal() {
   if (bb) { bb.textContent = ic; bb.style.display = ic > 0 ? "flex" : "none"; }
 
   saveCart();
+  // Upsell render karo
+renderUpsell();
+}
+  function renderUpsell() {
+  // Cart mein kya hai dekho
+  const cartItems = Object.keys(cart).filter(id => cart[id] && cart[id].qty > 0);
+  if (!cartItems.length) return;
+
+  // Cart items ki categories dekho
+  const cartCats = cartItems.map(id => allP[id] ? allP[id].category : '');
+
+  // Same category ke doosre products suggest karo
+  const suggestions = Object.entries(allP)
+    .filter(([id, p]) => {
+      return !cart[id] || cart[id].qty === 0; // Cart mein nahi hai
+    })
+    .filter(([id, p]) => cartCats.includes(p.category)) // Same category
+    .slice(0, 5);
+
+  if (!suggestions.length) return;
+
+  // Existing upsell section remove karo
+  const existing = document.getElementById('upsellSection');
+  if (existing) existing.remove();
+
+  const upsellHtml =
+    '<div class="upsell-section" id="upsellSection">' +
+      '<div class="upsell-title">🛒 Aksar saath kharide jaate hain</div>' +
+      '<div class="upsell-row">' +
+        suggestions.map(([id, p]) =>
+          '<div class="upsell-item" onclick="changeQty(\'' + id + '\',1);renderUpsell();">' +
+            '<img src="' + p.image + '" alt="' + id + '" loading="lazy">' +
+            '<div class="upsell-item-name">' + id + '</div>' +
+            '<div class="upsell-item-price">₹' + p.price + '</div>' +
+            '<button class="upsell-add">+ Add</button>' +
+          '</div>'
+        ).join('') +
+      '</div>' +
+    '</div>';
+
+  // Pay button se pehle insert karo
+  const payBtn = document.querySelector('.pay-btn');
+  if (payBtn) payBtn.insertAdjacentHTML('beforebegin', upsellHtml);
 }
 window.removeItem = id => {
   if (cart[id]) cart[id].qty = 0;
