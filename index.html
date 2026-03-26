@@ -6957,8 +6957,10 @@ function calcTotal() {
   if (bb) { bb.textContent = ic; bb.style.display = ic > 0 ? "flex" : "none"; }
 
   saveCart();
-  // Upsell render karo
-renderUpsell();
+   // Upsell render karo - setTimeout se error fix
+  setTimeout(() => {
+    if (typeof renderUpsell === 'function') renderUpsell();
+  }, 0);
 }
   function renderUpsell() {
   // Cart mein kya hai dekho
@@ -7391,20 +7393,21 @@ window.sendOrder = async (pm) => {
     createdAt: new Date()
   });
 
-  // Stock deduct karo ✅
-  for (let item in cart) {
-    if (cart[item] && cart[item].qty > 0) {
-      try {
-        const currentStock = allP[item] ? (allP[item].stock || 0) : 0;
-        if (currentStock > 0) {
-          const newStock = Math.max(0, currentStock - cart[item].qty);
-          await updateDoc(doc(db, "products", item), { stock: newStock });
-        }
-      } catch(e) { console.log("Stock update error:", e); }
+  // Stock deduct karo ✅ (parallel — faster)
+const stockUpdates = [];
+for (let item in cart) {
+  if (cart[item] && cart[item].qty > 0) {
+    const currentStock = allP[item] ? (allP[item].stock || 0) : 0;
+    if (currentStock > 0) {
+      const newStock = Math.max(0, currentStock - cart[item].qty);
+      stockUpdates.push(
+        updateDoc(doc(db, "products", item), { stock: newStock })
+          .catch(e => console.log("Stock update error:", e))
+      );
     }
   }
-
-  window.open("https://wa.me/917888716909?text=" + encodeURIComponent(msg), "_blank");
+}
+window.open("https://wa.me/917888716909?text=" + encodeURIComponent(msg), "_blank");
 try {
   let itemsForEmail = "";
   for (let item in cart) {
