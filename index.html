@@ -5227,7 +5227,7 @@ function showOrderConfirm(oid, nm, ph, payType, slot, itemsObj, subtotal, disc, 
       const qty = itemsObj[item].qty;
       const w = itemsObj[item].selectedWeight || 1;
       const unit = p ? (p.unit || 'kg') : 'kg';
-      const pr = unit === 'g' ? (p.price/1000)*w*qty : p.price*w*qty;
+      const pr = calcItemPrice(p, w, qty);
       itemsHtml += '<div class="oc-item-row"><span>🥬 ' + item + ' x ' + qty + ' (' + w + unit + ')</span><span>₹' + pr.toFixed(2) + '</span></div>';
     }
   }
@@ -6148,9 +6148,42 @@ window.submitPdReview = async () => {
     showToast('Could not submit review. Try again!', 'error');
   }
 };
- // GRAM CHECK — "kg" ko gram nahi maanna
+  function calcItemPrice(p, selectedWeight, qty) {
+  const unit = p.unit || 'kg';
+  const isGram = isGramUnit(unit);
+  const baseG = isGram ? (parseInt(unit) || 100) : 0;
+  const w = parseFloat(selectedWeight) || (baseG > 0 ? baseG : 0.5);
+  return baseG > 0
+    ? (p.price / baseG) * w * qty
+    : p.price * w * qty;
+}
 function isGramUnit(unit) {
   return unit && /^\d+g$/.test(unit.trim());
+}
+
+// Weight display fix
+function getDisplayWeight(selectedWeight, unit) {
+  const isGram = isGramUnit(unit);
+  const baseG = isGram ? (parseInt(unit) || 100) : 0;
+  if (baseG > 0) {
+    // Gram unit hai — selectedWeight grams mein hai
+    return selectedWeight >= 1000
+      ? (selectedWeight / 1000) + 'kg'
+      : selectedWeight + 'g';
+  }
+  return selectedWeight + (unit || 'kg');
+}
+
+// Price calculation fix
+function calcItemPrice(p, selectedWeight, qty) {
+  const unit = p.unit || 'kg';
+  const isGram = isGramUnit(unit);
+  const baseG = isGram ? (parseInt(unit) || 100) : 0;
+  const w = parseFloat(selectedWeight) || (baseG > 0 ? baseG : 0.5);
+  const price = baseG > 0
+    ? (p.price / baseG) * w * qty
+    : p.price * w * qty;
+  return price;
 }
 /* ═══ PUSH NOTIFICATIONS ═══ */
 const VAPID_KEY = 'BGEjE3MbyQK7spfxl6IuSF-PsdvmE_HqdvFVUxw47h26KvAiMZ_UiyOzekI2cN8DazOG7fwZ0JAsk3boESWS1JU'; // Step 1 se
@@ -6863,9 +6896,9 @@ function calcTotal() {
       if (!p) continue;
       const qty = cart[item].qty;
       const unit = p.unit || "kg";
-    const w = parseFloat(cart[item].selectedWeight) || 0.5;
-      const _gct = isGramUnit(unit) ? (parseInt(unit)||100) : 0;
-      const price = _gct > 0 ? (p.price / _gct) * w * qty : p.price * w * qty;
+   const w = parseFloat(cart[item].selectedWeight) ||
+          (isGramUnit(unit) ? (parseInt(unit)||100) : 0.5);
+const price = calcItemPrice(p, w, qty);
       total += price; ic++;
       const itemImg = p.image || '';
       const deliverySlotText = selectedSlot === 'asap' ? '⚡ 30 min delivery' : '📅 Scheduled';
@@ -6875,7 +6908,7 @@ function calcTotal() {
             (itemImg ? '<img class="citem-img" src="' + itemImg + '" alt="' + item + '" loading="lazy">' : '') +
             '<div class="citem-info">' +
               '<h4>' + item + '</h4>' +
-              '<p>' + qty + ' × ' + w + (isGramUnit(unit) ? "g" : unit) + ' = ₹' + price.toFixed(2) + '</p>' +
+             '<p>' + qty + ' × ' + getDisplayWeight(w, unit) + ' = ₹' + price.toFixed(2) + '</p>' +
               '<div class="citem-delivery"><span>' + deliverySlotText + '</span></div>' +
             '</div>' +
           '</div>' +
@@ -7191,8 +7224,9 @@ for (let item in cart) {
               const p = allP[item];
               const qty = cart[item].qty;
               const unit = p ? (p.unit||"kg") : "kg";
-              const w = cart[item].selectedWeight || 1;
-              const pr = unit==="g" ? (p.price/1000)*w*qty : p.price*w*qty;
+             const w = parseFloat(cart[item].selectedWeight) ||
+          (isGramUnit(unit) ? (parseInt(unit)||100) : 0.5);
+const pr = calcItemPrice(p, w, qty);
               itemsForEmail += "- " + item + " | " + qty + " x " + w + unit + " = Rs." + pr.toFixed(2) + "\n";
             }
           }
@@ -7339,8 +7373,9 @@ window.sendOrder = async (pm) => {
       const p = allP[item];
       const qty = cart[item].qty;
       const unit = p ? (p.unit || "kg") : "kg";
-      const w = cart[item].selectedWeight || 1;
-      const pr = unit === "g" ? (p.price / 1000) * w * qty : p.price * w * qty;
+      const w = parseFloat(cart[item].selectedWeight) ||
+          (isGramUnit(unit) ? (parseInt(unit)||100) : 0.5);
+const pr = calcItemPrice(p, w, qty);
       grandTotal += pr;
       itemsText += "   " + item + "\n"
         + "   Qty: " + qty + " x " + w + unit + "\n"
@@ -7415,8 +7450,9 @@ try {
       const p = allP[item];
       const qty = cart[item].qty;
       const unit = p ? (p.unit || "kg") : "kg";
-      const w = cart[item].selectedWeight || 1;
-      const pr = unit === "g" ? (p.price/1000)*w*qty : p.price*w*qty;
+     const w = parseFloat(cart[item].selectedWeight) ||
+          (isGramUnit(unit) ? (parseInt(unit)||100) : 0.5);
+const pr = calcItemPrice(p, w, qty);
       itemsForEmail += "• " + item + " — " + qty + " x " + w + unit + " = ₹" + pr.toFixed(2) + "\n";
     }
   }
