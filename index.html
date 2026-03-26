@@ -7058,8 +7058,32 @@ window.toggleCart = () => {
    PAYMENT ONLINE (Razorpay via Netlify)
    ========================================== */
 window.placeOrder = async () => {
-if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
-  if (total < 99) { showToast("⚠️ Minimum order amount is ₹99!", "warning"); return; }
+  // ── DOUBLE TAP FIX ──
+  const payBtn = document.querySelector('.pay-btn');
+  if (payBtn && payBtn.disabled) {
+    return;
+  }
+  if (payBtn) {
+    payBtn.disabled = true;
+    payBtn.textContent = '⏳ Processing...';
+  }
+  const resetPayBtn = () => {
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.textContent = '💳 Pay Online';
+    }
+  };
+
+  if (total <= 0) {
+    showToast("Cart is empty! Please add items.", "warning");
+    resetPayBtn();
+    return;
+  }
+  if (total < 99) {
+    showToast("⚠️ Minimum order amount is ₹99!", "warning");
+    resetPayBtn();
+    return;
+  }
 // Out of stock items check
   for (let item in cart) {
     if (cart[item] && cart[item].qty > 0) {
@@ -7192,7 +7216,12 @@ for (let item in cart) {
 }
       }
     };
+rzp.on("payment.failed", function(response) {
+  // ... existing code ...
+});
 
+rzp.open();
+resetPayBtn(); // ← Yeh line ADD KARO
     const rzp = new Razorpay(options);
 
     // ✅ PAYMENT ERROR HANDLING
@@ -7225,8 +7254,35 @@ for (let item in cart) {
    ========================================== */
 window.sendOrder = async (pm) => {
   if (!pm) pm = "Cash on Delivery";
-  if (total <= 0) { showToast("Cart is empty! Please add items.", "warning"); return; }
-  if (total < 99) { showToast("⚠️ Minimum order amount is ₹99!", "warning"); return; }
+
+  // ── DOUBLE TAP FIX ──
+  const codBtn = document.querySelector('.cod-btn');
+  if (codBtn && codBtn.disabled) {
+    return; // Already processing hai
+  }
+  if (codBtn) {
+    codBtn.disabled = true;
+    codBtn.textContent = '⏳ Placing Order...';
+  }
+
+  // Reset function
+  const resetCodBtn = () => {
+    if (codBtn) {
+      codBtn.disabled = false;
+      codBtn.textContent = '📦 Cash on Delivery';
+    }
+  };
+
+  if (total <= 0) {
+    showToast("Cart is empty! Please add items.", "warning");
+    resetCodBtn();
+    return;
+  }
+  if (total < 99) {
+    showToast("⚠️ Minimum order amount is ₹99!", "warning");
+    resetCodBtn();
+    return;
+  }
 // Out of stock items check
   for (let item in cart) {
     if (cart[item] && cart[item].qty > 0) {
@@ -7393,6 +7449,7 @@ toggleCart();
 cart = {};
 localStorage.removeItem('fkCart_v2');
 calcTotal();
+resetCodBtn(); // ← Button reset karo
 }; // ← sendOrder function close
 
 window.trackOrder = async () => {
