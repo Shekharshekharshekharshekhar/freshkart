@@ -48,6 +48,9 @@
 <!-- ── FONTS: Non-blocking ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://images.unsplash.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="dns-prefetch" href="https://www.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet" media="print" onload="this.media='all'">
 <noscript>
@@ -5648,6 +5651,7 @@ function renderRecentlyViewed() {
     '</div>';
   }).join('');
 }
+  optimizeImages();
   /* ── DELIVERY SLOT ── */
 let selectedSlot = 'asap';
 
@@ -6295,8 +6299,11 @@ async function saveUserToken() {
     });
     console.log('✅ Token saved!');
 
-  } catch(e) {
-    console.log('Token error:', e);
+ } catch(e) {
+    // Permission error silently ignore karo
+    if (e.code !== 'permission-denied') {
+      console.log('Token error:', e);
+    }
   }
 }
 
@@ -6454,7 +6461,25 @@ function initOfflineSupport() {
     } catch(e) {}
   });
 }
-
+// Images lazy load + WebP check
+function optimizeImages() {
+  const imgs = document.querySelectorAll('img[loading="lazy"]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const img = e.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+          }
+          io.unobserve(img);
+        }
+      });
+    }, { rootMargin: '50px' });
+    imgs.forEach(img => io.observe(img));
+  }
+}
 // Products load hone ke baad cache karo
 function cacheProducts() {
   try {
