@@ -6674,7 +6674,7 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
       discBadge +
       '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' +
       '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' +
-      '<img src="' + d.image + '" alt="' + id + '" loading="lazy" decoding="async" width="162" height="152" ' +
+     '<img src="' + d.image + '?w=300&q=60&auto=format&fit=crop&fm=webp" alt="' + id + '" loading="lazy" decoding="async" width="162" height="152"' +
       'onerror="this.src=\'https://via.placeholder.com/162x152/e8f5e9/27ae60?text=' + encodeURIComponent(id) + '\'" ' +
       'onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
       '<button class="pc-quickview" onclick="event.stopPropagation();openProductDetail(\'' + id + '\')">👁️ Quick View</button>' +
@@ -7749,9 +7749,9 @@ window.addEventListener('load', () => {
     console.log('%cFirst Content: ' + fcpTime + 'ms', fcpTime < 1000 ? 'color:green' : 'color:orange');
 
     // Slow hone pe console warning
-    if (loadTime > 3000) {
-      console.warn('⚠️ Page load slow hai! Images optimize karo.');
-    }
+    if (loadTime > 5000) {
+  console.warn('⚠️ Page load slow hai! Images optimize karo.');
+}
 
     // Firebase mein log karo (optional)
     if (currentUser && loadTime > 0) {
