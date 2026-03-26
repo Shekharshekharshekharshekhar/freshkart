@@ -92,7 +92,6 @@ function loadEmailJS() {
 }
 </script>
      <style>
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
 /* ═══ CSS VARIABLES ═══ */
 :root {
   --green:#27ae60; --green2:#2ecc71; --green3:#1a9e50;
@@ -6405,7 +6404,38 @@ addSwipeToClose('ordersPanel', window.closeOrdersPanel, 'right');
 addSwipeToClose('wishlistPanel', window.closeWishlist, 'right');
 addSwipeToClose('cartDrawer', window.toggleCart, 'right');
 function loadProducts() {
-  showSkeletons();
+  // Cache se pehle load karo — instant!
+  try {
+    const cached = localStorage.getItem('fkProductsCache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Object.keys(parsed).length > 0) {
+        allP = parsed;
+        Object.keys(allP).forEach(id => {
+          if (!cart[id]) {
+            const unit = allP[id].unit || 'kg';
+            const initW = isGramUnit(unit) ?
+              (parseInt(unit)||100) : 0.5;
+            cart[id] = {
+              qty: 0,
+              price: allP[id].price,
+              selectedWeight: initW
+            };
+          }
+        });
+        renderPills();
+        applyFilters();
+        renderRecommended();
+        renderRecentlyViewed();
+      }
+    } else {
+      showSkeletons();
+    }
+  } catch(e) {
+    showSkeletons();
+  }
+
+  // Background mein fresh data lo
   onSnapshot(collection(db,"products"), snap => {
     allP = {}; cats.clear();
     snap.forEach(d => {
@@ -7749,8 +7779,8 @@ window.addEventListener('load', () => {
     console.log('%cFirst Content: ' + fcpTime + 'ms', fcpTime < 1000 ? 'color:green' : 'color:orange');
 
     // Slow hone pe console warning
-    if (loadTime > 5000) {
-  console.warn('⚠️ Page load slow hai! Images optimize karo.');
+ if (loadTime > 5000) {
+  console.log('📊 Page load:', loadTime + 'ms');
 }
 
     // Firebase mein log karo (optional)
