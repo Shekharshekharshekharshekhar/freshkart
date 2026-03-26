@@ -6674,9 +6674,9 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
       discBadge +
       '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' +
       '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' +
-   '<img src="' + d.image + '" alt="' + id + '" loading="lazy" decoding="async" width="162" height="152"' +
-      'onerror="this.onerror=null;this.src='https://placehold.co/162x152/e8f5e9/27ae60?text=' + encodeURIComponent(id.substring(0,8)) + '\'" ' +
-      'onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
+ '<img src="' + d.image + '" alt="' + id + '" loading="lazy" decoding="async" width="162" height="152" ' +
+'onerror="this.onerror=null;this.style.display=\'none\'" ' +
+'onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
       '<button class="pc-quickview" onclick="event.stopPropagation();openProductDetail(\'' + id + '\')">👁️ Quick View</button>' +
     '</div>' +
     '<div class="pc-body">' +
