@@ -6148,7 +6148,8 @@ window.submitPdReview = async () => {
     showToast('Could not submit review. Try again!', 'error');
   }
 };
-  function calcItemPrice(p, selectedWeight, qty) {
+  function calcItemPrice(p, selectedWeight, qty) 
+  {
   const unit = p.unit || 'kg';
   const isGram = isGramUnit(unit);
   const baseG = isGram ? (parseInt(unit) || 100) : 0;
@@ -6173,18 +6174,8 @@ function getDisplayWeight(selectedWeight, unit) {
   }
   return selectedWeight + (unit || 'kg');
 }
-
 // Price calculation fix
-function calcItemPrice(p, selectedWeight, qty) {
-  const unit = p.unit || 'kg';
-  const isGram = isGramUnit(unit);
-  const baseG = isGram ? (parseInt(unit) || 100) : 0;
-  const w = parseFloat(selectedWeight) || (baseG > 0 ? baseG : 0.5);
-  const price = baseG > 0
-    ? (p.price / baseG) * w * qty
-    : p.price * w * qty;
-  return price;
-}
+
 /* ═══ PUSH NOTIFICATIONS ═══ */
 const VAPID_KEY = 'BGEjE3MbyQK7spfxl6IuSF-PsdvmE_HqdvFVUxw47h26KvAiMZ_UiyOzekI2cN8DazOG7fwZ0JAsk3boESWS1JU'; // Step 1 se
 
