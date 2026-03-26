@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HariBasket – Fresh Vegetables | 30 Min Delivery</title>
 
@@ -73,6 +74,7 @@ function loadEmailJS() {
     const s = document.createElement('script');
     s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
     s.onload = () => {
+      // EmailJS domain check
       emailjs.init("aL9YJ8DDVAsK33ZTv");
       window._ejsLoaded = true;
       resolve();
@@ -4082,7 +4084,7 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
     <div class="m-tabs-wrap"><div class="m-tabs">
       <button class="m-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
       <button class="m-tab" data-tab="signup" onclick="switchTab('signup')">Sign Up</button>
-      <button class="m-tab" data-tab="phone" onclick="switchTab('phone')">📱 OTP</button>
+     <!-- Phone OTP requires Firebase Blaze plan - disabled -->
     </div></div>
     <div class="m-body">
       <div class="fpanel active" id="panel-login">
