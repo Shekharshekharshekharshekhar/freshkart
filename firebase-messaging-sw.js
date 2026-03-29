@@ -1,5 +1,6 @@
 // HariBasket Service Worker — Auto Update + Push Notifications
-const CACHE_NAME = 'haribasket-v4';
+const CACHE_NAME = 'haribasket-v5';
+const CACHE_ENABLED = false; // Cache band karo
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -36,39 +37,16 @@ self.addEventListener('activate', event => {
 
 // ── FETCH ─────────────────────────────────────────
 self.addEventListener('fetch', event => {
-  // Sirf GET requests handle karo
+  // Cache completely bypass — always network
   if (event.request.method !== 'GET') return;
-
-  // Firebase aur API requests bypass karo
-  const url = event.request.url;
-  if (
-    url.includes('firestore.googleapis.com') ||
-    url.includes('firebase') ||
-    url.includes('netlify/functions') ||
-    url.includes('emailjs') ||
-    url.includes('razorpay')
-  ) {
-    return;
+  // Sirf navigate requests handle karo
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('/index.html');
+      })
+    );
   }
-
-  // Network first, cache fallback
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Fresh response cache mein save karo
-        if (response && response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Offline — cache se serve karo
-        return caches.match(event.request);
-      })
-  );
 });
 
 // ── PUSH NOTIFICATIONS ────────────────────────────
