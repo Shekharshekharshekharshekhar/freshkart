@@ -5308,8 +5308,12 @@ function updateWishlistButtons() {
   });
 }
 
-window.toggleWishlist = async (productId, btnEl) => {
-  if (!currentUser) { openLoginModal(); return; }
+window.toggleWishlist = async function(productId, btnEl) {
+  if (!currentUser) {
+    showToast('❤️ Wishlist ke liye login karo!', 'warning');
+    openLoginModal();
+    return;
+  }
   const existing = userWishlist.find(w => w.productId === productId);
   if (existing) {
     // Remove from wishlist
@@ -6609,15 +6613,23 @@ window.closeOrdersPanel = function() {
 };
 
 // Wishlist
+// Wishlist
 const _origOpenWishlist = window.openWishlist;
-window.openWishlist = function() {
+window.openWishlist = async function() {
+  if (!currentUser) { openLoginModal(); return; }
   pushModal('wishlist');
-  _origOpenWishlist();
+  document.getElementById('wishlistPanel').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  await loadWishlist();
+  renderWishlist();
 };
 
-const _origCloseWishlist = window.closeWishlist;
 window.closeWishlist = function() {
-  _origCloseWishlist();
+  document.getElementById('wishlistPanel').classList.remove('show');
+  document.body.style.overflow = '';
+  if (modalStack[modalStack.length-1] === 'wishlist') {
+    modalStack.pop();
+  }
 };
 
 // Profile
@@ -7893,6 +7905,9 @@ function initDarkMode() {
   if (saved === 'true' || (saved === null && prefersDark)) {
     document.body.classList.add('dark');
     updateDarkToggle(true);
+  } else {
+    document.body.classList.remove('dark');
+    updateDarkToggle(false);
   }
 
   // System change hone pe auto update
@@ -7910,13 +7925,12 @@ function updateDarkToggle(isDark) {
   if (btn) btn.textContent = isDark ? '☀️' : '🌙';
 }
 
-window.toggleDark = () => {
+window.toggleDark = function() {
   const isDark = document.body.classList.toggle('dark');
-  localStorage.setItem('fkDarkMode', isDark);
+  localStorage.setItem('fkDarkMode', String(isDark));
   updateDarkToggle(isDark);
   showToast(isDark ? '🌙 Dark mode on!' : '☀️ Light mode on!', 'info', 1500);
 };
-
 initDarkMode();
 const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); }), { threshold: 0.06 });
 
