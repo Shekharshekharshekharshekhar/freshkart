@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
@@ -7951,24 +7954,23 @@ function setBNav(id) { document.querySelectorAll(".bnav-item").forEach(b => b.cl
 // Auto detect system dark mode
 function initDarkMode() {
   const saved = localStorage.getItem('fkDarkMode');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const prefersDark = window.matchMedia(
+    '(prefers-color-scheme: dark)'
+  ).matches;
 
   if (saved === 'true' || (saved === null && prefersDark)) {
     document.body.classList.add('dark');
     updateDarkToggle(true);
+    // toggleDark call karo styling ke liye
+    window.toggleDark();
+    // Lekin class dobara toggle ho gayi — fix karo
+    if (!document.body.classList.contains('dark')) {
+      document.body.classList.add('dark');
+    }
   } else {
     document.body.classList.remove('dark');
     updateDarkToggle(false);
   }
-
-  // System change hone pe auto update
-  window.matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', e => {
-      if (localStorage.getItem('fkDarkMode') === null) {
-        document.body.classList.toggle('dark', e.matches);
-        updateDarkToggle(e.matches);
-      }
-    });
 }
 
 function updateDarkToggle(isDark) {
@@ -7987,9 +7989,46 @@ function updateDarkToggle(isDark) {
 
 window.toggleDark = function() {
   const isDark = document.body.classList.toggle('dark');
+
+  // Force all elements
+  document.documentElement.setAttribute(
+    'data-theme', isDark ? 'dark' : 'light'
+  );
+
+  // Direct style inject
+  let styleEl = document.getElementById('dark-override');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'dark-override';
+    document.head.appendChild(styleEl);
+  }
+
+  if (isDark) {
+    styleEl.textContent = `
+      body, body * { transition: background-color 0.3s, color 0.3s !important; }
+      body.dark { background: #090f0a !important; color: #ddeedd !important; }
+      body.dark .navbar { background: rgba(8,16,10,0.97) !important; }
+      body.dark .pcard { background: #111c12 !important; }
+      body.dark .search-wrap { background: #090f0a !important; }
+      body.dark .search-box input { background: #111c12 !important; color: #cce0cc !important; }
+      body.dark .bottom-nav { background: rgba(4,10,5,0.98) !important; }
+      body.dark .cart-drawer { background: rgba(6,12,8,0.99) !important; }
+      body.dark .cpill { background: #111c12 !important; color: #6a9a6a !important; }
+      body.dark .sort-pill { background: #111c12 !important; color: #6a9a6a !important; }
+      body.dark .sec-title { color: #c8e0c8 !important; }
+      body.dark .pc-name { color: #c8e0c8 !important; }
+      body.dark .footer { background: #040804 !important; }
+    `;
+  } else {
+    styleEl.textContent = '';
+  }
+
   localStorage.setItem('fkDarkMode', String(isDark));
   updateDarkToggle(isDark);
-  showToast(isDark ? '🌙 Dark mode on!' : '☀️ Light mode on!', 'info', 1500);
+  showToast(
+    isDark ? '🌙 Dark mode on!' : '☀️ Light mode on!',
+    'info', 1500
+  );
 };
 initDarkMode();
 const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("show"); }), { threshold: 0.06 });
