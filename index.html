@@ -5307,41 +5307,92 @@ function updateWishlistButtons() {
     btn.classList.toggle("active", isWishlisted);
   });
 }
-
 window.toggleWishlist = async function(productId, btnEl) {
   if (!currentUser) {
     showToast('❤️ Wishlist ke liye login karo!', 'warning');
     openLoginModal();
     return;
   }
-  const existing = userWishlist.find(w => w.productId === productId);
-  if (existing) {
-    // Remove from wishlist
+
+  const p = allP[productId];
+  if (!p) {
+    showToast('Product not found!', 'error');
+    return;
+  }
+
+  // Button immediately update karo — fast feedback
+  const isCurrentlyWishlisted = btnEl.classList.contains('active');
+
+  if (isCurrentlyWishlisted) {
+    // Remove karo
+    btnEl.textContent = '🤍';
+    btnEl.classList.remove('active');
+
     try {
-      await deleteDoc(doc(db, "wishlists", existing.docId));
-      userWishlist = userWishlist.filter(w => w.productId !== productId);
-      btnEl.textContent = "🤍";
-      btnEl.classList.remove("active");
-      showWishlistToast("Removed from wishlist");
-    } catch(e) { console.log("Remove wishlist error:", e); }
+      const existing = userWishlist.find(
+        w => w.productId === productId
+      );
+      if (existing) {
+        await deleteDoc(doc(db, 'wishlists', existing.docId));
+        userWishlist = userWishlist.filter(
+          w => w.productId !== productId
+        );
+        showToast('Wishlist se remove kiya!', 'info', 2000);
+      }
+    } catch(e) {
+      // Revert karo agar error
+      btnEl.textContent = '❤️';
+      btnEl.classList.add('active');
+      showToast('Error! Try again.', 'error');
+      console.log('Wishlist remove error:', e);
+    }
+
   } else {
-    // Add to wishlist
+    // Add karo
+    btnEl.textContent = '❤️';
+    btnEl.classList.add('active');
+
     try {
-      const p = allP[productId];
-      const docRef = await addDoc(collection(db, "wishlists"), {
-        userId: currentUser.uid,
+      // Pehle check karo already exist toh nahi
+      const alreadyExists = userWishlist.find(
+        w => w.productId === productId
+      );
+      if (alreadyExists) {
+        showToast('Already wishlist mein hai!', 'info', 2000);
+        return;
+      }
+
+      const docRef = await addDoc(
+        collection(db, 'wishlists'),
+        {
+          userId:    currentUser.uid,
+          productId: productId,
+          image:     p.image     || '',
+          price:     p.price     || 0,
+          unit:      p.unit      || 'kg',
+          category:  p.category  || 'Vegetables',
+          createdAt: new Date()
+        }
+      );
+
+      userWishlist.push({
+        docId:     docRef.id,
         productId: productId,
-        image: p.image,
-        price: p.price,
-        unit: p.unit || "kg",
-        category: p.category,
-        createdAt: new Date()
+        image:     p.image     || '',
+        price:     p.price     || 0,
+        unit:      p.unit      || 'kg',
+        category:  p.category  || 'Vegetables',
       });
-      userWishlist.push({ docId: docRef.id, productId, image: p.image, price: p.price, unit: p.unit||"kg", category: p.category });
-      btnEl.textContent = "❤️";
-      btnEl.classList.add("active");
-      showWishlistToast("Added to wishlist ❤️");
-    } catch(e) { console.log("Add wishlist error:", e); }
+
+      showToast('❤️ Wishlist mein add kiya!', 'success', 2000);
+
+    } catch(e) {
+      // Revert karo agar error
+      btnEl.textContent = '🤍';
+      btnEl.classList.remove('active');
+      showToast('Error! Try again.', 'error');
+      console.log('Wishlist add error:', e);
+    }
   }
 };
 
@@ -7923,6 +7974,15 @@ function initDarkMode() {
 function updateDarkToggle(isDark) {
   const btn = document.querySelector('.dark-toggle');
   if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+
+  // Force CSS apply karo
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
+  }
 }
 
 window.toggleDark = function() {
