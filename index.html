@@ -6473,6 +6473,204 @@ function loadProducts() {
     cacheProducts();
   });
 }
+  // ═══════════════════════════════════════
+//  BACK BUTTON — SAB MODALS/PANELS
+// ═══════════════════════════════════════
+
+const modalStack = [];
+
+function pushModal(name) {
+  history.pushState({ modal: name }, '', window.location.href);
+  modalStack.push(name);
+}
+
+function closeTopModal() {
+  const name = modalStack.pop();
+  if (!name) return;
+
+  switch(name) {
+    case 'cart':
+      const cartDrawer = document.getElementById('cartDrawer');
+      if (cartDrawer && cartDrawer.classList.contains('open')) {
+        window.toggleCart();
+      }
+      break;
+    case 'productDetail':
+      const pd = document.getElementById('productDetail');
+      if (pd && pd.classList.contains('show')) {
+        window.closeProductDetail();
+      }
+      break;
+    case 'login':
+      const lm = document.getElementById('loginModal');
+      if (lm && lm.classList.contains('show')) {
+        window.closeLoginModal();
+      }
+      break;
+    case 'orders':
+      const op = document.getElementById('ordersPanel');
+      if (op && op.classList.contains('show')) {
+        window.closeOrdersPanel();
+      }
+      break;
+    case 'wishlist':
+      const wp = document.getElementById('wishlistPanel');
+      if (wp && wp.classList.contains('show')) {
+        window.closeWishlist();
+      }
+      break;
+    case 'profile':
+      const pp = document.getElementById('profilePanel');
+      if (pp && pp.classList.contains('show')) {
+        window.closeProfilePanel();
+      }
+      break;
+    case 'orderConfirm':
+      const oc = document.getElementById('orderConfirm');
+      if (oc && oc.classList.contains('show')) {
+        window.closeOrderConfirm();
+      }
+      break;
+    case 'cancelModal':
+      const cm = document.getElementById('cancelModal');
+      if (cm && cm.classList.contains('show')) {
+        window.closeCancelModal();
+      }
+      break;
+    case 'infoModal':
+      const im = document.getElementById('infoModal');
+      if (im && im.classList.contains('show')) {
+        window.closeInfoModal();
+      }
+      break;
+  }
+}
+
+// Back button listener
+window.addEventListener('popstate', (event) => {
+  if (modalStack.length > 0) {
+    closeTopModal();
+  }
+});
+
+// ── Existing functions mein pushModal inject karo ──
+
+// Cart
+const _origToggleCart = window.toggleCart;
+window.toggleCart = function() {
+  const drawer = document.getElementById('cartDrawer');
+  const isOpen = drawer && drawer.classList.contains('open');
+  if (!isOpen) {
+    pushModal('cart');
+  } else {
+    if (modalStack[modalStack.length-1] === 'cart') {
+      modalStack.pop();
+      history.back();
+      return;
+    }
+  }
+  _origToggleCart();
+};
+
+// Product Detail
+const _origOpenPD = window.openProductDetail;
+window.openProductDetail = function(id) {
+  pushModal('productDetail');
+  _origOpenPD(id);
+};
+
+const _origClosePD = window.closeProductDetail;
+window.closeProductDetail = function() {
+  _origClosePD();
+};
+
+// Login
+const _origOpenLogin = window.openLoginModal;
+window.openLoginModal = function() {
+  pushModal('login');
+  _origOpenLogin();
+};
+
+const _origCloseLogin = window.closeLoginModal;
+window.closeLoginModal = function() {
+  _origCloseLogin();
+};
+
+// Orders
+const _origOpenOrders = window.openOrdersPanel;
+window.openOrdersPanel = function() {
+  pushModal('orders');
+  _origOpenOrders();
+};
+
+const _origCloseOrders = window.closeOrdersPanel;
+window.closeOrdersPanel = function() {
+  _origCloseOrders();
+};
+
+// Wishlist
+const _origOpenWishlist = window.openWishlist;
+window.openWishlist = function() {
+  pushModal('wishlist');
+  _origOpenWishlist();
+};
+
+const _origCloseWishlist = window.closeWishlist;
+window.closeWishlist = function() {
+  _origCloseWishlist();
+};
+
+// Profile
+const _origOpenProfile = window.openProfilePanel;
+window.openProfilePanel = window.openProfilePanelM = function() {
+  pushModal('profile');
+  _origOpenProfile();
+};
+
+// Order Confirm
+const _origCloseOC = window.closeOrderConfirm;
+window.closeOrderConfirm = function() {
+  if (modalStack[modalStack.length-1] === 'orderConfirm') {
+    modalStack.pop();
+  }
+  _origCloseOC();
+};
+
+// Cancel Modal
+const _origCloseCM = window.closeCancelModal;
+window.closeCancelModal = function() {
+  if (modalStack[modalStack.length-1] === 'cancelModal') {
+    modalStack.pop();
+  }
+  _origCloseCM();
+};
+
+// Info Modal
+const _origOpenInfo = window.openInfoModal;
+window.openInfoModal = function(page) {
+  pushModal('infoModal');
+  _origOpenInfo(page);
+};
+
+// ── MOBILE SWIPE BACK SUPPORT ──
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  const diffX = e.changedTouches[0].clientX - touchStartX;
+  const diffY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+
+  // Right swipe (50px+) aur horizontal ho
+  if (diffX > 50 && diffY < 80 && modalStack.length > 0) {
+    closeTopModal();
+    if (history.length > 1) history.back();
+  }
+}, { passive: true });
   /* ── OFFLINE SUPPORT ── */
 function initOfflineSupport() {
   // Products cache karo
