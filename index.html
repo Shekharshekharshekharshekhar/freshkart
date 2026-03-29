@@ -6563,6 +6563,48 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/firebase-messaging-sw.js')
     .then(async reg => {
       console.log('✅ SW registered', reg);
+
+      // ── AUTO UPDATE CHECK ──────────────────────
+      // Har 60 second mein update check karo
+      setInterval(() => {
+        reg.update().catch(() => {});
+      }, 60 * 1000);
+
+      // Naya SW waiting hai toh silently activate karo
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        if (!newSW) return;
+
+        newSW.addEventListener('statechange', () => {
+          if (
+            newSW.state === 'installed' &&
+            navigator.serviceWorker.controller
+          ) {
+            // Naya version ready — silently reload karo
+            newSW.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+
+      // Controller change hone pe reload
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener(
+        'controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            // Cart save karo pehle
+            try {
+              localStorage.setItem(
+                'fkCart_v2',
+                JSON.stringify(cart)
+              );
+            } catch(e) {}
+            // Silent reload
+            window.location.reload();
+          }
+        }
+      );
+
       await navigator.serviceWorker.ready;
       console.log('✅ SW ready!');
     })
