@@ -1,5 +1,5 @@
 // HariBasket Service Worker — Auto Update + Push Notifications
-const CACHE_NAME = 'haribasket-v3';
+const CACHE_NAME = 'haribasket-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
