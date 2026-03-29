@@ -1,38 +1,124 @@
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+// HariBasket Service Worker — Auto Update + Push Notifications
+const CACHE_NAME = 'haribasket-v3';
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+];
 
-firebase.initializeApp({
-  apiKey: "AIzaSyDDYqExFGbNWytFlYY3ttbr0zug427x_QM",
-  authDomain: "freshkart-web.firebaseapp.com",
-  projectId: "freshkart-web",
-  storageBucket: "freshkart-web.firebasestorage.app",
-  messagingSenderId: "960532053767",
-  appId: "1:960532053767:web:a13d2eb1fddea1ee28cfa2"
+// ── INSTALL ──────────────────────────────────────
+self.addEventListener('install', event => {
+  // Turant activate karo — wait mat karo
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(STATIC_ASSETS);
+    }).catch(() => {})
+  );
 });
 
-const messaging = firebase.messaging();
-
-// Background notification handle karo
-messaging.onBackgroundMessage((payload) => {
-  const { title, body } = payload.notification;
-  self.registration.showNotification(title, {
-    body,
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    data: payload.data,
-    actions: [
-      { action: 'open', title: '🛒 Order Now' },
-      { action: 'close', title: 'Close' }
-    ]
-  });
+// ── ACTIVATE ─────────────────────────────────────
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    Promise.all([
+      // Purane caches delete karo
+      caches.keys().then(keys =>
+        Promise.all(
+          keys
+            .filter(key => key !== CACHE_NAME)
+            .map(key => caches.delete(key))
+        )
+      ),
+      // Sab clients pe turant control lo
+      clients.claim()
+    ])
+  );
 });
 
-// Notification click handle karo
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  if (event.action === 'open' || !event.action) {
+// ── FETCH ─────────────────────────────────────────
+self.addEventListener('fetch', event => {
+  // Sirf GET requests handle karo
+  if (event.request.method !== 'GET') return;
+
+  // Firebase aur API requests bypass karo
+  const url = event.request.url;
+  if (
+    url.includes('firestore.googleapis.com') ||
+    url.includes('firebase') ||
+    url.includes('netlify/functions') ||
+    url.includes('emailjs') ||
+    url.includes('razorpay')
+  ) {
+    return;
+  }
+
+  // Network first, cache fallback
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        // Fresh response cache mein save karo
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Offline — cache se serve karo
+        return caches.match(event.request);
+      })
+  );
+});
+
+// ── PUSH NOTIFICATIONS ────────────────────────────
+self.addEventListener('push', event => {
+  if (!event.data) return;
+  try {
+    const data = event.data.json();
+    const options = {
+      body: data.body || 'HariBasket se naya update!',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      vibrate: [100, 50, 100],
+      data: { url: data.url || '/' },
+      actions: [
+        { action: 'open', title: 'Dekho' },
+        { action: 'close', title: 'Baad mein' }
+      ]
+    };
     event.waitUntil(
-      clients.openWindow('https://haribasket.netlify.app')
+      self.registration.showNotification(
+        data.title || 'HariBasket',
+        options
+      )
     );
+  } catch(e) {}
+});
+
+// ── NOTIFICATION CLICK ────────────────────────────
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  if (event.action === 'close') return;
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(list => {
+      for (const client of list) {
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(
+          event.notification.data.url || '/'
+        );
+      }
+    })
+  );
+});
+
+// ── AUTO UPDATE MESSAGE ───────────────────────────
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
