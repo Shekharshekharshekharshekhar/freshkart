@@ -5316,11 +5316,6 @@ function updateWishlistButtons() {
   });
 }
 window.toggleWishlist = async function(productId, btnEl) {
-  if (!currentUser) {
-    showToast('❤️ Wishlist ke liye login karo!', 'warning');
-    openLoginModal();
-    return;
-  }
 
   const p = allP[productId];
   if (!p) {
@@ -7017,7 +7012,7 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
       hotBadge +
       discBadge +
       '<div class="badge-cat" style="background:' + getCatColor(d.category) + '99;">' + d.category + '</div>' +
-      '<button class="wish-btn" onclick="event.stopPropagation();toggleWishlist(\'' + id + '\',this)">🤍</button>' +
+     '<button class="wish-btn" id="wish-' + id + '" type="button">🤍</button>' +
  '<img src="' + d.image + '" alt="' + id + '" loading="lazy" decoding="async" width="162" height="152" ' +
 'onerror="this.onerror=null;this.style.display=\'none\'" ' +
 'onclick="event.stopPropagation();openZoom(\'' + d.image + '\')" style="cursor:zoom-in;">' +
@@ -7049,6 +7044,16 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
 }
 document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
   updateWishlistButtons();
+  // Wish buttons pe event listeners lagao
+document.querySelectorAll('.wish-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    const productId = this.id.replace('wish-', '');
+    window.toggleWishlist(productId, this);
+  });
+});
 }
 window.rateProduct = async (id, stars) => {
   const cur = allP[id];
