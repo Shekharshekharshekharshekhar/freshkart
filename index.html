@@ -7045,15 +7045,19 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
 document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
   updateWishlistButtons();
   // Wish buttons pe event listeners lagao
-document.querySelectorAll('.wish-btn').forEach(btn => {
-  btn.addEventListener('click', function(e) {
+const grid = document.getElementById('productsGrid');
+if (grid && !grid._wishlistListener) {
+  grid._wishlistListener = true;
+  grid.addEventListener('click', function(e) {
+    const wishBtn = e.target.closest('.wish-btn');
+    if (!wishBtn) return;
     e.stopPropagation();
     e.stopImmediatePropagation();
     e.preventDefault();
-    const productId = this.id.replace('wish-', '');
-    window.toggleWishlist(productId, this);
-  });
-});
+    const productId = wishBtn.id.replace('wish-', '');
+    window.toggleWishlist(productId, wishBtn);
+  }, true); // capture phase mein
+}
 }
 window.rateProduct = async (id, stars) => {
   const cur = allP[id];
