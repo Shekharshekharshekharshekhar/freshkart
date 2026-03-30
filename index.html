@@ -4462,6 +4462,10 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 const gp   = new GoogleAuthProvider();
 let cart = {}, total = 0, delivery = 20, allP = {}, cats = new Set(), currentUser = null;
+
+// Window pe expose karo — global access ke liye
+window.allP = allP;
+window.currentUser = currentUser;
 /* ═══ CART PERSISTENCE ═══ */
 function saveCart() {
   try {
@@ -4499,6 +4503,7 @@ function loadCart() {
 }
 onAuthStateChanged(auth, u => {
   currentUser = u;
+  window.currentUser = u; // Window pe update karo
   const lb = document.getElementById("navLoginBtn");
   const ud = document.getElementById("userDropdown");
   if (u) {
@@ -6494,8 +6499,10 @@ function loadProducts() {
   }
 
   // Background mein fresh data lo
-  onSnapshot(collection(db,"products"), snap => {
-    allP = {}; cats.clear();
+ onSnapshot(collection(db,"products"), snap => {
+    allP = {};
+    window.allP = allP; 
+   cats.clear();
     snap.forEach(d => {
       const data = d.data();
       const cat = data.category || "Vegetables";
@@ -6528,7 +6535,8 @@ function loadProducts() {
     renderPills();
     applyFilters();
     renderRecommended();
-    cacheProducts();
+     cacheProducts();
+    window.allP = allP; // Final sync
   });
 }
   // ═══════════════════════════════════════
