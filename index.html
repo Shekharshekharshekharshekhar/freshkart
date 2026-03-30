@@ -7045,10 +7045,9 @@ const hotBadge = d.popular ? '<div class="badge-hot">🔥 Hot</div>' : '';
 document.querySelectorAll(".pcard.fade-up").forEach(el => obs.observe(el));
   updateWishlistButtons();
   // Wish buttons pe event listeners lagao
-const grid = document.getElementById('productsGrid');
-if (grid && !grid._wishlistListener) {
-  grid._wishlistListener = true;
-  grid.addEventListener('click', function(e) {
+if (!document._wishlistDelegated) {
+  document._wishlistDelegated = true;
+  document.body.addEventListener('click', function(e) {
     const wishBtn = e.target.closest('.wish-btn');
     if (!wishBtn) return;
     e.stopPropagation();
@@ -7056,7 +7055,7 @@ if (grid && !grid._wishlistListener) {
     e.preventDefault();
     const productId = wishBtn.id.replace('wish-', '');
     window.toggleWishlist(productId, wishBtn);
-  }, true); // capture phase mein
+  }, true);
 }
 }
 window.rateProduct = async (id, stars) => {
