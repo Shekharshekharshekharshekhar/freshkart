@@ -1,3 +1,42 @@
+// firebase-messaging-sw.js
+
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyDDYqExFGbNWytFlYY3ttbr0zug427x_QM",
+  authDomain: "freshkart-web.firebaseapp.com",
+  projectId: "freshkart-web",
+  storageBucket: "freshkart-web.firebasestorage.app",
+  messagingSenderId: "960532053767",
+  appId: "1:960532053767:web:a13d2eb1fddea1ee28cfa2"
+});
+
+const messaging = firebase.messaging();
+
+// Background notifications
+messaging.onBackgroundMessage(payload => {
+  const { title, body, icon } = payload.notification;
+  self.registration.showNotification(title, {
+    body,
+    icon: icon || '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [200, 100, 200],
+    data: payload.data,
+    actions: [
+      { action: 'open', title: '📦 Order Dekho' },
+      { action: 'close', title: '✕ Close' }
+    ]
+  });
+});
+
+// Notification click handle
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  if (e.action === 'open' || !e.action) {
+    clients.openWindow('https://haribasket.netlify.app');
+  }
+});
 // HariBasket Service Worker — Auto Update + Push Notifications
 const CACHE_NAME = 'haribasket-v5';
 const CACHE_ENABLED = false; // Cache band karo
