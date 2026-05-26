@@ -3933,7 +3933,7 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
    <input class="cinput" id="cust-name" placeholder="Your Full Name"
   oninput="validateField('cust-name')"
   onblur="validateField('cust-name')">
-<div class="field-error" id="err-name">⚠️ Kam se kam 3 characters chahiye</div>
+<div class="field-error" id="err-name">⚠️At least 3 characters are required!</div>
 
 <input class="cinput" id="cust-phone"
   placeholder="10-digit Mobile Number"
@@ -3942,13 +3942,13 @@ body.dark .pd-card::-webkit-scrollbar-thumb {
   inputmode="numeric"
   oninput="this.value=this.value.replace(/[^0-9]/g,'');validateField('cust-phone')"
   onblur="validateField('cust-phone')">
-<div class="field-error" id="err-phone">⚠️ Valid 10-digit Indian number chahiye (6-9 se shuru)</div>
+<div class="field-error" id="err-phone">⚠️A valid 10-digit Indian number is required (starting with 6-9)</div>
 
 <textarea class="ctextarea" id="cust-address"
   placeholder="Delivery Address (ghar number, gali, landmark)"
   oninput="validateField('cust-address')"
   onblur="validateField('cust-address')"></textarea>
-<div class="field-error" id="err-address">⚠️ Complete address chahiye (min 10 characters)</div>
+<div class="field-error" id="err-address">⚠️A complete address is required (minimum 10 characters)</div>
     <button class="pay-btn" onclick="placeOrder()">💳 Pay Online</button>
     <button class="cod-btn" onclick="sendOrder('Cash on Delivery')">📦 Cash on Delivery</button>
   </div>
